@@ -18,14 +18,37 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Select credentials for GitHub Packages
+        shell: bash
+        run: |
+          if [ -n "${{ secrets.PACKAGES_TOKEN }}" ]; then
+            if [ -n "${{ secrets.PACKAGES_USERNAME }}" ]; then
+              echo "MAVEN_USERNAME=${{ secrets.PACKAGES_USERNAME }}" >> $GITHUB_ENV
+            else
+              echo "MAVEN_USERNAME=${{ github.actor }}" >> $GITHUB_ENV
+            fi
+            echo "MAVEN_PASSWORD=${{ secrets.PACKAGES_TOKEN }}" >> $GITHUB_ENV
+          else
+            echo "MAVEN_USERNAME=${{ github.actor }}" >> $GITHUB_ENV
+            echo "MAVEN_PASSWORD=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
+          fi
+
       - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
           cache: 'maven'
+          server-id: github
+          server-username: ${{ env.MAVEN_USERNAME }}
+          server-password: ${{ env.MAVEN_PASSWORD }}
 
-      - name: Build (verify)
+      - name: Build (PR, disable private repo)
+        if: github.event_name == 'pull_request'
+        run: mvn -B -DskipTests -P '!github' verify
+
+      - name: Build (push)
+        if: github.event_name != 'pull_request'
         run: mvn -B -DskipTests verify
 
   deploy:
@@ -37,16 +60,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Guard require PAT if publishing to a different repo
+        shell: bash
+        run: |
+          TARGET_REPO="loadup-cloud/loadup-packages"
+          if [ "${{ github.repository }}" != "$TARGET_REPO" ] && [ -z "${{ secrets.PACKAGES_TOKEN }}" ]; then
+            echo "::error::Publishing to $TARGET_REPO from ${{ github.repository }} requires a PAT in secrets.PACKAGES_TOKEN with write:packages and repo scopes (and SSO enabled if your org enforces SSO).";
+            exit 1
+          fi
+
       - name: Select credentials for GitHub Packages
         shell: bash
         run: |
-          
-          echo "Using PAT from secrets.PACKAGES_USERNAME=${{ secrets.PACKAGES_USERNAME }}"
-          echo "Using PAT from secrets.PACKAGES_TOKEN=${{ secrets.PACKAGES_TOKEN }}"
-          echo "Using PAT from secrets.OSSRH_TOKEN=${{ secrets.OSSRH_TOKEN }}"
-          echo "Using PAT from secrets.OSSRH_USERNAME=${{ secrets.OSSRH_USERNAME }}"
-          echo "Using PAT from github.actor=${{ github.actor }}"
           if [ -n "${{ secrets.PACKAGES_TOKEN }}" ]; then
+            echo "Using PAT from secrets.PACKAGES_TOKEN"
             if [ -n "${{ secrets.PACKAGES_USERNAME }}" ]; then
               echo "MAVEN_USERNAME=${{ secrets.PACKAGES_USERNAME }}" >> $GITHUB_ENV
             else
