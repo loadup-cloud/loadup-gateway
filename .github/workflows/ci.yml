@@ -52,8 +52,8 @@ jobs:
           java-version: '17'
           cache: 'maven'
           server-id: github
-          server-username: ${{ github.actor }}
-          server-password: ${{ secrets.GITHUB_TOKEN }}
+          server-username: ${{ secrets.OSSRH_USERNAME }}
+          server-password: ${{ secrets.OSSRH_TOKEN }}
 
       - name: Build and deploy
         env:
