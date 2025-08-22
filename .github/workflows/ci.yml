@@ -37,6 +37,28 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Select credentials for GitHub Packages
+        shell: bash
+        run: |
+          
+          echo "Using PAT from secrets.PACKAGES_USERNAME=${{ secrets.PACKAGES_USERNAME }}"
+          echo "Using PAT from secrets.PACKAGES_TOKEN=${{ secrets.PACKAGES_TOKEN }}"
+          echo "Using PAT from secrets.OSSRH_TOKEN=${{ secrets.OSSRH_TOKEN }}"
+          echo "Using PAT from secrets.OSSRH_USERNAME=${{ secrets.OSSRH_USERNAME }}"
+          echo "Using PAT from github.actor=${{ github.actor }}"
+          if [ -n "${{ secrets.PACKAGES_TOKEN }}" ]; then
+            if [ -n "${{ secrets.PACKAGES_USERNAME }}" ]; then
+              echo "MAVEN_USERNAME=${{ secrets.PACKAGES_USERNAME }}" >> $GITHUB_ENV
+            else
+              echo "MAVEN_USERNAME=${{ github.actor }}" >> $GITHUB_ENV
+            fi
+            echo "MAVEN_PASSWORD=${{ secrets.PACKAGES_TOKEN }}" >> $GITHUB_ENV
+          else
+            echo "Using default GITHUB_TOKEN"
+            echo "MAVEN_USERNAME=${{ github.actor }}" >> $GITHUB_ENV
+            echo "MAVEN_PASSWORD=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
+          fi
+
       - name: Set up Java 17 and configure repository credentials
         uses: actions/setup-java@v4
         with:
@@ -44,12 +66,11 @@ jobs:
           java-version: '17'
           cache: 'maven'
           server-id: github
-          server-username: ${{ secrets.OSSRH_USERNAME }}
-          server-password: ${{ secrets.OSSRH_TOKEN }}
+          server-username: ${{ env.MAVEN_USERNAME }}
+          server-password: ${{ env.MAVEN_PASSWORD }}
 
       - name: Build and deploy
         env:
           MAVEN_OPTS: -Dorg.slf4j.simpleLogger.showDateTime=true
         run: |
           mvn -B -U -ntp -DskipTests deploy
-
