@@ -1,0 +1,7 @@
+path,method,target,requestTemplate,responseTemplate,enabled,properties
+/api/test/http,GET,http://localhost:8080/mock/api/test,test_request_template,test_response_template,true,timeout=30000;retryCount=3
+/api/test/http,POST,http://localhost:8080/mock/api/test,test_request_template,test_response_template,true,timeout=30000;retryCount=3
+/api/test/bean,GET,bean://testService:getData,test_request_template,test_response_template,true,timeout=30000;retryCount=3
+/api/test/bean,POST,bean://testService:saveData,test_request_template,test_response_template,true,timeout=30000;retryCount=3
+/api/test/rpc,POST,rpc://com.example.TestService:testMethod:1.0.0,test_request_template,test_response_template,false,timeout=30000;retryCount=3
+/api/test/disabled,GET,http://localhost:8080/disabled,,,false,timeout=30000;retryCount=3

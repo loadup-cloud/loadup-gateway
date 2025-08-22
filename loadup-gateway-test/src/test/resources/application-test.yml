@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: loadup-gateway-test
+
+loadup:
+  gateway:
+    enabled: true
+    route-refresh-interval: 5
+    template-cache-size: 100
+    default-timeout: 10000
+    default-retry-count: 1
+    storage:
+      type: FILE
+      file-path: src/test/resources/csv
+    plugins:
+      springbean:
+        enabled: true
+        priority: 100
+      http:
+        enabled: true
+        priority: 200
+      rpc:
+        enabled: false
+        priority: 300
+      file-repository:
+        enabled: true
+        priority: 100
+        config:
+          base-path: src/test/resources/csv
+      database-repository:
+        enabled: false
+        priority: 200
+
+logging:
+  level:
+    com.github.loadup: DEBUG
+    org.springframework: INFO
