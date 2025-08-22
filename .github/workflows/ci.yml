@@ -60,21 +60,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: "Guard: require PAT if publishing to a different repo"
-        shell: bash
-        run: |
-          TARGET_REPO="loadup-cloud/loadup-packages"
-          if [ "${{ github.repository }}" != "$TARGET_REPO" ] && [ -z "${{ secrets.PACKAGES_TOKEN }}" ]; then
-            echo "::error::Publishing to $TARGET_REPO from ${{ github.repository }} requires a PAT in secrets.PACKAGES_TOKEN with write:packages and repo scopes (and SSO enabled if your org enforces SSO).";
-            exit 1
-          fi
-
-      - name: "Guard: require PACKAGES_USERNAME when using PAT"
-        if: ${{ secrets.PACKAGES_TOKEN != '' && secrets.PACKAGES_USERNAME == '' }}
-        run: |
-          echo "::error::When using PACKAGES_TOKEN (PAT), set PACKAGES_USERNAME to the PAT owner's GitHub username to avoid 401 Unauthorized.";
-          exit 1
-
       - name: Select credentials for GitHub Packages
         shell: bash
         run: |
