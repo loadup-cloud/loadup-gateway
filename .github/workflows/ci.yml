@@ -36,12 +36,10 @@ jobs:
       - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
           java-version: '17'
+          distribution: 'liberica'
           cache: 'maven'
-          server-id: github
-          server-username: ${{ env.MAVEN_USERNAME }}
-          server-password: ${{ env.MAVEN_PASSWORD }}
+          cache-dependency-path: 'pom.xml'
 
       - name: Build (PR, disable private repo)
         if: github.event_name == 'pull_request'
@@ -54,6 +52,9 @@ jobs:
   deploy:
     name: Deploy to GitHub Packages
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     needs: build
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
@@ -73,18 +74,10 @@ jobs:
             echo "MAVEN_PASSWORD=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
           fi
 
-      - name: Set up Java 17 and configure repository credentials
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-          cache: 'maven'
-          server-id: github
-          server-username: ${{ env.MAVEN_USERNAME }}
-          server-password: ${{ env.MAVEN_PASSWORD }}
-
       - name: Build and deploy
         env:
           MAVEN_OPTS: -Dorg.slf4j.simpleLogger.showDateTime=true
+          GITHUB_ACTOR: ${{ secrets.PACKAGES_USERNAME }}
+          GITHUB_TOKEN: ${{ secrets.PACKAGES_TOKEN }}
         run: |
-          mvn -B -U -ntp -DskipTests deploy
+          mvn --batch-mode -DskipTests=true clean deploy
