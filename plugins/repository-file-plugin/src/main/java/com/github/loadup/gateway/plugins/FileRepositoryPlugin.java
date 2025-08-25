@@ -184,171 +184,33 @@ public class FileRepositoryPlugin implements RepositoryPlugin {
             return null;
         }
 
-        // 检查是否是最新的 properties 格式
-        boolean hasPropertiesFormat = Arrays.asList(headers).contains("properties") &&
-                                    !Arrays.asList(headers).contains("timeout") &&
-                                    !Arrays.asList(headers).contains("retryCount");
+        // 最新格式：path,method,target,requestTemplate,responseTemplate,enabled,properties
+        if (line.length >= 3) {
+            Map<String, Object> properties = new HashMap<>();
 
-        if (hasPropertiesFormat) {
-            // 最新格式：path,method,target,requestTemplate,responseTemplate,enabled,properties
-            if (line.length >= 3) {
-                Map<String, Object> properties = new HashMap<>();
-
-                // 解析 properties 字段（支持键值对和JSON格式）
-                if (line.length > 6 && line[6] != null && !line[6].trim().isEmpty()) {
-                    try {
-                        properties = parseProperties(line[6]);
-                    } catch (Exception e) {
-                        log.warn("Failed to parse properties: {}", line[6], e);
-                    }
-                }
-
-                RouteConfig route = RouteConfig.builder()
-                        .path(line[0])
-                        .method(line[1])
-                        .target(line[2])
-                        .requestTemplate(line.length > 3 ? line[3] : "")
-                        .responseTemplate(line.length > 4 ? line[4] : "")
-                        .enabled(line.length > 5 ? Boolean.parseBoolean(line[5]) : true)
-                        .properties(properties)
-                        .build();
-
-                // 自动生成 ID 和名称
-                route.generateIds();
-
-                // 解析 target 字段设置相应的 protocol 和其他字段
-                route.parseTarget();
-
-                return route;
-            }
-        } else {
-            // 检查是否是之前的简化格式（只有 path, method, target...）
-            boolean isSimplifiedFormat = Arrays.asList(headers).contains("path") &&
-                    !Arrays.asList(headers).contains("routeId");
-
-            if (isSimplifiedFormat) {
-                // 之前的简化格式：path,method,target,requestTemplate,responseTemplate,enabled,timeout,retryCount
-                if (line.length >= 3) {
-                    Map<String, Object> properties = new HashMap<>();
-
-                    // 从独立的 timeout 和 retryCount 字段构建 properties
-                    if (line.length > 6) {
-                        try {
-                            properties.put("timeout", Long.parseLong(line[6]));
-                        } catch (NumberFormatException e) {
-                            properties.put("timeout", 30000L);
-                        }
-                    }
-                    if (line.length > 7) {
-                        try {
-                            properties.put("retryCount", Integer.parseInt(line[7]));
-                        } catch (NumberFormatException e) {
-                            properties.put("retryCount", 3);
-                        }
-                    }
-
-                    RouteConfig route = RouteConfig.builder()
-                            .path(line[0])
-                            .method(line[1])
-                            .target(line[2])
-                            .requestTemplate(line.length > 3 ? line[3] : "")
-                            .responseTemplate(line.length > 4 ? line[4] : "")
-                            .enabled(line.length > 5 ? Boolean.parseBoolean(line[5]) : true)
-                            .properties(properties)
-                            .build();
-
-                    // 自动生成 ID 和名称
-                    route.generateIds();
-
-                    // 解析 target 字段设置相应的 protocol 和其他字段
-                    route.parseTarget();
-
-                    return route;
-                }
-            } else {
-                // 旧格式处理逻辑保持不变
-                RouteConfig.RouteConfigBuilder builder = RouteConfig.builder()
-                        .routeId(line[0])
-                        .routeName(line[1])
-                        .path(line[2])
-                        .method(line[3]);
-
-                // 检查是否是旧的 target 格式
-                boolean hasTargetField = Arrays.asList(headers).contains("target");
-
-                if (hasTargetField) {
-                    // 旧格式但有 target 字段
-                    if (line.length >= 5) {
-                        String target = line[4];
-                        builder.target(target);
-
-                        RouteConfig route = builder.build();
-                        route.parseTarget();
-
-                        // 构建 properties 包含 timeout 和 retryCount
-                        Map<String, Object> properties = new HashMap<>();
-                        if (line.length > 8) {
-                            try {
-                                properties.put("timeout", Long.parseLong(line[8]));
-                            } catch (NumberFormatException e) {
-                                properties.put("timeout", 30000L);
-                            }
-                        }
-                        if (line.length > 9) {
-                            try {
-                                properties.put("retryCount", Integer.parseInt(line[9]));
-                            } catch (NumberFormatException e) {
-                                properties.put("retryCount", 3);
-                            }
-                        }
-
-                        return RouteConfig.builder()
-                                .routeId(route.getRouteId())
-                                .routeName(route.getRouteName())
-                                .path(route.getPath())
-                                .method(route.getMethod())
-                                .target(route.getTarget())
-                                .protocol(route.getProtocol())
-                                .requestTemplate(line.length > 5 ? line[5] : "")
-                                .responseTemplate(line.length > 6 ? line[6] : "")
-                                .enabled(line.length > 7 ? Boolean.parseBoolean(line[7]) : true)
-                                .properties(properties)
-                                .build();
-                    }
-                } else {
-                    // 最旧格式：使用分离的字段
-                    if (line.length >= 12) {
-                        Map<String, Object> properties = new HashMap<>();
-                        // 从旧格式的独立字段构建 properties
-                        try {
-                            properties.put("timeout", Long.parseLong(line[11]));
-                        } catch (NumberFormatException e) {
-                            properties.put("timeout", 30000L);
-                        }
-                        try {
-                            properties.put("retryCount", line.length > 12 ? Integer.parseInt(line[12]) : 3);
-                        } catch (NumberFormatException e) {
-                            properties.put("retryCount", 3);
-                        }
-
-                        RouteConfig route = builder
-                                .protocol(line[4])
-                                .requestTemplate(line[8])
-                                .responseTemplate(line[9])
-                                .enabled(Boolean.parseBoolean(line[10]))
-                                .properties(properties)
-                                .build();
-
-                        // 设置临时字段用于生成 target
-                        route.setTargetUrl(line[5]);
-                        route.setTargetBean(line[6]);
-                        route.setTargetMethod(line[7]);
-                        route.generateTarget();
-                        return route;
-                    }
+            // 解析 properties 字段（支持键值对和JSON格式）
+            if (line.length > 6 && line[6] != null && !line[6].trim().isEmpty()) {
+                try {
+                    properties = parseProperties(line[6]);
+                } catch (Exception e) {
+                    log.warn("Failed to parse properties: {}", line[6], e);
                 }
             }
+
+            RouteConfig route = RouteConfig.builder()
+                    .path(line[0])
+                    .method(line[1])
+                    .target(line[2])
+                    .requestTemplate(line.length > 3 ? line[3] : "")
+                    .responseTemplate(line.length > 4 ? line[4] : "")
+                    .enabled(line.length > 5 ? Boolean.parseBoolean(line[5]) : true)
+                    .properties(properties)
+                    .build();
+
+
+            return route;
         }
+
 
         return null;
     }
@@ -532,11 +394,6 @@ public class FileRepositoryPlugin implements RepositoryPlugin {
 
             // 写入数据
             for (RouteConfig route : routes) {
-                // 确保 target 字段已生成
-                if (route.getTarget() == null || route.getTarget().trim().isEmpty()) {
-                    route.generateTarget();
-                }
-
                 // 生成 properties 字符串（使用分号分隔格式）
                 String propertiesStr = generatePropertiesString(route);
 

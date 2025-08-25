@@ -156,15 +156,6 @@ public class DatabaseRepositoryPlugin implements RepositoryPlugin {
      * 转换为实体
      */
     private RouteEntity convertToEntity(RouteConfig config) {
-        // 确保 ID 和名称已生成
-        if (config.getRouteId() == null || config.getRouteId().trim().isEmpty()) {
-            config.generateIds();
-        }
-
-        // 确保 target 字段已生成
-        if (config.getTarget() == null || config.getTarget().trim().isEmpty()) {
-            config.generateTarget();
-        }
 
         RouteEntity entity = new RouteEntity();
         entity.setRouteId(config.getRouteId());
@@ -218,28 +209,6 @@ public class DatabaseRepositoryPlugin implements RepositoryPlugin {
                 .enabled(entity.isEnabled())
                 .properties(properties)
                 .build();
-
-        // 如果缺少 ID 或名称，则自动生成
-        if ((config.getRouteId() == null || config.getRouteId().trim().isEmpty()) ||
-            (config.getRouteName() == null || config.getRouteName().trim().isEmpty())) {
-            config.generateIds();
-        }
-
-        // 如果没有 target 字段但有旧字段，则生成 target
-        if ((config.getTarget() == null || config.getTarget().trim().isEmpty()) &&
-            (entity.getTargetUrl() != null || entity.getTargetBean() != null)) {
-
-            // 设置临时字段用于生成 target
-            config.setTargetUrl(entity.getTargetUrl());
-            config.setTargetBean(entity.getTargetBean());
-            config.setTargetMethod(entity.getTargetMethod());
-            config.generateTarget();
-        }
-
-        // 解析 target 字段以确保所有字段都正确设置
-        if (config.getTarget() != null && !config.getTarget().trim().isEmpty()) {
-            config.parseTarget();
-        }
 
         return config;
     }

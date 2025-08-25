@@ -28,6 +28,7 @@ import com.github.loadup.gateway.facade.model.PluginConfig;
 import com.github.loadup.gateway.facade.spi.ProxyPlugin;
 import com.github.loadup.gateway.facade.constants.GatewayConstants;
 import com.github.loadup.gateway.facade.utils.JsonUtils;
+import com.github.loadup.gateway.facade.exception.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -75,34 +76,47 @@ public class SpringBeanProxyPlugin implements ProxyPlugin {
     @Override
     public GatewayResponse execute(GatewayRequest request) throws Exception {
         // 这个方法在ProxyPlugin中不直接使用，而是通过proxy方法
-        throw new UnsupportedOperationException("Use proxy method instead");
+        throw GatewayExceptionFactory.operationNotSupported("Use proxy method instead");
     }
 
     @Override
     public GatewayResponse proxy(GatewayRequest request, String target) throws Exception {
-        String[] parts = target.split(":");
-        if (parts.length != 2) {
-            throw new IllegalArgumentException("Invalid target format. Expected: beanName:methodName");
-        }
-
-        String beanName = parts[0];
-        String methodName = parts[1];
 
         try {
+            String[] parts = target.split(":");
+            if (parts.length != 2) {
+                throw GatewayExceptionFactory.invalidBeanTarget(target);
+            }
+
+            String beanName = parts[0];
+            String methodName = parts[1];
+
             // 获取Spring Bean
-            Object bean = applicationContext.getBean(beanName);
+            Object bean;
+            try {
+                bean = applicationContext.getBean(beanName);
+            } catch (Exception e) {
+                throw GatewayExceptionFactory.beanNotFound(beanName);
+            }
 
             // 获取方法
             Method method = findMethod(bean.getClass(), methodName);
             if (method == null) {
-                throw new NoSuchMethodException("Method not found: " + methodName);
+                throw GatewayExceptionFactory.methodNotFound(beanName, methodName);
             }
 
             // 准备参数
             Object[] args = prepareMethodArgs(request, method);
 
             // 调用方法
-            Object result = method.invoke(bean, args);
+            Object result;
+            try {
+                result = method.invoke(bean, args);
+            } catch (java.lang.reflect.InvocationTargetException e) {
+                // 提取原始异常并包装
+                Throwable cause = e.getCause() != null ? e.getCause() : e;
+                throw GatewayExceptionFactory.methodInvokeFailed(beanName, methodName, cause);
+            }
 
             // 构建响应
             return GatewayResponse.builder()
@@ -114,16 +128,13 @@ public class SpringBeanProxyPlugin implements ProxyPlugin {
                     .responseTime(LocalDateTime.now())
                     .build();
 
+        } catch (GatewayException e) {
+            // 网关异常直接使用异常处理器处理
+            return ExceptionHandler.handleException(request.getRequestId(), e);
         } catch (Exception e) {
-            log.error("SpringBean proxy failed", e);
-            return GatewayResponse.builder()
-                    .requestId(request.getRequestId())
-                    .statusCode(GatewayConstants.Status.INTERNAL_ERROR)
-                    .body("{\"error\":\"" + e.getMessage() + "\"}")
-                    .contentType(GatewayConstants.ContentType.JSON)
-                    .responseTime(LocalDateTime.now())
-                    .errorMessage(e.getMessage())
-                    .build();
+            // 其他异常包装后处理
+            GatewayException wrappedException = GatewayExceptionFactory.wrap(e, "SPRINGBEAN_PROXY");
+            return ExceptionHandler.handleException(request.getRequestId(), wrappedException);
         }
     }
 

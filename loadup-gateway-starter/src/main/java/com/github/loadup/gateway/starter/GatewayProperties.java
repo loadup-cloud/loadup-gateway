@@ -72,6 +72,11 @@ public class GatewayProperties {
      */
     private Map<String, PluginProperties> plugins = new HashMap<>();
 
+    /**
+     * 响应相关配置
+     */
+    private ResponseProperties response = new ResponseProperties();
+
     @Data
     public static class Storage {
         /**
@@ -103,5 +108,13 @@ public class GatewayProperties {
         private boolean enabled = true;
         private int priority = 100;
         private Map<String, Object> config = new HashMap<>();
+    }
+
+    @Data
+    public static class ResponseProperties {
+        /**
+         * 是否统一包装响应
+         */
+        private boolean wrap = true;
     }
 }

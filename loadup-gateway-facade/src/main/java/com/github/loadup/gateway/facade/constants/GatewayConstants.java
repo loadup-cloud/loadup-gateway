@@ -10,12 +10,12 @@ package com.github.loadup.gateway.facade.constants;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -27,7 +27,8 @@ package com.github.loadup.gateway.facade.constants;
  */
 public final class GatewayConstants {
 
-    private GatewayConstants() {}
+    private GatewayConstants() {
+    }
 
     /**
      * 协议类型
@@ -96,5 +97,14 @@ public final class GatewayConstants {
         public static final String PLUGIN_CONFIG = "config";
         public static final String TEMPLATE_PATH = "template.path";
         public static final String STORAGE_TYPE = "storage.type";
+    }
+
+    /**
+     * 路由配置属性键
+     */
+    public static final class PropertyKeys {
+        public static final String TIMEOUT = "timeout";
+        public static final String RETRY_COUNT = "retryCount";
+        public static final String WRAP_RESPONSE = "wrapResponse";
     }
 }
