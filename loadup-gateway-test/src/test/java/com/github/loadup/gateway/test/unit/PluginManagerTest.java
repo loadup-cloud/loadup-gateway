@@ -84,8 +84,9 @@ public class PluginManagerTest extends BaseGatewayTest {
     public void shouldExecuteHttpProxy() throws Exception {
         // Given
         GatewayRequest request = createHttpRequest("/api/test", "GET", null);
-        RouteConfig route = createTestRoute("/api/test",
-                                          GatewayConstants.Protocol.HTTP, "http://localhost:8080/api/test");
+        RouteConfig route = createTestRoute("/api/test", "GET",
+                "http://localhost:8080/api/test");
+
         GatewayResponse expectedResponse = GatewayResponse.builder()
                 .requestId(testRequestId)
                 .statusCode(200)
@@ -110,8 +111,11 @@ public class PluginManagerTest extends BaseGatewayTest {
     public void shouldExecuteBeanProxy() throws Exception {
         // Given
         GatewayRequest request = createHttpRequest("/api/test", "POST", "{\"data\":\"test\"}");
-        RouteConfig route = createTestRoute("/api/test",
-                                          GatewayConstants.Protocol.BEAN, "testService:getData");
+        RouteConfig route = createTestRoute("/api/test", "POST",
+                "bean://testService:getData");
+
+        // 目标配置现在会自动解析，无需手动调用 parseTarget()
+
         GatewayResponse expectedResponse = GatewayResponse.builder()
                 .requestId(testRequestId)
                 .statusCode(200)
@@ -136,7 +140,7 @@ public class PluginManagerTest extends BaseGatewayTest {
     public void shouldThrowExceptionWhenNoPluginFound() {
         // Given
         GatewayRequest request = createHttpRequest("/api/test", "GET", null);
-        RouteConfig route = createTestRoute("/api/test", "UNKNOWN", "unknown");
+        RouteConfig route = createTestRoute("/api/test", "GET", "unknown");
 
         // When & Then
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
@@ -151,8 +155,10 @@ public class PluginManagerTest extends BaseGatewayTest {
     public void shouldHandlePluginExecutionException() throws Exception {
         // Given
         GatewayRequest request = createHttpRequest("/api/test", "GET", null);
-        RouteConfig route = createTestRoute("/api/test",
-                                          GatewayConstants.Protocol.HTTP, "http://localhost:8080/api/test");
+        RouteConfig route = createTestRoute("/api/test", "GET",
+                "http://localhost:8080/api/test");
+
+        // 目标配置现在会自动解析，无需手动调用 parseTarget()
 
         when(httpPlugin.proxy(request, "http://localhost:8080/api/test"))
                 .thenThrow(new RuntimeException("Network error"));

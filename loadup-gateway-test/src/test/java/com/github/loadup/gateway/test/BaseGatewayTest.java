@@ -25,7 +25,6 @@ package com.github.loadup.gateway.test;
 import com.github.loadup.gateway.facade.model.GatewayRequest;
 import com.github.loadup.gateway.facade.model.GatewayResponse;
 import com.github.loadup.gateway.facade.model.RouteConfig;
-import com.github.loadup.gateway.facade.constants.GatewayConstants;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -76,49 +75,15 @@ public abstract class BaseGatewayTest {
     /**
      * 创建测试路由配置
      */
-    protected RouteConfig createTestRoute(String path, String protocol, String target) {
-        // 创建 properties 包含 timeout 和 retryCount
+    protected RouteConfig createTestRoute(String path, String method, String target) {
         Map<String, Object> properties = new HashMap<>();
         properties.put("timeout", 30000L);
         properties.put("retryCount", 3);
 
-        // 创建自定义的 RouteConfig 子类，重写 getRouteId 和 getRouteName 方法
-        RouteConfig route = new RouteConfig() {
-            @Override
-            public String getRouteId() {
-                if (super.getRouteId() == null) {
-                    generateIds();
-                }
-                return super.getRouteId();
-            }
-
-            @Override
-            public String getRouteName() {
-                if (super.getRouteName() == null) {
-                    generateIds();
-                }
-                return super.getRouteName();
-            }
-        };
-
-        // 设置基本属性
-        route.setPath(path);
-        route.setMethod("GET");
-        route.setEnabled(true);
-        route.setProperties(properties);
-
-        // 根据协议类型设置统一的 target 字段
-        if (GatewayConstants.Protocol.HTTP.equals(protocol)) {
-            route.setTarget(target);
-        } else if (GatewayConstants.Protocol.BEAN.equals(protocol)) {
-            route.setTarget("bean://" + target);
-        } else if (GatewayConstants.Protocol.RPC.equals(protocol)) {
-            route.setTarget("rpc://" + target);
-        }
-
-        // 解析 target 字段以设置相应的 protocol 和其他字段
-        route.parseTarget();
-
+        // 创建 RouteConfig 实例
+        RouteConfig route = RouteConfig.builder().path(path)
+                .method(method).enabled(true).target(target)
+                .properties(properties).build();
         return route;
     }
 

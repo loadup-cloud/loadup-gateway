@@ -1,6 +1,8 @@
 spring:
   application:
     name: loadup-gateway-test
+  main:
+    allow-bean-definition-overriding: true
 
 loadup:
   gateway:

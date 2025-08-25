@@ -72,7 +72,7 @@ public class RouteResolverTest extends BaseGatewayTest {
         String path = "/api/test";
         String method = "GET";
         GatewayRequest request = createHttpRequest(path, method, null);
-        RouteConfig expectedRoute = createTestRoute(path, "HTTP", "http://localhost:8080");
+        RouteConfig expectedRoute = createTestRoute("/api/test", "GET", "http://localhost:8080/api/test");
 
         when(repositoryPlugin.getRouteByPath(path, method))
                 .thenReturn(Optional.of(expectedRoute));
@@ -110,8 +110,8 @@ public class RouteResolverTest extends BaseGatewayTest {
     @DisplayName("应该刷新路由缓存")
     public void shouldRefreshRouteCache() throws Exception {
         // Given
-        RouteConfig route1 = createTestRoute("/api/test1", "HTTP", "http://localhost:8080");
-        RouteConfig route2 = createTestRoute("/api/test2", "BEAN", "testService:getData");
+        RouteConfig route1 = createTestRoute("/api/test1", "GET", "http://localhost:8080");
+        RouteConfig route2 = createTestRoute("/api/test2", "GET", "testService:getData");
 
         when(repositoryPlugin.getAllRoutes())
                 .thenReturn(Arrays.asList(route1, route2));

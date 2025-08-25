@@ -10,12 +10,12 @@ package com.github.loadup.gateway.test.unit;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -41,6 +41,7 @@ public class RouteConfigPropertiesTest extends BaseGatewayTest {
         RouteConfig route = RouteConfig.builder()
                 .path("/api/test")
                 .method("GET")
+                .target("http://localhost:8080/users")
                 .build();
 
         // 测试设置和获取 timeout
@@ -62,6 +63,7 @@ public class RouteConfigPropertiesTest extends BaseGatewayTest {
         RouteConfig route = RouteConfig.builder()
                 .path("/api/test")
                 .method("GET")
+                .target("http://localhost:8080/users")
                 .build();
 
         // 测试默认值
@@ -74,6 +76,7 @@ public class RouteConfigPropertiesTest extends BaseGatewayTest {
         RouteConfig route = RouteConfig.builder()
                 .path("/api/test")
                 .method("GET")
+                .target("http://localhost:8080/users")
                 .build();
 
         // 设置自定义属性
@@ -97,6 +100,7 @@ public class RouteConfigPropertiesTest extends BaseGatewayTest {
         RouteConfig route = RouteConfig.builder()
                 .path("/api/test")
                 .method("GET")
+                .target("http://localhost:8080/users")
                 .properties(properties)
                 .build();
 
@@ -117,6 +121,7 @@ public class RouteConfigPropertiesTest extends BaseGatewayTest {
         RouteConfig route = RouteConfig.builder()
                 .path("/api/test")
                 .method("GET")
+                .target("http://localhost:8080/users")
                 .properties(properties)
                 .build();
 
@@ -142,8 +147,6 @@ public class RouteConfigPropertiesTest extends BaseGatewayTest {
         route.setProperty("compression", true);
 
         // 生成ID和解析target
-        route.generateIds();
-        route.parseTarget();
 
         // 验证所有字段都正确设置
         assertNotNull(route.getRouteId());

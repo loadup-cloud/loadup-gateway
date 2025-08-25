@@ -22,10 +22,12 @@ package com.github.loadup.gateway.test.unit;
  * #L%
  */
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.loadup.gateway.core.action.ActionDispatcher;
 import com.github.loadup.gateway.core.router.RouteResolver;
 import com.github.loadup.gateway.core.template.TemplateEngine;
 import com.github.loadup.gateway.core.plugin.PluginManager;
+import com.github.loadup.gateway.facade.config.GatewayProperties;
 import com.github.loadup.gateway.facade.model.GatewayRequest;
 import com.github.loadup.gateway.facade.model.GatewayResponse;
 import com.github.loadup.gateway.facade.model.RouteConfig;
@@ -39,6 +41,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.Optional;
 
+import static com.github.loadup.gateway.facade.exception.ErrorCode.ROUTE_NOT_FOUND;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -57,6 +60,12 @@ public class ActionDispatcherTest extends BaseGatewayTest {
     @Mock
     private PluginManager pluginManager;
 
+    @Mock
+    private GatewayProperties gatewayProperties;
+
+    @Mock
+    private ObjectMapper objectMapper;
+
     private ActionDispatcher actionDispatcher;
 
     @BeforeEach
@@ -65,6 +74,11 @@ public class ActionDispatcherTest extends BaseGatewayTest {
         MockitoAnnotations.openMocks(this);
 
         actionDispatcher = new ActionDispatcher();
+
+        // Mock GatewayProperties default behavior
+        GatewayProperties.ResponseProperties responseProps = new GatewayProperties.ResponseProperties();
+        responseProps.setWrap(true);
+        when(gatewayProperties.getResponse()).thenReturn(responseProps);
 
         // 使用反射注入mock对象
         try {
@@ -79,6 +93,14 @@ public class ActionDispatcherTest extends BaseGatewayTest {
             var pluginManagerField = ActionDispatcher.class.getDeclaredField("pluginManager");
             pluginManagerField.setAccessible(true);
             pluginManagerField.set(actionDispatcher, pluginManager);
+
+            var gatewayPropertiesField = ActionDispatcher.class.getDeclaredField("gatewayProperties");
+            gatewayPropertiesField.setAccessible(true);
+            gatewayPropertiesField.set(actionDispatcher, gatewayProperties);
+
+            var objectMapperField = ActionDispatcher.class.getDeclaredField("objectMapper");
+            objectMapperField.setAccessible(true);
+            objectMapperField.set(actionDispatcher, objectMapper);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -89,8 +111,8 @@ public class ActionDispatcherTest extends BaseGatewayTest {
     public void shouldSuccessfullyDispatchRequest() throws Exception {
         // Given
         GatewayRequest request = createHttpRequest("/api/test", "GET", null);
-        RouteConfig route = createTestRoute("/api/test",
-                                          GatewayConstants.Protocol.HTTP, "http://localhost:8080");
+        RouteConfig route = createTestRoute("/api/test", "GET",
+                "http://localhost:8080");
         GatewayResponse mockResponse = GatewayResponse.builder()
                 .requestId(testRequestId)
                 .statusCode(200)
@@ -127,7 +149,7 @@ public class ActionDispatcherTest extends BaseGatewayTest {
 
         // Then
         assertErrorResponse(result, GatewayConstants.Status.NOT_FOUND);
-        assertTrue(result.getBody().contains("Route not found"));
+        assertTrue(result.getBody().contains(ROUTE_NOT_FOUND.getMessage()));
         assertEquals(testRequestId, result.getRequestId());
 
         verify(routeResolver).resolve(request);
@@ -139,8 +161,8 @@ public class ActionDispatcherTest extends BaseGatewayTest {
     public void shouldProcessRequestTemplate() throws Exception {
         // Given
         GatewayRequest request = createHttpRequest("/api/test", "POST", "{\"name\":\"test\"}");
-        RouteConfig route = createTestRoute("/api/test",
-                                          GatewayConstants.Protocol.HTTP, "http://localhost:8080");
+        RouteConfig route = createTestRoute("/api/test", "POST",
+                "http://localhost:8080");
         route.setRequestTemplate("test_request_template");
 
         GatewayRequest processedRequest = createHttpRequest("/api/test", "POST", "{\"name\":\"test\",\"processed\":true}");
@@ -169,8 +191,8 @@ public class ActionDispatcherTest extends BaseGatewayTest {
     public void shouldProcessResponseTemplate() throws Exception {
         // Given
         GatewayRequest request = createHttpRequest("/api/test", "GET", null);
-        RouteConfig route = createTestRoute("/api/test",
-                                          GatewayConstants.Protocol.HTTP, "http://localhost:8080");
+        RouteConfig route = createTestRoute("/api/test", "GET",
+                "http://localhost:8080");
         route.setResponseTemplate("test_response_template");
 
         GatewayResponse originalResponse = GatewayResponse.builder()
@@ -204,8 +226,8 @@ public class ActionDispatcherTest extends BaseGatewayTest {
     public void shouldHandleProxyExecutionException() throws Exception {
         // Given
         GatewayRequest request = createHttpRequest("/api/test", "GET", null);
-        RouteConfig route = createTestRoute("/api/test",
-                                          GatewayConstants.Protocol.HTTP, "http://localhost:8080");
+        RouteConfig route = createTestRoute("/api/test", "GET",
+                "http://localhost:8080");
 
         when(routeResolver.resolve(request)).thenReturn(Optional.of(route));
         when(templateEngine.processRequestTemplate(request, null)).thenReturn(request);
@@ -216,7 +238,7 @@ public class ActionDispatcherTest extends BaseGatewayTest {
 
         // Then
         assertErrorResponse(result, GatewayConstants.Status.INTERNAL_ERROR);
-        assertTrue(result.getBody().contains("Internal Server Error"));
+        assertTrue(result.getBody().contains("Network error"));
         assertNotNull(result.getErrorMessage());
         assertTrue(result.getProcessingTime() > 0);
     }

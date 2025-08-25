@@ -10,12 +10,12 @@ package com.github.loadup.gateway.test.integration;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -23,15 +23,16 @@ package com.github.loadup.gateway.test.integration;
  */
 
 import com.github.loadup.gateway.core.action.ActionDispatcher;
+import com.github.loadup.gateway.facade.constants.GatewayConstants;
+import com.github.loadup.gateway.facade.exception.ErrorCode;
 import com.github.loadup.gateway.facade.model.GatewayRequest;
 import com.github.loadup.gateway.facade.model.GatewayResponse;
 import com.github.loadup.gateway.facade.model.RouteConfig;
-import com.github.loadup.gateway.facade.constants.GatewayConstants;
 import com.github.loadup.gateway.facade.spi.RepositoryPlugin;
 import com.github.loadup.gateway.test.BaseGatewayTest;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -41,8 +42,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 /**
  * 网关集成测试
@@ -71,16 +72,14 @@ public class GatewayIntegrationTest extends BaseGatewayTest {
 
         // 创建 properties 包含 timeout 和 retryCount
         Map<String, Object> properties = new HashMap<>();
-        properties.put("timeout", 30000L);
-        properties.put("retryCount", 3);
+        properties.put(GatewayConstants.PropertyKeys.TIMEOUT, 30000L);
+        properties.put(GatewayConstants.PropertyKeys.RETRY_COUNT, 3);
 
         RouteConfig route = RouteConfig.builder()
-                .routeId("test-http-route-1")
-                .routeName("Test HTTP Route 1")
                 .path("/api/test/http")
                 .method("GET")
                 .protocol(GatewayConstants.Protocol.HTTP)
-                .targetUrl("http://httpbin.org/get")
+                .target("http://httpbin.org/get")
                 .enabled(true)
                 .properties(properties)
                 .build();
@@ -107,17 +106,14 @@ public class GatewayIntegrationTest extends BaseGatewayTest {
 
         // 创建 properties 包含 timeout 和 retryCount
         Map<String, Object> properties = new HashMap<>();
-        properties.put("timeout", 30000L);
-        properties.put("retryCount", 3);
+        properties.put(GatewayConstants.PropertyKeys.TIMEOUT, 30000L);
+        properties.put(GatewayConstants.PropertyKeys.RETRY_COUNT, 3);
 
         RouteConfig route = RouteConfig.builder()
-                .routeId("test-bean-route-1")
-                .routeName("Test Bean Route 1")
                 .path("/api/test/bean")
                 .method("POST")
                 .protocol(GatewayConstants.Protocol.BEAN)
-                .targetBean("testService")
-                .targetMethod("processData")
+                .target("bean://testService:processData")
                 .enabled(true)
                 .properties(properties)
                 .build();
@@ -143,24 +139,22 @@ public class GatewayIntegrationTest extends BaseGatewayTest {
 
         // 创建 properties 包含 timeout 和 retryCount
         Map<String, Object> properties = new HashMap<>();
-        properties.put("timeout", 30000L);
-        properties.put("retryCount", 3);
+        properties.put(GatewayConstants.PropertyKeys.TIMEOUT, 30000L);
+        properties.put(GatewayConstants.PropertyKeys.RETRY_COUNT, 3);
 
         RouteConfig route = RouteConfig.builder()
-                .routeId("test-template-route")
-                .routeName("Test Template Route")
                 .path("/api/test/template")
                 .method("POST")
                 .protocol(GatewayConstants.Protocol.HTTP)
-                .targetUrl("http://httpbin.org/post")
+                .target("http://httpbin.org/post")
                 .requestTemplate("""
-                    request.headers.put("X-Custom-Header", "test-value")
-                    return request
-                    """)
+                        request.headers.put("X-Custom-Header", "test-value")
+                        return request
+                        """)
                 .responseTemplate("""
-                    response.headers.put("X-Response-Processed", "true")
-                    return response
-                    """)
+                        response.headers.put("X-Response-Processed", "true")
+                        return response
+                        """)
                 .enabled(true)
                 .properties(properties)
                 .build();
@@ -192,7 +186,7 @@ public class GatewayIntegrationTest extends BaseGatewayTest {
 
         // Then
         assertErrorResponse(response, GatewayConstants.Status.NOT_FOUND);
-        assertTrue(response.getBody().contains("Route not found"));
+        assertTrue(response.getBody().contains(ErrorCode.ROUTE_NOT_FOUND.getMessage()));
         assertEquals(testRequestId, response.getRequestId());
     }
 
@@ -204,16 +198,14 @@ public class GatewayIntegrationTest extends BaseGatewayTest {
 
         // 创建 properties 包含 timeout 和 retryCount
         Map<String, Object> properties = new HashMap<>();
-        properties.put("timeout", 1000L); // 1秒超时
-        properties.put("retryCount", 1);
+        properties.put(GatewayConstants.PropertyKeys.TIMEOUT, 1000L); // 1秒超时
+        properties.put(GatewayConstants.PropertyKeys.RETRY_COUNT, 1);
 
         RouteConfig route = RouteConfig.builder()
-                .routeId("timeout-route")
-                .routeName("Timeout Route")
                 .path("/api/test/timeout")
                 .method("GET")
                 .protocol(GatewayConstants.Protocol.HTTP)
-                .targetUrl("http://httpbin.org/delay/5") // 5秒延迟
+                .target("http://httpbin.org/delay/5") // 5秒延迟
                 .enabled(true)
                 .properties(properties)
                 .build();

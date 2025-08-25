@@ -74,9 +74,8 @@ public class FileRepositoryPluginTest extends BaseGatewayTest {
     @DisplayName("应该能够保存和获取路由配置")
     public void shouldSaveAndGetRouteConfig() throws Exception {
         // Given
-        RouteConfig route = createTestRoute("/api/test",
-                                          GatewayConstants.Protocol.HTTP, "http://localhost:8080");
-        route.generateIds();
+        RouteConfig route = createTestRoute("/api/test", "GET",
+                "http://localhost:8080");
         // When
         fileRepositoryPlugin.saveRoute(route);
         Optional<RouteConfig> result = fileRepositoryPlugin.getRoute(route.getRouteId());
@@ -91,8 +90,8 @@ public class FileRepositoryPluginTest extends BaseGatewayTest {
     @DisplayName("应该能够通过路径和方法获取路由")
     public void shouldGetRouteByPathAndMethod() throws Exception {
         // Given
-        RouteConfig route = createTestRoute("/api/user",
-                                          GatewayConstants.Protocol.BEAN, "userService:getUser");
+        RouteConfig route = createTestRoute("/api/user", "GET",
+                "userService:getUser");
 
         // When
         fileRepositoryPlugin.saveRoute(route);
@@ -109,10 +108,10 @@ public class FileRepositoryPluginTest extends BaseGatewayTest {
     @DisplayName("应该能够获取所有路由")
     public void shouldGetAllRoutes() throws Exception {
         // Given
-        RouteConfig route1 = createTestRoute("/api/test1",
-                                           GatewayConstants.Protocol.HTTP, "http://localhost:8080/test1");
-        RouteConfig route2 = createTestRoute("/api/test2",
-                                           GatewayConstants.Protocol.BEAN, "testService:getData");
+        RouteConfig route1 = createTestRoute("/api/test1", "GET",
+                "http://localhost:8080/test1");
+        RouteConfig route2 = createTestRoute("/api/test2", "GET",
+                "testService:getData");
 
         // When
         fileRepositoryPlugin.saveRoute(route1);
@@ -129,8 +128,8 @@ public class FileRepositoryPluginTest extends BaseGatewayTest {
     @DisplayName("应该能够删除路由")
     public void shouldDeleteRoute() throws Exception {
         // Given
-        RouteConfig route = createTestRoute("/api/delete",
-                                          GatewayConstants.Protocol.HTTP, "http://localhost:8080");
+        RouteConfig route = createTestRoute("/api/test", "GET",
+                "http://localhost:8080");
 
         // When
         fileRepositoryPlugin.saveRoute(route);

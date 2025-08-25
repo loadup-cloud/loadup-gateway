@@ -46,6 +46,11 @@
             <artifactId>repository-file-plugin</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.github.loadup</groupId>
+            <artifactId>proxy-springbean-plugin</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

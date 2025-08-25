@@ -32,6 +32,7 @@ import org.springframework.context.annotation.ComponentScan;
 @SpringBootApplication
 @ComponentScan(basePackages = {
     "com.github.loadup.gateway.core",
+    "com.github.loadup.gateway.facade",
     "com.github.loadup.gateway.plugins",
     "com.github.loadup.gateway.test"
 })

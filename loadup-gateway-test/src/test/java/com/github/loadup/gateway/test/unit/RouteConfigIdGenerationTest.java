@@ -39,11 +39,11 @@ public class RouteConfigIdGenerationTest extends BaseGatewayTest {
     @Test
     public void testGenerateRouteId() {
         RouteConfig route = RouteConfig.builder()
-                .path("/api/test/user")
+                .path("/api/test")
+                .target("http://localhost:8080/api/user")
                 .method("GET")
                 .build();
 
-        route.generateIds();
 
         assertNotNull(route.getRouteId());
         assertTrue(route.getRouteId().startsWith("route-"));
@@ -54,26 +54,26 @@ public class RouteConfigIdGenerationTest extends BaseGatewayTest {
     public void testGenerateRouteName() {
         RouteConfig route1 = RouteConfig.builder()
                 .path("/api/test/user")
+                .target("http://localhost:8080/api/user")
                 .method("GET")
                 .build();
 
-        route1.generateIds();
         assertEquals("Api test user (GET)", route1.getRouteName());
 
         RouteConfig route2 = RouteConfig.builder()
-                .path("/api/user-management")
+                .path("/api/user/management")
+                .target("http://localhost:8080/api/user-management")
                 .method("POST")
                 .build();
 
-        route2.generateIds();
         assertEquals("Api user management (POST)", route2.getRouteName());
 
         RouteConfig route3 = RouteConfig.builder()
                 .path("/")
+                .target("http://localhost:8080/")
                 .method("GET")
                 .build();
 
-        route3.generateIds();
         assertEquals("Root (GET)", route3.getRouteName());
     }
 
@@ -81,16 +81,16 @@ public class RouteConfigIdGenerationTest extends BaseGatewayTest {
     public void testUniqueRouteIds() {
         RouteConfig route1 = RouteConfig.builder()
                 .path("/api/test")
+                .target("http://localhost:8080/api/user")
                 .method("GET")
                 .build();
 
         RouteConfig route2 = RouteConfig.builder()
                 .path("/api/test")
+                .target("http://localhost:8080/api/user")
                 .method("POST")
                 .build();
 
-        route1.generateIds();
-        route2.generateIds();
 
         assertNotEquals(route1.getRouteId(), route2.getRouteId());
     }
@@ -99,16 +99,16 @@ public class RouteConfigIdGenerationTest extends BaseGatewayTest {
     public void testConsistentRouteIds() {
         RouteConfig route1 = RouteConfig.builder()
                 .path("/api/test")
+                .target("http://localhost:8080/api/test")
                 .method("GET")
                 .build();
 
         RouteConfig route2 = RouteConfig.builder()
                 .path("/api/test")
+                .target("http://localhost:8080/api/test")
                 .method("GET")
                 .build();
 
-        route1.generateIds();
-        route2.generateIds();
 
         // 相同的路径和方法应该生成相同的ID
         assertEquals(route1.getRouteId(), route2.getRouteId());
@@ -134,8 +134,6 @@ public class RouteConfigIdGenerationTest extends BaseGatewayTest {
                 .build();
 
         // 生成ID和解析target
-        route.generateIds();
-        route.parseTarget();
 
         // 验证所有字段都正确设置
         assertNotNull(route.getRouteId());
