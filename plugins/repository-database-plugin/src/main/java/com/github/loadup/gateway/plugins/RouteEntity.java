@@ -22,7 +22,8 @@ package com.github.loadup.gateway.plugins;
  * #L%
  */
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
@@ -32,7 +33,8 @@ import java.util.Date;
 /**
  * 路由实体
  */
-@Data
+@Getter
+@Setter
 @Table("gateway_routes")
 public class RouteEntity {
     @Id
@@ -71,7 +73,6 @@ public class RouteEntity {
     private long timeout = 30000;
     private int retryCount = 3;
 
-    // large text field; no @Lob in Spring Data JDBC
     private String properties;
 
     private Date updatedAt;

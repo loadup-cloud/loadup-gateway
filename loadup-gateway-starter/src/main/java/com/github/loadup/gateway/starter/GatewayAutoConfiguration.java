@@ -10,12 +10,12 @@ package com.github.loadup.gateway.starter;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -27,12 +27,13 @@ import com.github.loadup.gateway.core.filter.GatewayFilter;
 import com.github.loadup.gateway.core.plugin.PluginManager;
 import com.github.loadup.gateway.core.router.RouteResolver;
 import com.github.loadup.gateway.core.template.TemplateEngine;
+import com.github.loadup.gateway.facade.config.GatewayProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * Gateway自动配置类
@@ -40,7 +41,7 @@ import org.springframework.context.annotation.ComponentScan;
 @Configuration
 @EnableConfigurationProperties(GatewayProperties.class)
 @ConditionalOnClass(GatewayFilter.class)
-@ComponentScan(basePackages = "com.github.loadup.gateway.core")
+@ComponentScan(basePackages = "com.github.loadup.gateway")
 public class GatewayAutoConfiguration {
 
     @Bean

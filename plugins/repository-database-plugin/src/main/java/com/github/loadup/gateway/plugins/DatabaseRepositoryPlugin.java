@@ -29,6 +29,7 @@ import com.github.loadup.gateway.facade.model.PluginConfig;
 import com.github.loadup.gateway.facade.model.RouteConfig;
 import com.github.loadup.gateway.facade.spi.RepositoryPlugin;
 import com.github.loadup.gateway.facade.utils.JsonUtils;
+import com.github.loadup.gateway.plugins.mapper.RouteMapper;
 import com.github.loadup.gateway.plugins.repository.RouteManager;
 import com.github.loadup.gateway.plugins.repository.TemplateManager;
 import lombok.extern.slf4j.Slf4j;
@@ -51,6 +52,9 @@ public class DatabaseRepositoryPlugin implements RepositoryPlugin {
 
     @Autowired
     private TemplateManager templateManager;
+
+    @Autowired
+    private RouteMapper routeMapper;
 
     @Override
     public String getName() {
@@ -94,7 +98,7 @@ public class DatabaseRepositoryPlugin implements RepositoryPlugin {
 
     @Override
     public void saveRoute(RouteConfig routeConfig) throws Exception {
-        RouteEntity entity = convertToEntity(routeConfig);
+        RouteEntity entity = routeMapper.toEntity(routeConfig);
         routeManager.save(entity);
         log.info("Route saved to database: {}", routeConfig.getRouteId());
     }
@@ -152,34 +156,6 @@ public class DatabaseRepositoryPlugin implements RepositoryPlugin {
     @Override
     public String getSupportedStorageType() {
         return GatewayConstants.Storage.DATABASE;
-    }
-
-    /**
-     * 转换为实体
-     */
-    private RouteEntity convertToEntity(RouteConfig config) {
-
-        RouteEntity entity = new RouteEntity();
-        entity.setRouteId(config.getRouteId());
-        entity.setRouteName(config.getRouteName());
-        entity.setPath(config.getPath());
-        entity.setMethod(config.getMethod());
-        entity.setProtocol(config.getProtocol());
-        entity.setTarget(config.getTarget());
-
-        // 设置临时字段用于兼容性
-        entity.setTargetUrl(config.getTargetUrl());
-        entity.setTargetBean(config.getTargetBean());
-        entity.setTargetMethod(config.getTargetMethod());
-
-        entity.setRequestTemplate(config.getRequestTemplate());
-        entity.setResponseTemplate(config.getResponseTemplate());
-        entity.setEnabled(config.isEnabled());
-        entity.setTimeout(config.getTimeout()); // 从 properties 中获取
-        entity.setRetryCount(config.getRetryCount()); // 从 properties 中获取
-        entity.setProperties(JsonUtils.toJson(config.getProperties()));
-        entity.setUpdatedAt(new Date());
-        return entity;
     }
 
     /**
