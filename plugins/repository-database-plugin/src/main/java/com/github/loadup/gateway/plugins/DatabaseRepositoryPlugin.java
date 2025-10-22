@@ -10,33 +10,34 @@ package com.github.loadup.gateway.plugins;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
 
+import com.github.loadup.gateway.facade.constants.GatewayConstants;
 import com.github.loadup.gateway.facade.model.GatewayRequest;
 import com.github.loadup.gateway.facade.model.GatewayResponse;
 import com.github.loadup.gateway.facade.model.PluginConfig;
 import com.github.loadup.gateway.facade.model.RouteConfig;
 import com.github.loadup.gateway.facade.spi.RepositoryPlugin;
-import com.github.loadup.gateway.facade.constants.GatewayConstants;
 import com.github.loadup.gateway.facade.utils.JsonUtils;
-import com.github.loadup.gateway.plugins.repository.RouteRepository;
-import com.github.loadup.gateway.plugins.repository.TemplateRepository;
+import com.github.loadup.gateway.plugins.repository.RouteManager;
+import com.github.loadup.gateway.plugins.repository.TemplateManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
  * 数据库存储插件
@@ -46,10 +47,10 @@ import java.util.stream.Collectors;
 public class DatabaseRepositoryPlugin implements RepositoryPlugin {
 
     @Autowired
-    private RouteRepository routeRepository;
+    private RouteManager routeManager;
 
     @Autowired
-    private TemplateRepository templateRepository;
+    private TemplateManager templateManager;
 
     @Override
     public String getName() {
@@ -94,32 +95,33 @@ public class DatabaseRepositoryPlugin implements RepositoryPlugin {
     @Override
     public void saveRoute(RouteConfig routeConfig) throws Exception {
         RouteEntity entity = convertToEntity(routeConfig);
-        routeRepository.save(entity);
+        routeManager.save(entity);
         log.info("Route saved to database: {}", routeConfig.getRouteId());
     }
 
     @Override
     public Optional<RouteConfig> getRoute(String routeId) throws Exception {
-        Optional<RouteEntity> entity = routeRepository.findByRouteId(routeId);
+        Optional<RouteEntity> entity = routeManager.findByRouteId(routeId);
         return entity.map(this::convertToModel);
     }
 
     @Override
     public Optional<RouteConfig> getRouteByPath(String path, String method) throws Exception {
-        Optional<RouteEntity> entity = routeRepository.findByPathAndMethod(path, method);
+        Optional<RouteEntity> entity = routeManager.findByPathAndMethod(path, method);
         return entity.map(this::convertToModel);
     }
 
     @Override
     public List<RouteConfig> getAllRoutes() throws Exception {
-        return routeRepository.findAll().stream()
+        Iterable<RouteEntity> entities = routeManager.findAll();
+        return StreamSupport.stream(entities.spliterator(), false)
                 .map(this::convertToModel)
                 .collect(Collectors.toList());
     }
 
     @Override
     public void deleteRoute(String routeId) throws Exception {
-        routeRepository.deleteByRouteId(routeId);
+        routeManager.deleteByRouteId(routeId);
         log.info("Route deleted from database: {}", routeId);
     }
 
@@ -131,19 +133,19 @@ public class DatabaseRepositoryPlugin implements RepositoryPlugin {
         entity.setContent(content);
         entity.setUpdatedAt(new Date());
 
-        templateRepository.save(entity);
+        templateManager.save(entity);
         log.info("Template saved to database: {} ({})", templateId, templateType);
     }
 
     @Override
     public Optional<String> getTemplate(String templateId, String templateType) throws Exception {
-        Optional<TemplateEntity> entity = templateRepository.findByTemplateIdAndTemplateType(templateId, templateType);
+        Optional<TemplateEntity> entity = templateManager.findByTemplateIdAndTemplateType(templateId, templateType);
         return entity.map(TemplateEntity::getContent);
     }
 
     @Override
     public void deleteTemplate(String templateId, String templateType) throws Exception {
-        templateRepository.deleteByTemplateIdAndTemplateType(templateId, templateType);
+        templateManager.deleteByTemplateIdAndTemplateType(templateId, templateType);
         log.info("Template deleted from database: {} ({})", templateId, templateType);
     }
 

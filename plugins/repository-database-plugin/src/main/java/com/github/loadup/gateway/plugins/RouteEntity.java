@@ -10,12 +10,12 @@ package com.github.loadup.gateway.plugins;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -23,36 +23,33 @@ package com.github.loadup.gateway.plugins;
  */
 
 import lombok.Data;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
-import jakarta.persistence.*;
 import java.util.Date;
 
 /**
  * 路由实体
  */
 @Data
-@Entity
-@Table(name = "gateway_routes", indexes = {
-    @Index(name = "idx_path_method", columnList = "path,method"),
-    @Index(name = "idx_route_id", columnList = "routeId")
-})
+@Table("gateway_routes")
 public class RouteEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false)
+    // unique/nullable constraints should be enforced at DB schema level
     private String routeId;
 
     private String routeName;
 
-    @Column(nullable = false)
+    @Column("path")
     private String path;
 
-    @Column(nullable = false)
+    @Column("method")
     private String method;
 
-    @Column(nullable = false)
+    @Column("protocol")
     private String protocol;
 
     /**
@@ -65,21 +62,17 @@ public class RouteEntity {
     private String targetBean;
     private String targetMethod;
 
-    @Lob
     private String requestTemplate;
 
-    @Lob
     private String responseTemplate;
 
-    @Column(nullable = false)
     private boolean enabled = true;
 
     private long timeout = 30000;
     private int retryCount = 3;
 
-    @Lob
+    // large text field; no @Lob in Spring Data JDBC
     private String properties;
 
-    @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt;
 }
