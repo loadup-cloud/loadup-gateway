@@ -10,12 +10,12 @@ package com.github.loadup.gateway.facade.utils;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -23,7 +23,8 @@ package com.github.loadup.gateway.facade.utils;
  */
 
 import org.apache.commons.lang3.StringUtils;
-import java.util.UUID;
+
+import java.security.SecureRandom;
 import java.util.regex.Pattern;
 
 /**
@@ -32,14 +33,35 @@ import java.util.regex.Pattern;
 public final class CommonUtils {
 
     private static final Pattern PATH_PATTERN = Pattern.compile("^/[a-zA-Z0-9/_-]*$");
+    // SecureRandom for generating OpenTelemetry-compatible trace IDs
+    private static final SecureRandom RANDOM = new SecureRandom();
 
-    private CommonUtils() {}
+    private CommonUtils() {
+    }
 
     /**
-     * 生成请求ID
+     * 生成请求ID（OpenTelemetry trace-id 格式：32 个小写十六进制字符，代表 16 字节）
      */
     public static String generateRequestId() {
-        return UUID.randomUUID().toString().replace("-", "");
+        byte[] bytes = new byte[16];
+        String traceId;
+        do {
+            RANDOM.nextBytes(bytes);
+            traceId = bytesToLowerHex(bytes);
+            // repeat if all-zero (OpenTelemetry disallows all-zero trace id)
+        } while ("00000000000000000000000000000000".equals(traceId));
+        return traceId;
+    }
+
+    private static String bytesToLowerHex(byte[] bytes) {
+        char[] hexArray = "0123456789abcdef".toCharArray();
+        char[] hexChars = new char[bytes.length * 2];
+        for (int j = 0; j < bytes.length; j++) {
+            int v = bytes[j] & 0xFF;
+            hexChars[j * 2] = hexArray[v >>> 4];
+            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+        }
+        return new String(hexChars);
     }
 
     /**

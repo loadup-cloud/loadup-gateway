@@ -21,6 +21,10 @@
         </dependency>
         <dependency>
             <groupId>com.github.loadup</groupId>
+            <artifactId>loadup-gateway-facade</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.loadup</groupId>
             <artifactId>loadup-gateway-starter</artifactId>
         </dependency>
         <dependency>

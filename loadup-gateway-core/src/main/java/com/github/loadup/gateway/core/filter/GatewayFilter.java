@@ -27,6 +27,14 @@ import com.github.loadup.gateway.facade.model.GatewayRequest;
 import com.github.loadup.gateway.facade.model.GatewayResponse;
 import com.github.loadup.gateway.facade.utils.CommonUtils;
 import com.github.loadup.gateway.facade.utils.JsonUtils;
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Context;
+import io.opentelemetry.context.Scope;
+import io.opentelemetry.context.propagation.TextMapGetter;
+import io.opentelemetry.context.propagation.TextMapPropagator;
 import jakarta.annotation.Resource;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -56,25 +64,63 @@ public class GatewayFilter implements Filter {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-        // 生成请求ID
-        String requestId = CommonUtils.generateRequestId();
+        // Prepare OpenTelemetry propagator and tracer
+        TextMapPropagator propagator = GlobalOpenTelemetry.getPropagators().getTextMapPropagator();
+        TextMapGetter<HttpServletRequest> getter = new TextMapGetter<HttpServletRequest>() {
+            @Override
+            public Iterable<String> keys(HttpServletRequest carrier) {
+                Enumeration<String> headerNames = carrier.getHeaderNames();
+                if (headerNames == null) return Collections.emptyList();
+                List<String> keys = new ArrayList<>();
+                while (headerNames.hasMoreElements()) {
+                    keys.add(headerNames.nextElement());
+                }
+                return keys;
+            }
 
-        try {
-            // 构建网关请求对象
-            GatewayRequest gatewayRequest = buildGatewayRequest(httpRequest, requestId);
+            @Override
+            public String get(HttpServletRequest carrier, String key) {
+                if (carrier == null) return null;
+                return carrier.getHeader(key);
+            }
+        };
 
-            log.info("Gateway processing request: {} {} with ID: {}",
-                    gatewayRequest.getMethod(), gatewayRequest.getPath(), requestId);
+        // Extract incoming context and start a server span. The span will inherit an upstream trace if present.
+        Context extractedContext = propagator.extract(Context.current(), httpRequest, getter);
+        Tracer tracer = GlobalOpenTelemetry.getTracer("com.github.loadup.gateway.core");
+        Span span = tracer.spanBuilder(httpRequest.getMethod() + " " + httpRequest.getRequestURI())
+                .setSpanKind(SpanKind.SERVER)
+                .setParent(extractedContext)
+                .startSpan();
 
-            // 分发到Action处理器
-            GatewayResponse gatewayResponse = actionDispatcher.dispatch(gatewayRequest);
+        // Use the span's trace id as requestId (will be upstream trace id if present, otherwise newly generated)
+        String requestId = span.getSpanContext() != null && span.getSpanContext().isValid()
+                ? span.getSpanContext().getTraceId()
+                : CommonUtils.generateRequestId();
 
-            // 写入响应
-            writeResponse(httpResponse, gatewayResponse);
+        try (Scope scope = span.makeCurrent()) {
 
-        } catch (Exception e) {
-            log.error("Gateway processing failed for request ID: {}", requestId, e);
-            handleError(httpResponse, requestId, e);
+            try {
+                // 构建网关请求对象
+                GatewayRequest gatewayRequest = buildGatewayRequest(httpRequest, requestId);
+
+                log.info("Gateway processing request: {} {} with ID: {}",
+                        gatewayRequest.getMethod(), gatewayRequest.getPath(), requestId);
+
+                // 分发到Action处理器
+                GatewayResponse gatewayResponse = actionDispatcher.dispatch(gatewayRequest);
+
+                // 写入响应
+                writeResponse(httpResponse, gatewayResponse);
+
+            } catch (Exception e) {
+                log.error("Gateway processing failed for request ID: {}", requestId, e);
+                handleError(httpResponse, requestId, e);
+            }
+
+        } finally {
+            // End the span when request processing is complete
+            span.end();
         }
     }
 
