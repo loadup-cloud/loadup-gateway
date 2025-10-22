@@ -1,4 +1,4 @@
-package com.github.loadup.gateway.plugins.repository;
+package com.github.loadup.gateway.plugins.manager;
 
 /*-
  * #%L
@@ -22,7 +22,7 @@ package com.github.loadup.gateway.plugins.repository;
  * #L%
  */
 
-import com.github.loadup.gateway.plugins.RouteEntity;
+import com.github.loadup.gateway.plugins.entity.RouteEntity;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 

@@ -2,7 +2,7 @@ package com.github.loadup.gateway.plugins.mapper;
 
 import com.github.loadup.gateway.facade.model.RouteConfig;
 import com.github.loadup.gateway.facade.utils.JsonUtils;
-import com.github.loadup.gateway.plugins.RouteEntity;
+import com.github.loadup.gateway.plugins.entity.RouteEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

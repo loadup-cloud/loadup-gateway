@@ -1,4 +1,4 @@
-package com.github.loadup.gateway.plugins;
+package com.github.loadup.gateway.plugins.entity;
 
 /*-
  * #%L
