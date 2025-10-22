@@ -22,6 +22,8 @@ package com.github.loadup.gateway.plugins.entity;
  * #L%
  */
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
@@ -31,6 +33,8 @@ import java.util.Date;
 /**
  * 路由实体
  */
+@Getter
+@Setter
 @Table("gateway_routes")
 public class RouteEntity {
     @Id
@@ -73,139 +77,4 @@ public class RouteEntity {
 
     private Date updatedAt;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getRouteId() {
-        return routeId;
-    }
-
-    public void setRouteId(String routeId) {
-        this.routeId = routeId;
-    }
-
-    public String getRouteName() {
-        return routeName;
-    }
-
-    public void setRouteName(String routeName) {
-        this.routeName = routeName;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    public String getMethod() {
-        return method;
-    }
-
-    public void setMethod(String method) {
-        this.method = method;
-    }
-
-    public String getProtocol() {
-        return protocol;
-    }
-
-    public void setProtocol(String protocol) {
-        this.protocol = protocol;
-    }
-
-    public String getTarget() {
-        return target;
-    }
-
-    public void setTarget(String target) {
-        this.target = target;
-    }
-
-    public String getTargetUrl() {
-        return targetUrl;
-    }
-
-    public void setTargetUrl(String targetUrl) {
-        this.targetUrl = targetUrl;
-    }
-
-    public String getTargetBean() {
-        return targetBean;
-    }
-
-    public void setTargetBean(String targetBean) {
-        this.targetBean = targetBean;
-    }
-
-    public String getTargetMethod() {
-        return targetMethod;
-    }
-
-    public void setTargetMethod(String targetMethod) {
-        this.targetMethod = targetMethod;
-    }
-
-    public String getRequestTemplate() {
-        return requestTemplate;
-    }
-
-    public void setRequestTemplate(String requestTemplate) {
-        this.requestTemplate = requestTemplate;
-    }
-
-    public String getResponseTemplate() {
-        return responseTemplate;
-    }
-
-    public void setResponseTemplate(String responseTemplate) {
-        this.responseTemplate = responseTemplate;
-    }
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    public long getTimeout() {
-        return timeout;
-    }
-
-    public void setTimeout(long timeout) {
-        this.timeout = timeout;
-    }
-
-    public int getRetryCount() {
-        return retryCount;
-    }
-
-    public void setRetryCount(int retryCount) {
-        this.retryCount = retryCount;
-    }
-
-    public String getProperties() {
-        return properties;
-    }
-
-    public void setProperties(String properties) {
-        this.properties = properties;
-    }
-
-    public Date getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(Date updatedAt) {
-        this.updatedAt = updatedAt;
-    }
 }

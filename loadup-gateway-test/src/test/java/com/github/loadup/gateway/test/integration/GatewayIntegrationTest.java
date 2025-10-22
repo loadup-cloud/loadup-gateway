@@ -30,10 +30,10 @@ import com.github.loadup.gateway.facade.model.GatewayResponse;
 import com.github.loadup.gateway.facade.model.RouteConfig;
 import com.github.loadup.gateway.facade.spi.RepositoryPlugin;
 import com.github.loadup.gateway.test.BaseGatewayTest;
+import jakarta.annotation.Resource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
@@ -53,7 +53,7 @@ import static org.mockito.Mockito.when;
 @DisplayName("网关集成测试")
 public class GatewayIntegrationTest extends BaseGatewayTest {
 
-    @Autowired
+    @Resource
     private ActionDispatcher actionDispatcher;
 
     @MockBean

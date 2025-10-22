@@ -34,8 +34,8 @@ import com.github.loadup.gateway.plugins.entity.TemplateEntity;
 import com.github.loadup.gateway.plugins.manager.RouteManager;
 import com.github.loadup.gateway.plugins.manager.TemplateManager;
 import com.github.loadup.gateway.plugins.mapper.RouteMapper;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -49,13 +49,13 @@ import java.util.stream.StreamSupport;
 @Component
 public class DatabaseRepositoryPlugin implements RepositoryPlugin {
 
-    @Autowired
+    @Resource
     private RouteManager routeManager;
 
-    @Autowired
+    @Resource
     private TemplateManager templateManager;
 
-    @Autowired
+    @Resource
     private RouteMapper routeMapper;
 
     @Override

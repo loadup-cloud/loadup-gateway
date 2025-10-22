@@ -10,47 +10,49 @@ package com.github.loadup.gateway.facade.utils;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
-import lombok.extern.slf4j.Slf4j;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Map;
 import java.util.HashMap;
-import java.util.UUID;
+import java.util.Map;
 
 /**
  * JSON工具类
  */
 public final class JsonUtils {
-    
+
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-    
-    private JsonUtils() {}
-    
+
+    private JsonUtils() {
+    }
+
     /**
      * 对象转JSON字符串
      */
     public static String toJson(Object obj) {
         try {
+            if (obj instanceof String str) {
+                return str;
+            }
             return OBJECT_MAPPER.writeValueAsString(obj);
         } catch (Exception e) {
             return null;
         }
     }
-    
+
     /**
      * JSON字符串转对象
      */
@@ -61,7 +63,7 @@ public final class JsonUtils {
             return null;
         }
     }
-    
+
     /**
      * JSON字符串转Map
      */
@@ -73,7 +75,7 @@ public final class JsonUtils {
             return new HashMap<>();
         }
     }
-    
+
     /**
      * 解析JSON节点
      */
@@ -84,7 +86,7 @@ public final class JsonUtils {
             return null;
         }
     }
-    
+
     /**
      * 判断是否为有效JSON
      */
@@ -99,4 +101,6 @@ public final class JsonUtils {
             return false;
         }
     }
+
+
 }

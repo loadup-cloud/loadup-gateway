@@ -10,12 +10,12 @@ package com.github.loadup.gateway.core.action;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -24,18 +24,21 @@ package com.github.loadup.gateway.core.action;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.loadup.gateway.core.plugin.PluginManager;
+import com.github.loadup.gateway.core.router.RouteResolver;
+import com.github.loadup.gateway.core.template.TemplateEngine;
 import com.github.loadup.gateway.facade.config.GatewayProperties;
 import com.github.loadup.gateway.facade.constants.GatewayConstants;
+import com.github.loadup.gateway.facade.exception.ExceptionHandler;
+import com.github.loadup.gateway.facade.exception.GatewayException;
+import com.github.loadup.gateway.facade.exception.GatewayExceptionFactory;
+import com.github.loadup.gateway.facade.exception.RouteException;
 import com.github.loadup.gateway.facade.model.GatewayRequest;
 import com.github.loadup.gateway.facade.model.GatewayResponse;
 import com.github.loadup.gateway.facade.model.Result;
 import com.github.loadup.gateway.facade.model.RouteConfig;
-import com.github.loadup.gateway.facade.exception.*;
-import com.github.loadup.gateway.core.plugin.PluginManager;
-import com.github.loadup.gateway.core.router.RouteResolver;
-import com.github.loadup.gateway.core.template.TemplateEngine;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -48,19 +51,19 @@ import java.util.Optional;
 @Component
 public class ActionDispatcher {
 
-    @Autowired
+    @Resource
     private RouteResolver routeResolver;
 
-    @Autowired
+    @Resource
     private TemplateEngine templateEngine;
 
-    @Autowired
+    @Resource
     private PluginManager pluginManager;
 
-    @Autowired
+    @Resource
     private GatewayProperties gatewayProperties;
 
-    @Autowired
+    @Resource
     private ObjectMapper objectMapper;
 
     /**
@@ -76,7 +79,7 @@ public class ActionDispatcher {
                 // 使用统一异常处理构建404响应
                 RouteException routeException = GatewayExceptionFactory.routeNotFound(request.getPath());
                 return ExceptionHandler.handleException(request.getRequestId(), routeException,
-                    System.currentTimeMillis() - startTime);
+                        System.currentTimeMillis() - startTime);
             }
 
             RouteConfig route = routeOpt.get();
@@ -113,13 +116,13 @@ public class ActionDispatcher {
         } catch (GatewayException e) {
             // 网关异常直接处理
             return ExceptionHandler.handleException(request.getRequestId(), e,
-                System.currentTimeMillis() - startTime);
+                    System.currentTimeMillis() - startTime);
         } catch (Exception e) {
             // 其他异常包装后处理
             log.error("Request dispatch failed", e);
             GatewayException wrappedException = GatewayExceptionFactory.wrap(e, "DISPATCHER");
             return ExceptionHandler.handleException(request.getRequestId(), wrappedException,
-                System.currentTimeMillis() - startTime);
+                    System.currentTimeMillis() - startTime);
         }
     }
 

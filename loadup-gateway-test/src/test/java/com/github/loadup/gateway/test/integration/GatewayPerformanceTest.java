@@ -10,12 +10,12 @@ package com.github.loadup.gateway.test.integration;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -25,13 +25,11 @@ package com.github.loadup.gateway.test.integration;
 import com.github.loadup.gateway.core.action.ActionDispatcher;
 import com.github.loadup.gateway.facade.model.GatewayRequest;
 import com.github.loadup.gateway.facade.model.GatewayResponse;
-import com.github.loadup.gateway.facade.model.RouteConfig;
-import com.github.loadup.gateway.facade.constants.GatewayConstants;
 import com.github.loadup.gateway.test.BaseGatewayTest;
-import org.junit.jupiter.api.Test;
+import jakarta.annotation.Resource;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.RepeatedTest;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.ArrayList;
@@ -49,7 +47,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("网关性能测试")
 public class GatewayPerformanceTest extends BaseGatewayTest {
 
-    @Autowired
+    @Resource
     private ActionDispatcher actionDispatcher;
 
     @Test

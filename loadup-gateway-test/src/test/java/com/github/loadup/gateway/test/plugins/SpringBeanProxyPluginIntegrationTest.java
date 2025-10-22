@@ -27,17 +27,16 @@ import com.github.loadup.gateway.facade.model.GatewayRequest;
 import com.github.loadup.gateway.facade.model.GatewayResponse;
 import com.github.loadup.gateway.plugins.SpringBeanProxyPlugin;
 import com.github.loadup.gateway.test.BaseGatewayTest;
+import jakarta.annotation.Resource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -49,10 +48,10 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("SpringBean代理插件集成测试")
 public class SpringBeanProxyPluginIntegrationTest extends BaseGatewayTest {
 
-    @Autowired
+    @Resource
     private SpringBeanProxyPlugin plugin;
 
-    @Autowired
+    @Resource
     private TestBusinessService testBusinessService;
 
     private GatewayRequest testRequest;
@@ -237,15 +236,33 @@ public class SpringBeanProxyPluginIntegrationTest extends BaseGatewayTest {
         private double amount;
         private String currency;
 
-        public PaymentRequest() {}
+        public PaymentRequest() {
+        }
 
         // Getters and Setters
-        public String getUserId() { return userId; }
-        public void setUserId(String userId) { this.userId = userId; }
-        public double getAmount() { return amount; }
-        public void setAmount(double amount) { this.amount = amount; }
-        public String getCurrency() { return currency; }
-        public void setCurrency(String currency) { this.currency = currency; }
+        public String getUserId() {
+            return userId;
+        }
+
+        public void setUserId(String userId) {
+            this.userId = userId;
+        }
+
+        public double getAmount() {
+            return amount;
+        }
+
+        public void setAmount(double amount) {
+            this.amount = amount;
+        }
+
+        public String getCurrency() {
+            return currency;
+        }
+
+        public void setCurrency(String currency) {
+            this.currency = currency;
+        }
     }
 
     /**
@@ -258,23 +275,53 @@ public class SpringBeanProxyPluginIntegrationTest extends BaseGatewayTest {
         private double amount;
         private String currency;
 
-        public PaymentResult() {}
+        public PaymentResult() {
+        }
 
         public static PaymentResultBuilder builder() {
             return new PaymentResultBuilder();
         }
 
         // Getters and Setters
-        public String getStatus() { return status; }
-        public void setStatus(String status) { this.status = status; }
-        public String getTransactionId() { return transactionId; }
-        public void setTransactionId(String transactionId) { this.transactionId = transactionId; }
-        public String getUserId() { return userId; }
-        public void setUserId(String userId) { this.userId = userId; }
-        public double getAmount() { return amount; }
-        public void setAmount(double amount) { this.amount = amount; }
-        public String getCurrency() { return currency; }
-        public void setCurrency(String currency) { this.currency = currency; }
+        public String getStatus() {
+            return status;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
+        }
+
+        public String getTransactionId() {
+            return transactionId;
+        }
+
+        public void setTransactionId(String transactionId) {
+            this.transactionId = transactionId;
+        }
+
+        public String getUserId() {
+            return userId;
+        }
+
+        public void setUserId(String userId) {
+            this.userId = userId;
+        }
+
+        public double getAmount() {
+            return amount;
+        }
+
+        public void setAmount(double amount) {
+            this.amount = amount;
+        }
+
+        public String getCurrency() {
+            return currency;
+        }
+
+        public void setCurrency(String currency) {
+            this.currency = currency;
+        }
 
         public static class PaymentResultBuilder {
             private PaymentResult result = new PaymentResult();
@@ -318,7 +365,8 @@ public class SpringBeanProxyPluginIntegrationTest extends BaseGatewayTest {
         private String userId;
         private double amount;
 
-        public Transaction() {}
+        public Transaction() {
+        }
 
         public Transaction(String transactionId, String userId, double amount) {
             this.transactionId = transactionId;
@@ -327,12 +375,29 @@ public class SpringBeanProxyPluginIntegrationTest extends BaseGatewayTest {
         }
 
         // Getters and Setters
-        public String getTransactionId() { return transactionId; }
-        public void setTransactionId(String transactionId) { this.transactionId = transactionId; }
-        public String getUserId() { return userId; }
-        public void setUserId(String userId) { this.userId = userId; }
-        public double getAmount() { return amount; }
-        public void setAmount(double amount) { this.amount = amount; }
+        public String getTransactionId() {
+            return transactionId;
+        }
+
+        public void setTransactionId(String transactionId) {
+            this.transactionId = transactionId;
+        }
+
+        public String getUserId() {
+            return userId;
+        }
+
+        public void setUserId(String userId) {
+            this.userId = userId;
+        }
+
+        public double getAmount() {
+            return amount;
+        }
+
+        public void setAmount(double amount) {
+            this.amount = amount;
+        }
     }
 
     /**
@@ -343,26 +408,56 @@ public class SpringBeanProxyPluginIntegrationTest extends BaseGatewayTest {
         private int quantity;
         private CustomerInfo customerInfo;
 
-        public OrderRequest() {}
+        public OrderRequest() {
+        }
 
         // Getters and Setters
-        public String getProductId() { return productId; }
-        public void setProductId(String productId) { this.productId = productId; }
-        public int getQuantity() { return quantity; }
-        public void setQuantity(int quantity) { this.quantity = quantity; }
-        public CustomerInfo getCustomerInfo() { return customerInfo; }
-        public void setCustomerInfo(CustomerInfo customerInfo) { this.customerInfo = customerInfo; }
+        public String getProductId() {
+            return productId;
+        }
+
+        public void setProductId(String productId) {
+            this.productId = productId;
+        }
+
+        public int getQuantity() {
+            return quantity;
+        }
+
+        public void setQuantity(int quantity) {
+            this.quantity = quantity;
+        }
+
+        public CustomerInfo getCustomerInfo() {
+            return customerInfo;
+        }
+
+        public void setCustomerInfo(CustomerInfo customerInfo) {
+            this.customerInfo = customerInfo;
+        }
 
         public static class CustomerInfo {
             private String name;
             private String email;
 
-            public CustomerInfo() {}
+            public CustomerInfo() {
+            }
 
-            public String getName() { return name; }
-            public void setName(String name) { this.name = name; }
-            public String getEmail() { return email; }
-            public void setEmail(String email) { this.email = email; }
+            public String getName() {
+                return name;
+            }
+
+            public void setName(String name) {
+                this.name = name;
+            }
+
+            public String getEmail() {
+                return email;
+            }
+
+            public void setEmail(String email) {
+                this.email = email;
+            }
         }
     }
 
@@ -375,21 +470,45 @@ public class SpringBeanProxyPluginIntegrationTest extends BaseGatewayTest {
         private String productId;
         private int quantity;
 
-        public OrderResult() {}
+        public OrderResult() {
+        }
 
         public static OrderResultBuilder builder() {
             return new OrderResultBuilder();
         }
 
         // Getters and Setters
-        public String getStatus() { return status; }
-        public void setStatus(String status) { this.status = status; }
-        public String getOrderId() { return orderId; }
-        public void setOrderId(String orderId) { this.orderId = orderId; }
-        public String getProductId() { return productId; }
-        public void setProductId(String productId) { this.productId = productId; }
-        public int getQuantity() { return quantity; }
-        public void setQuantity(int quantity) { this.quantity = quantity; }
+        public String getStatus() {
+            return status;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
+        }
+
+        public String getOrderId() {
+            return orderId;
+        }
+
+        public void setOrderId(String orderId) {
+            this.orderId = orderId;
+        }
+
+        public String getProductId() {
+            return productId;
+        }
+
+        public void setProductId(String productId) {
+            this.productId = productId;
+        }
+
+        public int getQuantity() {
+            return quantity;
+        }
+
+        public void setQuantity(int quantity) {
+            this.quantity = quantity;
+        }
 
         public static class OrderResultBuilder {
             private OrderResult result = new OrderResult();

@@ -4,18 +4,20 @@ A flexible gateway framework with plugin architecture for building scalable and 
 
 ## Overview
 
-LoadUp Gateway is a modular gateway framework built with Spring Boot that provides a plugin-based architecture for handling various types of proxying and data repository operations. It supports HTTP, RPC, and Spring Bean proxying, along with file-based and database-based configuration repositories.
+LoadUp Gateway is a modular gateway framework built with Spring Boot that provides a plugin-based architecture for
+handling various types of proxying and data repository operations. It supports HTTP, RPC, and Spring Bean proxying,
+along with file-based and database-based configuration repositories.
 
 ## Features
 
 - **Plugin Architecture**: Extensible plugin system for custom functionality
-- **Multiple Proxy Types**: 
-  - HTTP proxy plugin
-  - RPC proxy plugin (Dubbo integration)
-  - Spring Bean proxy plugin
+- **Multiple Proxy Types**:
+    - HTTP proxy plugin
+    - RPC proxy plugin (Dubbo integration)
+    - Spring Bean proxy plugin
 - **Flexible Repository Support**:
-  - File-based repository plugin
-  - Database repository plugin
+    - File-based repository plugin
+    - Database repository plugin
 - **Spring Boot Integration**: Native Spring Boot starter for easy integration
 - **Configuration Management**: Dynamic configuration with multiple sources
 
@@ -74,7 +76,7 @@ loadup:
 @RestController
 public class GatewayController {
     
-    @Autowired
+    @Resource
     private GatewayService gatewayService;
     
     @RequestMapping("/**")
@@ -174,6 +176,7 @@ This project is licensed under the GNU General Public License v3.0 - see the [LI
 ## Changelog
 
 ### Version 1.0.0-SNAPSHOT
+
 - Initial release
 - Core gateway framework
 - Plugin architecture implementation

@@ -27,10 +27,10 @@ import com.github.loadup.gateway.facade.model.GatewayRequest;
 import com.github.loadup.gateway.facade.model.GatewayResponse;
 import com.github.loadup.gateway.plugins.SpringBeanProxyPlugin;
 import com.github.loadup.gateway.test.BaseGatewayTest;
+import jakarta.annotation.Resource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -52,10 +52,10 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("SpringBean代理插件性能测试")
 public class SpringBeanProxyPluginPerformanceTest extends BaseGatewayTest {
 
-    @Autowired
+    @Resource
     private SpringBeanProxyPlugin plugin;
 
-    @Autowired
+    @Resource
     private PerformanceTestService performanceTestService;
 
     private ExecutorService executorService;
@@ -339,12 +339,24 @@ public class SpringBeanProxyPluginPerformanceTest extends BaseGatewayTest {
         private int threadId;
         private int requestId;
 
-        public ProcessRequest() {}
+        public ProcessRequest() {
+        }
 
-        public int getThreadId() { return threadId; }
-        public void setThreadId(int threadId) { this.threadId = threadId; }
-        public int getRequestId() { return requestId; }
-        public void setRequestId(int requestId) { this.requestId = requestId; }
+        public int getThreadId() {
+            return threadId;
+        }
+
+        public void setThreadId(int threadId) {
+            this.threadId = threadId;
+        }
+
+        public int getRequestId() {
+            return requestId;
+        }
+
+        public void setRequestId(int requestId) {
+            this.requestId = requestId;
+        }
     }
 
     /**
@@ -356,7 +368,8 @@ public class SpringBeanProxyPluginPerformanceTest extends BaseGatewayTest {
         private int requestId;
         private long timestamp;
 
-        public ProcessResult() {}
+        public ProcessResult() {
+        }
 
         public ProcessResult(String id, int threadId, int requestId, long timestamp) {
             this.id = id;
@@ -366,14 +379,37 @@ public class SpringBeanProxyPluginPerformanceTest extends BaseGatewayTest {
         }
 
         // Getters and Setters
-        public String getId() { return id; }
-        public void setId(String id) { this.id = id; }
-        public int getThreadId() { return threadId; }
-        public void setThreadId(int threadId) { this.threadId = threadId; }
-        public int getRequestId() { return requestId; }
-        public void setRequestId(int requestId) { this.requestId = requestId; }
-        public long getTimestamp() { return timestamp; }
-        public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public int getThreadId() {
+            return threadId;
+        }
+
+        public void setThreadId(int threadId) {
+            this.threadId = threadId;
+        }
+
+        public int getRequestId() {
+            return requestId;
+        }
+
+        public void setRequestId(int requestId) {
+            this.requestId = requestId;
+        }
+
+        public long getTimestamp() {
+            return timestamp;
+        }
+
+        public void setTimestamp(long timestamp) {
+            this.timestamp = timestamp;
+        }
     }
 
     /**
@@ -382,10 +418,16 @@ public class SpringBeanProxyPluginPerformanceTest extends BaseGatewayTest {
     public static class LargeDataRequest {
         private String data;
 
-        public LargeDataRequest() {}
+        public LargeDataRequest() {
+        }
 
-        public String getData() { return data; }
-        public void setData(String data) { this.data = data; }
+        public String getData() {
+            return data;
+        }
+
+        public void setData(String data) {
+            this.data = data;
+        }
     }
 
     /**
@@ -394,10 +436,16 @@ public class SpringBeanProxyPluginPerformanceTest extends BaseGatewayTest {
     public static class QuickRequest {
         private int index;
 
-        public QuickRequest() {}
+        public QuickRequest() {
+        }
 
-        public int getIndex() { return index; }
-        public void setIndex(int index) { this.index = index; }
+        public int getIndex() {
+            return index;
+        }
+
+        public void setIndex(int index) {
+            this.index = index;
+        }
     }
 
     /**
@@ -406,9 +454,15 @@ public class SpringBeanProxyPluginPerformanceTest extends BaseGatewayTest {
     public static class ErrorTestRequest {
         private boolean shouldFail;
 
-        public ErrorTestRequest() {}
+        public ErrorTestRequest() {
+        }
 
-        public boolean isShouldFail() { return shouldFail; }
-        public void setShouldFail(boolean shouldFail) { this.shouldFail = shouldFail; }
+        public boolean isShouldFail() {
+            return shouldFail;
+        }
+
+        public void setShouldFail(boolean shouldFail) {
+            this.shouldFail = shouldFail;
+        }
     }
 }
