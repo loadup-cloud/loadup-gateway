@@ -10,35 +10,45 @@ package com.github.loadup.gateway.plugins;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
 
+import com.github.loadup.gateway.facade.config.GatewayProperties;
+import com.github.loadup.gateway.facade.constants.GatewayConstants;
 import com.github.loadup.gateway.facade.model.GatewayRequest;
 import com.github.loadup.gateway.facade.model.GatewayResponse;
 import com.github.loadup.gateway.facade.model.PluginConfig;
 import com.github.loadup.gateway.facade.model.RouteConfig;
 import com.github.loadup.gateway.facade.spi.RepositoryPlugin;
-import com.github.loadup.gateway.facade.constants.GatewayConstants;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.springframework.stereotype.Component;
 
-import java.io.*;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.JarURLConnection;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.stream.Stream;
 
 /**
  * 文件存储插件 - 使用CSV格式
@@ -47,9 +57,15 @@ import java.util.*;
 @Component
 public class FileRepositoryPlugin implements RepositoryPlugin {
 
-    private String basePath = "./gateway-config";
+    // basePath will be resolved during initialize. Default source is classpath:/gateway-config
+    private String basePath = null; // resolved filesystem directory
     private final String ROUTES_FILE = "routes.csv";
     private final String TEMPLATES_DIR = "templates";
+    @Resource
+    private GatewayProperties gatewayProperties;
+
+    public FileRepositoryPlugin() {
+    }
 
     @Override
     public String getName() {
@@ -75,30 +91,148 @@ public class FileRepositoryPlugin implements RepositoryPlugin {
     public void initialize(PluginConfig config) {
         log.info("FileRepositoryPlugin initialized with config: {}", config);
 
-        if (config.getProperties() != null) {
-            String configPath = (String) config.getProperties().get("basePath");
-            if (configPath != null) {
-                this.basePath = configPath;
+        // 1. Check PluginConfig properties first (backwards compatibility)
+        String configured = null;
+        if (config != null && config.getProperties() != null) {
+            Object cfg = config.getProperties().get("basePath");
+            if (cfg instanceof String) {
+                configured = ((String) cfg).trim();
             }
         }
 
-        // 创建必要的目录
+        // 2. If not provided via PluginConfig, read from GatewayProperties
+        if (configured == null || configured.isEmpty()) {
+            try {
+                configured = null;// gatewayProperties.getRepositoryType().getConfigPath();
+            } catch (Exception e) {
+                log.warn("Failed to read file repository base path from GatewayProperties", e);
+                configured = null;
+            }
+        }
+
+        // 3. Default to classpath:/gateway-config when still not provided
+        if (configured == null || configured.isEmpty()) {
+            configured = "classpath:/gateway-config";
+        }
+
+        // Resolve the configured location to a writable filesystem directory
         try {
-            Files.createDirectories(Paths.get(basePath));
+            if (configured.startsWith("classpath:")) {
+                String cpPath = configured.substring("classpath:".length());
+                // ensure no leading slash
+                if (cpPath.startsWith("/")) {
+                    cpPath = cpPath.substring(1);
+                }
+                Path tempDir = copyClasspathDirToTemp(cpPath);
+                this.basePath = tempDir.toAbsolutePath().toString();
+            } else {
+                // treat as filesystem path (relative or absolute). Create directories if necessary.
+                Path p = Paths.get(configured);
+                Files.createDirectories(p);
+                this.basePath = p.toAbsolutePath().toString();
+            }
+
+            // Ensure templates directory exists
             Files.createDirectories(Paths.get(basePath, TEMPLATES_DIR));
 
-            // 创建路由CSV文件头部（如果不存在）
+            // Create routes CSV file if missing
             Path routesFile = Paths.get(basePath, ROUTES_FILE);
             if (!Files.exists(routesFile)) {
                 createRoutesFile(routesFile);
             }
+
+            log.info("FileRepositoryPlugin basePath resolved to {} (source={})", this.basePath, configured);
         } catch (Exception e) {
-            log.error("Failed to initialize file repository", e);
+            log.error("Failed to initialize file repository with configured path: {}", configured, e);
         }
     }
 
+    /**
+     * Copy resources under given classpath directory to a temporary directory and return its Path.
+     * This allows reading/writing files that are packaged in the classpath.
+     */
+    private Path copyClasspathDirToTemp(String classpathDir) throws IOException {
+        // Create a temp directory unique to this application run
+        String tmpRoot = System.getProperty("java.io.tmpdir");
+        Path targetDir = Paths.get(tmpRoot, "loadup-gateway-config", String.valueOf(Math.abs(new Random().nextInt())));
+        Files.createDirectories(targetDir);
+
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        Enumeration<URL> resources = cl.getResources(classpathDir);
+
+        boolean found = false;
+        while (resources.hasMoreElements()) {
+            URL resourceUrl = resources.nextElement();
+            found = true;
+            String protocol = resourceUrl.getProtocol();
+            if ("file".equals(protocol)) {
+                // Resource is on filesystem (e.g., during development)
+                try {
+                    Path src = Paths.get(resourceUrl.toURI());
+                    // copy directory recursively
+                    try (Stream<Path> walker = Files.walk(src)) {
+                        walker.forEach(srcPath -> {
+                            try {
+                                Path rel = src.relativize(srcPath);
+                                Path destPath = targetDir.resolve(rel.toString());
+                                if (Files.isDirectory(srcPath)) {
+                                    Files.createDirectories(destPath);
+                                } else {
+                                    Files.createDirectories(destPath.getParent());
+                                    Files.copy(srcPath, destPath);
+                                }
+                            } catch (IOException e) {
+                                log.warn("Failed to copy resource file {}", srcPath, e);
+                            }
+                        });
+                    }
+                } catch (Exception e) {
+                    log.warn("Failed to copy classpath (file) resource {}", resourceUrl, e);
+                }
+            } else if ("jar".equals(protocol)) {
+                // Resource is inside a JAR — iterate JAR entries
+                try {
+                    JarURLConnection jarCon = (JarURLConnection) resourceUrl.openConnection();
+                    try (JarFile jar = jarCon.getJarFile()) {
+                        Enumeration<JarEntry> entries = jar.entries();
+                        String prefix = classpathDir.endsWith("/") ? classpathDir : (classpathDir + "/");
+                        while (entries.hasMoreElements()) {
+                            JarEntry entry = entries.nextElement();
+                            String name = entry.getName();
+                            if (name.startsWith(prefix)) {
+                                String relative = name.substring(prefix.length());
+                                if (entry.isDirectory()) {
+                                    Files.createDirectories(targetDir.resolve(relative));
+                                } else {
+                                    Path outFile = targetDir.resolve(relative);
+                                    Files.createDirectories(outFile.getParent());
+                                    try (InputStream is = cl.getResourceAsStream(name)) {
+                                        if (is != null) {
+                                            Files.copy(is, outFile);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    log.warn("Failed to copy classpath (jar) resources from {}", resourceUrl, e);
+                }
+            } else {
+                log.warn("Unsupported classpath resource protocol: {} for URL {}", protocol, resourceUrl);
+            }
+        }
+
+        if (!found) {
+            // No resources found — still ensure directory exists so plugin can create files
+            Files.createDirectories(targetDir);
+        }
+
+        return targetDir;
+    }
+
     @Override
-    public GatewayResponse execute(GatewayRequest request) throws Exception {
+    public GatewayResponse execute(GatewayRequest request) {
         throw new UnsupportedOperationException("Repository plugin does not handle requests directly");
     }
 
@@ -140,16 +274,12 @@ public class FileRepositoryPlugin implements RepositoryPlugin {
 
     @Override
     public Optional<RouteConfig> getRoute(String routeId) throws Exception {
-        return getAllRoutes().stream()
-                .filter(route -> route.getRouteId().equals(routeId))
-                .findFirst();
+        return getAllRoutes().stream().filter(route -> route.getRouteId().equals(routeId)).findFirst();
     }
 
     @Override
     public Optional<RouteConfig> getRouteByPath(String path, String method) throws Exception {
-        return getAllRoutes().stream()
-                .filter(route -> route.getPath().equals(path) && route.getMethod().equals(method))
-                .findFirst();
+        return getAllRoutes().stream().filter(route -> route.getPath().equals(path) && route.getMethod().equals(method)).findFirst();
     }
 
     @Override
@@ -162,11 +292,11 @@ public class FileRepositoryPlugin implements RepositoryPlugin {
         List<RouteConfig> routes = new ArrayList<>();
 
         try (CSVReader reader = new CSVReader(new FileReader(routesFile.toFile()))) {
-            String[] headers = reader.readNext(); // 跳过头部
+            String[] headers = reader.readNext(); // 跳过头部 (currently unused)
             String[] line;
 
             while ((line = reader.readNext()) != null) {
-                RouteConfig route = parseRouteFromCsvLine(line, headers);
+                RouteConfig route = parseRouteFromCsvLine(line);
                 if (route != null) {
                     routes.add(route);
                 }
@@ -179,7 +309,7 @@ public class FileRepositoryPlugin implements RepositoryPlugin {
     /**
      * 从 CSV 行解析路由配置，支持新旧格式
      */
-    private RouteConfig parseRouteFromCsvLine(String[] line, String[] headers) {
+    private RouteConfig parseRouteFromCsvLine(String[] line) {
         if (line.length < 2) {
             return null;
         }
@@ -197,18 +327,7 @@ public class FileRepositoryPlugin implements RepositoryPlugin {
                 }
             }
 
-            RouteConfig route = RouteConfig.builder()
-                    .path(line[0])
-                    .method(line[1])
-                    .target(line[2])
-                    .requestTemplate(line.length > 3 ? line[3] : "")
-                    .responseTemplate(line.length > 4 ? line[4] : "")
-                    .enabled(line.length > 5 ? Boolean.parseBoolean(line[5]) : true)
-                    .properties(properties)
-                    .build();
-
-
-            return route;
+            return RouteConfig.builder().path(line[0]).method(line[1]).target(line[2]).requestTemplate(line.length > 3 ? line[3] : "").responseTemplate(line.length > 4 ? line[4] : "").enabled(line.length <= 5 || Boolean.parseBoolean(line[5])).properties(properties).build();
         }
 
 
@@ -372,10 +491,7 @@ public class FileRepositoryPlugin implements RepositoryPlugin {
      */
     private void createRoutesFile(Path routesFile) throws IOException {
         try (CSVWriter writer = new CSVWriter(new FileWriter(routesFile.toFile()))) {
-            String[] headers = {
-                "path", "method", "target", "requestTemplate",
-                "responseTemplate", "enabled", "properties"
-            };
+            String[] headers = {"path", "method", "target", "requestTemplate", "responseTemplate", "enabled", "properties"};
             writer.writeNext(headers);
         }
     }
@@ -386,10 +502,7 @@ public class FileRepositoryPlugin implements RepositoryPlugin {
     private void writeRoutesToFile(Path routesFile, List<RouteConfig> routes) throws IOException {
         try (CSVWriter writer = new CSVWriter(new FileWriter(routesFile.toFile()))) {
             // 写入头部 - 使用最新的 properties 格式
-            String[] headers = {
-                "path", "method", "target", "requestTemplate",
-                "responseTemplate", "enabled", "properties"
-            };
+            String[] headers = {"path", "method", "target", "requestTemplate", "responseTemplate", "enabled", "properties"};
             writer.writeNext(headers);
 
             // 写入数据
@@ -397,15 +510,7 @@ public class FileRepositoryPlugin implements RepositoryPlugin {
                 // 生成 properties 字符串（使用分号分隔格式）
                 String propertiesStr = generatePropertiesString(route);
 
-                String[] data = {
-                    route.getPath(),
-                    route.getMethod(),
-                    route.getTarget() != null ? route.getTarget() : "",
-                    route.getRequestTemplate() != null ? route.getRequestTemplate() : "",
-                    route.getResponseTemplate() != null ? route.getResponseTemplate() : "",
-                    String.valueOf(route.isEnabled()),
-                    propertiesStr
-                };
+                String[] data = {route.getPath(), route.getMethod(), route.getTarget() != null ? route.getTarget() : "", route.getRequestTemplate() != null ? route.getRequestTemplate() : "", route.getResponseTemplate() != null ? route.getResponseTemplate() : "", String.valueOf(route.isEnabled()), propertiesStr};
                 writer.writeNext(data);
             }
         }

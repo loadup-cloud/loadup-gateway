@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: loadup-gateway-test
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/loadup-boot?useUnicode=true&characterEncoding=utf8
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+loadup:
+  gateway:
+    enabled: true
+    route-refresh-interval: 5
+    template-cache-size: 100
+    default-timeout: 10000
+    default-retry-count: 1
+    # Proxy plugin configuration (kebab-case maps to camelCase fields in GatewayProperties)
+    proxy-plugins:
+      bean:
+        enabled: true
+      rpc:
+        enabled: true
+      http:
+        enabled: true
+        max-connections: 200
+
+    # Storage plugin: choose 'type' and then configure the matching group
+    storage:
+      # type: FILE | DATABASE
+      type: FILE
+      # When type = FILE, configure the `file` group below
+      file:
+        base-path: /var/lib/loadup/data
+
+      #
+
+logging:
+  level:
+    com.github.loadup: DEBUG
+    org.springframework: INFO

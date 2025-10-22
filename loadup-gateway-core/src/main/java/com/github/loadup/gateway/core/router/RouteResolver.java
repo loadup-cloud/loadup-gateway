@@ -25,6 +25,7 @@ package com.github.loadup.gateway.core.router;
 import com.github.loadup.gateway.facade.model.GatewayRequest;
 import com.github.loadup.gateway.facade.model.RouteConfig;
 import com.github.loadup.gateway.facade.spi.RepositoryPlugin;
+import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -49,7 +50,8 @@ public class RouteResolver {
     private final ConcurrentHashMap<String, RouteConfig> routeCache = new ConcurrentHashMap<>();
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
-    public RouteResolver() {
+    @PostConstruct
+    public void refresh() {
         // 定时刷新路由缓存（热更新支持）
         scheduler.scheduleAtFixedRate(this::refreshRoutes, 30, 30, TimeUnit.SECONDS);
     }
