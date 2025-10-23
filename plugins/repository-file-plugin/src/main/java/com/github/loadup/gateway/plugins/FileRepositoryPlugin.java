@@ -100,12 +100,17 @@ public class FileRepositoryPlugin implements RepositoryPlugin {
             }
         }
 
-        // 2. If not provided via PluginConfig, read from GatewayProperties
-        if (configured == null || configured.isEmpty()) {
+        // 2. If not provided via PluginConfig, read from GatewayProperties.storage.file.basePath
+        if (configured == null || configured.trim().isEmpty()) {
             try {
-                configured = null;// gatewayProperties.getRepositoryType().getConfigPath();
+                if (gatewayProperties != null) {
+                    GatewayProperties.StorageFile file = gatewayProperties.getStorage().getFile();
+                    if (file != null) {
+                        configured = file.getBasePath().trim();
+                    }
+                }
             } catch (Exception e) {
-                log.warn("Failed to read file repository base path from GatewayProperties", e);
+                log.warn("Failed to read file repository base path from GatewayProperties (reflective)", e);
                 configured = null;
             }
         }
@@ -282,6 +287,7 @@ public class FileRepositoryPlugin implements RepositoryPlugin {
         return getAllRoutes().stream().filter(route -> route.getPath().equals(path) && route.getMethod().equals(method)).findFirst();
     }
 
+
     @Override
     public List<RouteConfig> getAllRoutes() throws Exception {
         Path routesFile = Paths.get(basePath, ROUTES_FILE);
@@ -292,7 +298,7 @@ public class FileRepositoryPlugin implements RepositoryPlugin {
         List<RouteConfig> routes = new ArrayList<>();
 
         try (CSVReader reader = new CSVReader(new FileReader(routesFile.toFile()))) {
-            String[] headers = reader.readNext(); // 跳过头部 (currently unused)
+            reader.readNext(); // skip header
             String[] line;
 
             while ((line = reader.readNext()) != null) {
@@ -303,7 +309,80 @@ public class FileRepositoryPlugin implements RepositoryPlugin {
             }
         }
 
+        routes.forEach(rc -> applyTemplates(rc));
+
         return routes;
+    }
+
+    /**
+     * Replace requestTemplate/responseTemplate values that are template file names with their file contents.
+     * If a template value does not correspond to an existing file, it will be left as-is.
+     */
+    private void applyTemplates(RouteConfig rc) {
+        if (rc == null) return;
+        try {
+            String req = rc.getRequestTemplate();
+            if (req != null && !req.trim().isEmpty()) {
+                String loaded = loadTemplateContent(req.trim());
+                if (loaded != null) rc.setRequestTemplate(loaded);
+            }
+
+            String resp = rc.getResponseTemplate();
+            if (resp != null && !resp.trim().isEmpty()) {
+                String loaded = loadTemplateContent(resp.trim());
+                if (loaded != null) rc.setResponseTemplate(loaded);
+            }
+        } catch (Exception e) {
+            log.warn("Error applying templates for route {}: {}", rc.getRouteId(), e.getMessage());
+        }
+    }
+
+    /**
+     * Try to load a template by name from the resolved filesystem `basePath/templates/<name>`.
+     * If not found, try classpath `templates/<name>` (or the plain name) as fallback. Returns null if not found.
+     */
+    private String loadTemplateContent(String templateName) {
+        if (templateName == null || templateName.trim().isEmpty()) return null;
+        try {
+            // Try a list of candidate filenames to be more flexible with CSV template naming
+            List<String> candidates = new ArrayList<>();
+            candidates.add(templateName);
+            candidates.add(templateName + ".groovy");
+            candidates.add(templateName + "_request.groovy");
+            candidates.add(templateName + "_response.groovy");
+            candidates.add(templateName + "_request_template.groovy");
+            candidates.add(templateName + "_response_template.groovy");
+
+            for (String candidate : candidates) {
+                // Prefer filesystem templates under basePath/templates
+                if (basePath != null) {
+                    Path p = Paths.get(basePath, TEMPLATES_DIR, candidate);
+                    if (Files.exists(p) && Files.isRegularFile(p)) {
+                        return Files.readString(p);
+                    }
+                }
+
+                // Fallback: try classpath resource under templates/<candidate>
+                String resourcePath = TEMPLATES_DIR + "/" + candidate;
+                ClassLoader cl = Thread.currentThread().getContextClassLoader();
+                try (InputStream is = cl.getResourceAsStream(resourcePath)) {
+                    if (is != null) {
+                        return new String(is.readAllBytes());
+                    }
+                }
+
+                // Fallback: try direct classpath resource by candidate name
+                try (InputStream is = cl.getResourceAsStream(candidate)) {
+                    if (is != null) {
+                        return new String(is.readAllBytes());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Failed to load template '{}' : {}", templateName, e.getMessage());
+        }
+        // not found -> return original filename so callers still see something
+        return templateName;
     }
 
     /**
@@ -510,9 +589,59 @@ public class FileRepositoryPlugin implements RepositoryPlugin {
                 // 生成 properties 字符串（使用分号分隔格式）
                 String propertiesStr = generatePropertiesString(route);
 
-                String[] data = {route.getPath(), route.getMethod(), route.getTarget() != null ? route.getTarget() : "", route.getRequestTemplate() != null ? route.getRequestTemplate() : "", route.getResponseTemplate() != null ? route.getResponseTemplate() : "", String.valueOf(route.isEnabled()), propertiesStr};
+                // Ensure we don't persist raw template bodies into CSV: if template appears to be content, save it as a template file and reference its id instead
+                String reqField = route.getRequestTemplate() != null ? route.getRequestTemplate() : "";
+                String respField = route.getResponseTemplate() != null ? route.getResponseTemplate() : "";
+
+                try {
+                    if (looksLikeTemplateContent(reqField)) {
+                        String tplId = route.getRouteId() + "_req";
+                        // saveTemplate may throw; catch and fallback to writing raw
+                        try {
+                            saveTemplate(tplId, "request", reqField);
+                            reqField = tplId; // store id in CSV
+                        } catch (Exception e) {
+                            log.warn("Failed to save request template for route {}: {}", route.getRouteId(), e.getMessage());
+                        }
+                    }
+                } catch (Exception ignored) {
+                }
+
+                try {
+                    if (looksLikeTemplateContent(respField)) {
+                        String tplId = route.getRouteId() + "_resp";
+                        try {
+                            saveTemplate(tplId, "response", respField);
+                            respField = tplId;
+                        } catch (Exception e) {
+                            log.warn("Failed to save response template for route {}: {}", route.getRouteId(), e.getMessage());
+                        }
+                    }
+                } catch (Exception ignored) {
+                }
+
+                String[] data = {route.getPath(), route.getMethod(), route.getTarget() != null ? route.getTarget() : "", reqField, respField, String.valueOf(route.isEnabled()), propertiesStr};
                 writer.writeNext(data);
             }
         }
     }
+
+    /**
+     * Heuristic to decide whether a template field is full content rather than a short id/filename.
+     */
+    private boolean looksLikeTemplateContent(String s) {
+        if (s == null) return false;
+        String t = s.trim();
+        if (t.isEmpty()) return false;
+        // If it contains newline or Groovy/JS keywords, looks like content
+        if (t.contains("\n") || t.contains("\r")) return true;
+        if (t.length() > 200) return true; // long text -> content
+        String lower = t.toLowerCase();
+        if (lower.contains("def ") || lower.contains("return ") || lower.contains("class ") || lower.contains("package ") || lower.contains("function "))
+            return true;
+        // If it contains symbols typical for templates, treat as content
+        if (t.contains("{") || t.contains("}") || t.contains("$")) return true;
+        return false;
+    }
 }
+

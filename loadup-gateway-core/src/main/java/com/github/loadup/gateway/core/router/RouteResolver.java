@@ -22,20 +22,23 @@ package com.github.loadup.gateway.core.router;
  * #L%
  */
 
+import com.github.loadup.gateway.facade.config.GatewayProperties;
 import com.github.loadup.gateway.facade.model.GatewayRequest;
+import com.github.loadup.gateway.facade.model.PluginConfig;
 import com.github.loadup.gateway.facade.model.RouteConfig;
 import com.github.loadup.gateway.facade.spi.RepositoryPlugin;
+import com.github.loadup.gateway.facade.utils.JsonUtils;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 路由解析器
@@ -46,14 +49,29 @@ public class RouteResolver {
 
     @Resource
     private RepositoryPlugin repositoryPlugin;
+    @Resource
+    private GatewayProperties gatewayProperties;
 
     private final ConcurrentHashMap<String, RouteConfig> routeCache = new ConcurrentHashMap<>();
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     @PostConstruct
     public void refresh() {
+        //initialize route
+        GatewayProperties.Storage storage = gatewayProperties.getStorage();
+        GatewayProperties.Storage.StorageType storageType = storage.getType();
+        GatewayProperties.StorageFile file = storage.getFile();
+        Map<String, Object> map = JsonUtils.toMap(file);
+        PluginConfig pluginConfig = PluginConfig.builder()
+                .pluginName("StoragePlugin")
+                .enabled(true)
+                .pluginType("Storage")
+                .properties(map)
+                .build();
+        repositoryPlugin.initialize(pluginConfig);
+        this.refreshRoutes();
         // 定时刷新路由缓存（热更新支持）
-        scheduler.scheduleAtFixedRate(this::refreshRoutes, 30, 30, TimeUnit.SECONDS);
+//        scheduler.scheduleAtFixedRate(this::refreshRoutes, 30, 30, TimeUnit.SECONDS);
     }
 
     /**

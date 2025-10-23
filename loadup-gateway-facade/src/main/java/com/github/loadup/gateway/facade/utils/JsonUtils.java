@@ -26,7 +26,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -72,7 +71,19 @@ public final class JsonUtils {
         try {
             return OBJECT_MAPPER.readValue(json, Map.class);
         } catch (Exception e) {
-            return new HashMap<>();
+            return null;
+        }
+    }
+
+    /**
+     * JSON字符串转Map
+     */
+    @SuppressWarnings("unchecked")
+    public static Map<String, Object> toMap(Object obj) {
+        try {
+            return toMap(toJson(obj));
+        } catch (Exception e) {
+            return null;
         }
     }
 
