@@ -30,31 +30,31 @@ public class SystemException extends GatewayException {
     private static final String MODULE = "SYSTEM";
 
     public SystemException(ErrorCode errorCode, String message) {
-        super(errorCode.getCode(), ErrorType.SYSTEM, MODULE, message);
+        super(errorCode.getCode(), ErrorType.SYSTEM, MODULE, errorCode.getMessage() + ":" + message);
     }
 
     public SystemException(ErrorCode errorCode, String message, Throwable cause) {
-        super(errorCode.getCode(), ErrorType.SYSTEM, MODULE, message, cause);
+        super(errorCode.getCode(), ErrorType.SYSTEM, MODULE, errorCode.getMessage() + ":" + message, cause);
     }
 
     // 便捷方法
     public static SystemException configurationError(String message) {
-        return new SystemException(ErrorCode.CONFIGURATION_ERROR, "配置错误: " + message);
+        return new SystemException(ErrorCode.CONFIGURATION_ERROR, message);
     }
 
     public static SystemException initializationError(String component, Throwable cause) {
-        return new SystemException(ErrorCode.INITIALIZATION_ERROR, "组件初始化失败: " + component, cause);
+        return new SystemException(ErrorCode.INITIALIZATION_ERROR, component, cause);
     }
 
     public static SystemException internalError(String message) {
-        return new SystemException(ErrorCode.SYSTEM_ERROR, "系统内部错误: " + message);
+        return new SystemException(ErrorCode.SYSTEM_ERROR, message);
     }
 
     public static SystemException internalError(String message, Throwable cause) {
-        return new SystemException(ErrorCode.SYSTEM_ERROR, "系统内部错误: " + message, cause);
+        return new SystemException(ErrorCode.SYSTEM_ERROR, message, cause);
     }
 
     public static SystemException operationNotSupported(String operation) {
-        return new SystemException(ErrorCode.OPERATION_NOT_SUPPORTED, "操作不支持: " + operation);
+        return new SystemException(ErrorCode.OPERATION_NOT_SUPPORTED, operation);
     }
 }

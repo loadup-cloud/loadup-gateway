@@ -6,7 +6,7 @@ package com.github.loadup.gateway.facade.exception;
  * %%
  * Copyright (C) 2025 LoadUp Gateway Authors
  * %%
- * This program is free software: you can redistribute it and/or modify
+ * This program is free software:you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
@@ -30,23 +30,23 @@ public class RouteException extends GatewayException {
     private static final String MODULE = "ROUTE";
 
     public RouteException(ErrorCode errorCode, String message) {
-        super(errorCode.getCode(), ErrorType.ROUTING, MODULE, message);
+        super(errorCode.getCode(), ErrorType.ROUTING, MODULE, errorCode.getMessage() + ":" + message);
     }
 
     public RouteException(ErrorCode errorCode, String message, Throwable cause) {
-        super(errorCode.getCode(), ErrorType.ROUTING, MODULE, message, cause);
+        super(errorCode.getCode(), ErrorType.ROUTING, MODULE, errorCode.getMessage() + ":" + message, cause);
     }
 
     // 便捷方法
     public static RouteException notFound(String path) {
-        return new RouteException(ErrorCode.ROUTE_NOT_FOUND, "路由未找到: " + path);
+        return new RouteException(ErrorCode.ROUTE_NOT_FOUND, path);
     }
 
     public static RouteException invalidPath(String path) {
-        return new RouteException(ErrorCode.ROUTE_INVALID_PATH, "无效的路由路径: " + path);
+        return new RouteException(ErrorCode.ROUTE_INVALID_PATH, path);
     }
 
     public static RouteException configError(String message) {
-        return new RouteException(ErrorCode.ROUTE_CONFIG_ERROR, "路由配置错误: " + message);
+        return new RouteException(ErrorCode.ROUTE_CONFIG_ERROR, message);
     }
 }

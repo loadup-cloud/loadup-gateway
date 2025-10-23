@@ -30,13 +30,6 @@ public final class GatewayConstants {
     private GatewayConstants() {
     }
 
-    public static final class Plugin {
-        public static final String PROXY_HTTP = "HTTP";
-        public static final String PROXY_RPC = "RPC";
-        public static final String PROXY_BEAN = "BEAN";
-        public static final String STORAGE_FILE = "FILE";
-        public static final String STORAGE_DATABASE = "DATABASE";
-    }
 
     /**
      * 协议类型

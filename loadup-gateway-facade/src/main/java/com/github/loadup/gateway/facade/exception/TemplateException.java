@@ -30,23 +30,23 @@ public class TemplateException extends GatewayException {
     private static final String MODULE = "TEMPLATE";
 
     public TemplateException(ErrorCode errorCode, String message) {
-        super(errorCode.getCode(), ErrorType.TEMPLATE, MODULE, message);
+        super(errorCode.getCode(), ErrorType.TEMPLATE, MODULE, errorCode.getMessage() + ":" + message);
     }
 
     public TemplateException(ErrorCode errorCode, String message, Throwable cause) {
-        super(errorCode.getCode(), ErrorType.TEMPLATE, MODULE, message, cause);
+        super(errorCode.getCode(), ErrorType.TEMPLATE, MODULE, errorCode.getMessage() + ":" + message, cause);
     }
 
     // 便捷方法
     public static TemplateException notFound(String templateName) {
-        return new TemplateException(ErrorCode.TEMPLATE_NOT_FOUND, "模板未找到: " + templateName);
+        return new TemplateException(ErrorCode.TEMPLATE_NOT_FOUND, templateName);
     }
 
     public static TemplateException parseError(String templateName, Throwable cause) {
-        return new TemplateException(ErrorCode.TEMPLATE_PARSE_ERROR, "模板解析失败: " + templateName, cause);
+        return new TemplateException(ErrorCode.TEMPLATE_PARSE_ERROR, templateName, cause);
     }
 
     public static TemplateException executionError(String templateName, Throwable cause) {
-        return new TemplateException(ErrorCode.TEMPLATE_EXECUTION_ERROR, "模板执行失败: " + templateName, cause);
+        return new TemplateException(ErrorCode.TEMPLATE_EXECUTION_ERROR, templateName, cause);
     }
 }

@@ -30,27 +30,27 @@ public class PluginException extends GatewayException {
     private static final String MODULE = "PLUGIN";
 
     public PluginException(ErrorCode errorCode, String message) {
-        super(errorCode.getCode(), ErrorType.PLUGIN, MODULE, message);
+        super(errorCode.getCode(), ErrorType.PLUGIN, MODULE, errorCode.getMessage() + ":" + message);
     }
 
     public PluginException(ErrorCode errorCode, String message, Throwable cause) {
-        super(errorCode.getCode(), ErrorType.PLUGIN, MODULE, message, cause);
+        super(errorCode.getCode(), ErrorType.PLUGIN, MODULE, errorCode.getMessage() + ":" + message, cause);
     }
 
     // 便捷方法
     public static PluginException notFound(String pluginName) {
-        return new PluginException(ErrorCode.PLUGIN_NOT_FOUND, "插件未找到: " + pluginName);
+        return new PluginException(ErrorCode.PLUGIN_NOT_FOUND, pluginName);
     }
 
     public static PluginException initFailed(String pluginName, Throwable cause) {
-        return new PluginException(ErrorCode.PLUGIN_INIT_FAILED, "插件初始化失败: " + pluginName, cause);
+        return new PluginException(ErrorCode.PLUGIN_INIT_FAILED, pluginName, cause);
     }
 
     public static PluginException executionFailed(String pluginName, Throwable cause) {
-        return new PluginException(ErrorCode.PLUGIN_EXECUTION_FAILED, "插件执行失败: " + pluginName, cause);
+        return new PluginException(ErrorCode.PLUGIN_EXECUTION_FAILED, pluginName, cause);
     }
 
     public static PluginException configInvalid(String pluginName, String reason) {
-        return new PluginException(ErrorCode.PLUGIN_CONFIG_INVALID, "插件配置无效: " + pluginName + " - " + reason);
+        return new PluginException(ErrorCode.PLUGIN_CONFIG_INVALID, pluginName + " - " + reason);
     }
 }

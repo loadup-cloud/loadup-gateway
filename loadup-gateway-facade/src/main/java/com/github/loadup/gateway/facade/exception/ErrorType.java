@@ -23,84 +23,84 @@ package com.github.loadup.gateway.facade.exception;
  */
 
 /**
- * 错误类型枚举
+ * Error type enumeration
  */
 public enum ErrorType {
 
     /**
-     * 配置错误
+     * Configuration error
      */
-    CONFIGURATION("配置错误"),
+    CONFIGURATION("Configuration error"),
 
     /**
-     * 路由错误
+     * Routing error
      */
-    ROUTING("路由错误"),
+    ROUTING("Routing error"),
 
     /**
-     * 插件错误
+     * Plugin error
      */
-    PLUGIN("插件错误"),
+    PLUGIN("Plugin error"),
 
     /**
-     * 代理错误
+     * Proxy error
      */
-    PROXY("代理错误"),
+    PROXY("Proxy error"),
 
     /**
-     * 参数验证错误
+     * Parameter validation error
      */
-    VALIDATION("参数验证错误"),
+    VALIDATION("Validation error"),
 
     /**
-     * 业务逻辑错误
+     * Business logic error
      */
-    BUSINESS("业务逻辑错误"),
+    BUSINESS("Business logic error"),
 
     /**
-     * 系统错误
+     * System error
      */
-    SYSTEM("系统错误"),
+    SYSTEM("System error"),
 
     /**
-     * 网络错误
+     * Network error
      */
-    NETWORK("网络错误"),
+    NETWORK("Network error"),
 
     /**
-     * 序列化/反序列化错误
+     * Serialization/Deserialization error
      */
-    SERIALIZATION("序列化错误"),
+    SERIALIZATION("Serialization error"),
 
     /**
-     * 模板处理错误
+     * Template processing error
      */
-    TEMPLATE("模板处理错误"),
+    TEMPLATE("Template processing error"),
 
     /**
-     * 存储错误
+     * Storage error
      */
-    STORAGE("存储错误"),
+    STORAGE("Storage error"),
 
     /**
-     * 权限错误
+     * Authorization error
      */
-    AUTHORIZATION("权限错误"),
+    AUTHORIZATION("Authorization error"),
 
     /**
-     * 限流错误
+     * Rate limiting error
      */
-    RATE_LIMIT("限流错误"),
+    RATE_LIMIT("Rate limit error"),
 
     /**
-     * 超时错误
+     * Timeout error
      */
-    TIMEOUT("超时错误"),
+    TIMEOUT("Timeout error"),
 
     /**
-     * 未知错误
+     * Unknown error
      */
-    UNKNOWN("未知错误");
+    UNKNOWN("Unknown error");
 
     private final String description;
 

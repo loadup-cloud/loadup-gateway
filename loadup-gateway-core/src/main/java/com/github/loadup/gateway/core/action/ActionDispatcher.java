@@ -39,6 +39,7 @@ import com.github.loadup.gateway.facade.model.Result;
 import com.github.loadup.gateway.facade.model.RouteConfig;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.StopWatch;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -70,7 +71,7 @@ public class ActionDispatcher {
      * 分发请求到相应的处理器
      */
     public GatewayResponse dispatch(GatewayRequest request) {
-        long startTime = System.currentTimeMillis();
+        StopWatch stopWatch = StopWatch.createStarted();
 
         try {
             // 解析路由
@@ -79,7 +80,7 @@ public class ActionDispatcher {
                 // 使用统一异常处理构建404响应
                 RouteException routeException = GatewayExceptionFactory.routeNotFound(request.getPath());
                 return ExceptionHandler.handleException(request.getRequestId(), routeException,
-                        System.currentTimeMillis() - startTime);
+                        stopWatch.getTime());
             }
 
             RouteConfig route = routeOpt.get();
@@ -99,7 +100,8 @@ public class ActionDispatcher {
             }
 
             // 设置处理时间
-            long processingTime = System.currentTimeMillis() - startTime;
+            stopWatch.stop();
+            long processingTime = stopWatch.getTime();
             processedResponse.setProcessingTime(processingTime);
 
             // 统一响应格式处理
@@ -116,13 +118,13 @@ public class ActionDispatcher {
         } catch (GatewayException e) {
             // 网关异常直接处理
             return ExceptionHandler.handleException(request.getRequestId(), e,
-                    System.currentTimeMillis() - startTime);
+                    stopWatch.getTime());
         } catch (Exception e) {
             // 其他异常包装后处理
             log.error("Request dispatch failed", e);
             GatewayException wrappedException = GatewayExceptionFactory.wrap(e, "DISPATCHER");
             return ExceptionHandler.handleException(request.getRequestId(), wrappedException,
-                    System.currentTimeMillis() - startTime);
+                    stopWatch.getTime());
         }
     }
 

@@ -30,50 +30,47 @@ public class ProxyException extends GatewayException {
     private static final String MODULE = "PROXY";
 
     public ProxyException(ErrorCode errorCode, String message) {
-        super(errorCode.getCode(), ErrorType.PROXY, MODULE, message);
+        super(errorCode.getCode(), ErrorType.PROXY, MODULE, errorCode.getMessage() + ":" + message);
     }
 
     public ProxyException(ErrorCode errorCode, String message, Throwable cause) {
-        super(errorCode.getCode(), ErrorType.PROXY, MODULE, message, cause);
+        super(errorCode.getCode(), ErrorType.PROXY, MODULE, errorCode.getMessage() + ":" + message, cause);
     }
 
     // 便捷方法 - SpringBean代理异常
     public static ProxyException beanNotFound(String beanName) {
-        return new ProxyException(ErrorCode.BEAN_NOT_FOUND, "Spring Bean未找到: " + beanName);
+        return new ProxyException(ErrorCode.BEAN_NOT_FOUND, beanName);
     }
 
     public static ProxyException methodNotFound(String beanName, String methodName) {
-        return new ProxyException(ErrorCode.BEAN_METHOD_NOT_FOUND,
-            "Bean方法未找到: " + beanName + "." + methodName);
+        return new ProxyException(ErrorCode.BEAN_METHOD_NOT_FOUND, beanName + "." + methodName);
     }
 
     public static ProxyException methodInvokeFailed(String beanName, String methodName, Throwable cause) {
-        return new ProxyException(ErrorCode.BEAN_METHOD_INVOKE_FAILED,
-            "Bean方法调用失败: " + beanName + "." + methodName, cause);
+        return new ProxyException(ErrorCode.BEAN_METHOD_INVOKE_FAILED, beanName + "." + methodName, cause);
     }
 
     public static ProxyException invalidTarget(String target) {
-        return new ProxyException(ErrorCode.BEAN_TARGET_FORMAT_INVALID,
-            "Bean目标格式无效: " + target + "，期望格式: beanName:methodName");
+        return new ProxyException(ErrorCode.BEAN_TARGET_FORMAT_INVALID, target + "，Expected format is beanName:methodName");
     }
 
     // 便捷方法 - HTTP代理异常
     public static ProxyException httpRequestFailed(String url, Throwable cause) {
-        return new ProxyException(ErrorCode.HTTP_REQUEST_FAILED, "HTTP请求失败: " + url, cause);
+        return new ProxyException(ErrorCode.HTTP_REQUEST_FAILED, url, cause);
     }
 
     public static ProxyException httpTimeout(String url) {
-        return new ProxyException(ErrorCode.HTTP_CONNECTION_TIMEOUT, "HTTP连接超时: " + url);
+        return new ProxyException(ErrorCode.HTTP_CONNECTION_TIMEOUT, url);
     }
 
     // 便捷方法 - RPC代理异常
     public static ProxyException rpcServiceNotFound(String serviceName) {
-        return new ProxyException(ErrorCode.RPC_SERVICE_NOT_FOUND, "RPC服务未找到: " + serviceName);
+        return new ProxyException(ErrorCode.RPC_SERVICE_NOT_FOUND, serviceName);
     }
 
     public static ProxyException rpcCallFailed(String serviceName, String methodName, Throwable cause) {
         return new ProxyException(ErrorCode.RPC_CALL_FAILED,
-            "RPC调用失败: " + serviceName + "." + methodName, cause);
+                "RPC调用失败: " + serviceName + "." + methodName, cause);
     }
 
     // 通用代理异常

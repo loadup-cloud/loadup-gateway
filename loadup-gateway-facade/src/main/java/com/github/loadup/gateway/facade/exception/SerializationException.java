@@ -30,20 +30,19 @@ public class SerializationException extends GatewayException {
     private static final String MODULE = "SERIALIZATION";
 
     public SerializationException(ErrorCode errorCode, String message) {
-        super(errorCode.getCode(), ErrorType.SERIALIZATION, MODULE, message);
+        super(errorCode.getCode(), ErrorType.SERIALIZATION, MODULE, errorCode.getMessage() + ":" + message);
     }
 
     public SerializationException(ErrorCode errorCode, String message, Throwable cause) {
-        super(errorCode.getCode(), ErrorType.SERIALIZATION, MODULE, message, cause);
+        super(errorCode.getCode(), ErrorType.SERIALIZATION, MODULE, errorCode.getMessage() + ":" + message, cause);
     }
 
     // 便捷方法
     public static SerializationException jsonParseError(String json, Throwable cause) {
-        return new SerializationException(ErrorCode.JSON_PARSE_ERROR, "JSON解析失败: " + json, cause);
+        return new SerializationException(ErrorCode.JSON_PARSE_ERROR, json, cause);
     }
 
     public static SerializationException jsonSerializeError(Object object, Throwable cause) {
-        return new SerializationException(ErrorCode.JSON_SERIALIZE_ERROR,
-            "JSON序列化失败: " + object.getClass().getSimpleName(), cause);
+        return new SerializationException(ErrorCode.JSON_SERIALIZE_ERROR, object.getClass().getSimpleName(), cause);
     }
 }
