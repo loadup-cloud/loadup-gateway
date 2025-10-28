@@ -23,338 +23,244 @@ package com.github.loadup.gateway.facade.model;
  */
 
 import com.github.loadup.gateway.facade.constants.GatewayConstants;
-import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
- * 路由配置模型
+ * 路由配置模型（不可变）
  */
-@Data
-@Builder
+@Getter
 public class RouteConfig {
 
     /**
      * 路由ID（自动生成，基于 path + method）
      */
-    private String routeId;
+    private final String routeId;
 
     /**
      * 路由名称（自动生成，基于 path）
      */
-    private String routeName;
+    private final String routeName;
 
     /**
      * 匹配路径
      */
-    private String path;
-
-    /**
-     * 设置匹配路径，并自动生成ID
-     */
-    public void setPath(String path) {
-        this.path = path;
-        // 自动生成ID
-        generateIdsInternal();
-    }
+    private final String path;
 
     /**
      * HTTP方法
      */
-    private String method = "POST";
-
-    /**
-     * 设置HTTP方法，并自动生成ID
-     */
-    public void setMethod(String method) {
-        this.method = method;
-        // 自动生成ID
-        generateIdsInternal();
-    }
+    private final String method;
 
     /**
      * 协议类型 (HTTP/RPC/BEAN)
      */
-    private String protocol;
+    private final String protocol;
 
     /**
-     * 统一目标配置 (支持前缀格式: http://..., bean://service:method, rpc://class:method:version)
+     * 统一目标配置 (原始字符串)
      */
-    private String target;
+    private final String target;
 
     /**
-     * 设置目标配置，并自动解析到相应字段
+     * 目标 URL（HTTP/RPC 时使用）
      */
-    public void setTarget(String target) {
-        this.target = target;
-        // 自动解析目标配置
-        parseTargetInternal();
-    }
+    private final String targetUrl;
 
     /**
-     * 获取目标URL（用于HTTP和RPC协议）
+     * 目标 Bean 名称（BEAN 协议时使用）
      */
-    public String getTargetUrl() {
-        // 如果targetUrl为空但target不为空，尝试解析
-        if (targetUrl == null && target != null && !target.trim().isEmpty()) {
-            parseTargetInternal();
-        }
-        return targetUrl;
-    }
+    private final String targetBean;
 
     /**
-     * 获取目标Bean名称（用于BEAN协议）
+     * 目标方法名（BEAN 协议时使用）
      */
-    public String getTargetBean() {
-        // 如果targetBean为空但target不为空，尝试解析
-        if (targetBean == null && target != null && !target.trim().isEmpty()) {
-            parseTargetInternal();
-        }
-        return targetBean;
-    }
-
-    /**
-     * 获取目标方法名称（用于BEAN协议）
-     */
-    public String getTargetMethod() {
-        // 如果targetMethod为空但target不为空，尝试解析
-        if (targetMethod == null && target != null && !target.trim().isEmpty()) {
-            parseTargetInternal();
-        }
-        return targetMethod;
-    }
+    private final String targetMethod;
 
     /**
      * 请求模板脚本
      */
-    private String requestTemplate;
+    private final String requestTemplate;
 
     /**
      * 响应模板脚本
      */
-    private String responseTemplate;
+    private final String responseTemplate;
 
     /**
      * 是否启用
      */
-    private boolean enabled;
+    private final boolean enabled;
 
     /**
-     * 扩展配置 (包含 timeout、retryCount 等所有可扩展的配置项)
+     * 扩展配置（不可变拷贝）
      */
-    private Map<String, Object> properties;
+    private final Map<String, Object> properties;
 
-    // 临时兼容字段，用于解析后存储
-    private transient String targetUrl;
-    private transient String targetBean;
-    private transient String targetMethod;
+    /**
+     * 解析后的超时时间（毫秒）
+     */
+    private final long parsedTimeout;
 
-    private RouteConfig() {
+    /**
+     * 解析后的重试次数
+     */
+    private final int parsedRetryCount;
 
+    /**
+     * 解析后的 wrapResponse（null 表示使用全局配置）
+     */
+    private final Boolean parsedWrapResponse;
+
+    // 私有构造，Builder 调用
+    private RouteConfig(RouteConfigBuilder b) {
+        this.path = Objects.requireNonNull(b.path, "path is required");
+        this.method = b.method != null ? b.method : "POST";
+        this.target = Objects.requireNonNull(b.target, "target is required");
+        this.requestTemplate = b.requestTemplate;
+        this.responseTemplate = b.responseTemplate;
+        this.enabled = b.enabled;
+
+        // properties 拷贝并不可变化
+        if (b.properties == null) {
+            this.properties = Collections.emptyMap();
+        } else {
+            this.properties = Collections.unmodifiableMap(new HashMap<>(b.properties));
+        }
+
+        // 解析 target
+        TargetParseResult tpr = parseTarget(this.target);
+        this.protocol = tpr.protocol;
+        this.targetUrl = tpr.targetUrl;
+        this.targetBean = tpr.targetBean;
+        this.targetMethod = tpr.targetMethod;
+
+        // 解析 properties
+        PropertiesParseResult ppr = parseProperties(this.properties);
+        this.parsedTimeout = ppr.timeout;
+        this.parsedRetryCount = ppr.retryCount;
+        this.parsedWrapResponse = ppr.wrapResponse;
+
+        // 生成 id/name
+        this.routeId = generateRouteId(this.path, this.method);
+        this.routeName = generateRouteName(this.path, this.method);
     }
 
-    /**
-     * 获取超时时间(毫秒)
-     */
+
+    // 公开的读取方法返回解析后缓存值（@Getter 已生成常规字段的 getter）
     public long getTimeout() {
-        if (properties != null && properties.containsKey(GatewayConstants.PropertyKeys.TIMEOUT)) {
-            Object timeout = properties.get(GatewayConstants.PropertyKeys.TIMEOUT);
-            if (timeout instanceof Number) {
-                return ((Number) timeout).longValue();
-            } else if (timeout instanceof String) {
-                try {
-                    return Long.parseLong((String) timeout);
-                } catch (NumberFormatException e) {
-                    return 30000L; // 默认值
-                }
-            }
-        }
-        return 30000L; // 默认值
+        return this.parsedTimeout;
     }
 
-    /**
-     * 设置超时时间(毫秒)
-     */
-    public void setTimeout(long timeout) {
-        if (properties == null) {
-            properties = new HashMap<>();
-        }
-        properties.put(GatewayConstants.PropertyKeys.TIMEOUT, timeout);
-    }
-
-    /**
-     * 获取重试次数
-     */
     public int getRetryCount() {
-        if (properties != null && properties.containsKey(GatewayConstants.PropertyKeys.RETRY_COUNT)) {
-            Object retryCount = properties.get(GatewayConstants.PropertyKeys.RETRY_COUNT);
-            if (retryCount instanceof Number) {
-                return ((Number) retryCount).intValue();
-            } else if (retryCount instanceof String) {
-                try {
-                    return Integer.parseInt((String) retryCount);
-                } catch (NumberFormatException e) {
-                    return 3; // 默认值
-                }
-            }
-        }
-        return 3; // 默认值
+        return this.parsedRetryCount;
     }
 
-    /**
-     * 设置重试次数
-     */
-    public void setRetryCount(int retryCount) {
-        if (properties == null) {
-            properties = new HashMap<>();
-        }
-        properties.put(GatewayConstants.PropertyKeys.RETRY_COUNT, retryCount);
-    }
-
-    /**
-     * 获取指定的属性值
-     */
-    public Object getProperty(String key) {
-        return properties != null ? properties.get(key) : null;
-    }
-
-    /**
-     * 设置属性值
-     */
-    public void setProperty(String key, Object value) {
-        if (properties == null) {
-            properties = new HashMap<>();
-        }
-        properties.put(key, value);
-    }
-
-    /**
-     * 获取是否统一包装响应（优先级高于全局配置）
-     */
     public Boolean getWrapResponse() {
-        if (properties != null && properties.containsKey(GatewayConstants.PropertyKeys.WRAP_RESPONSE)) {
-            Object wrapResponse = properties.get(GatewayConstants.PropertyKeys.WRAP_RESPONSE);
-            if (wrapResponse instanceof Boolean) {
-                return (Boolean) wrapResponse;
-            } else if (wrapResponse instanceof String) {
-                return Boolean.parseBoolean((String) wrapResponse);
+        return this.parsedWrapResponse;
+    }
+
+    // 内部静态帮助类和方法
+    private static class TargetParseResult {
+        String protocol;
+        String targetUrl;
+        String targetBean;
+        String targetMethod;
+    }
+
+    private static TargetParseResult parseTarget(String target) {
+        TargetParseResult r = new TargetParseResult();
+        if (target == null || target.trim().isEmpty()) {
+            return r;
+        }
+
+        if (StringUtils.startsWithIgnoreCase(target, GatewayConstants.Protocol.HTTP + "://") ||
+                StringUtils.startsWithIgnoreCase(target, GatewayConstants.Protocol.HTTP + "s://")) {
+            r.protocol = GatewayConstants.Protocol.HTTP;
+            r.targetUrl = target;
+            return r;
+        }
+
+        if (StringUtils.startsWithIgnoreCase(target, GatewayConstants.Protocol.BEAN + "://")) {
+            r.protocol = GatewayConstants.Protocol.BEAN;
+            String beanTarget = target.substring(7); // remove "bean://"
+            String[] parts = beanTarget.split(":");
+            if (parts.length >= 1) r.targetBean = parts[0];
+            if (parts.length >= 2) r.targetMethod = parts[1];
+            return r;
+        }
+
+        if (StringUtils.startsWithIgnoreCase(target, GatewayConstants.Protocol.RPC + "://")) {
+            r.protocol = GatewayConstants.Protocol.RPC;
+            r.targetUrl = target.substring(6);
+            return r;
+        }
+
+        return r;
+    }
+
+    private static class PropertiesParseResult {
+        long timeout = 30000L;
+        int retryCount = 3;
+        Boolean wrapResponse = null;
+    }
+
+    private static PropertiesParseResult parseProperties(Map<String, Object> properties) {
+        PropertiesParseResult r = new PropertiesParseResult();
+        if (properties == null || properties.isEmpty()) return r;
+
+        Object timeout = properties.get(GatewayConstants.PropertyKeys.TIMEOUT);
+        if (timeout instanceof Number) {
+            r.timeout = ((Number) timeout).longValue();
+        } else if (timeout instanceof String) {
+            try {
+                r.timeout = Long.parseLong((String) timeout);
+            } catch (NumberFormatException ignored) {
             }
         }
-        return null; // 返回null表示使用全局配置
-    }
 
-    /**
-     * 设置是否统一包装响应
-     */
-    public void setWrapResponse(Boolean wrapResponse) {
-        if (properties == null) {
-            properties = new HashMap<>();
+        Object retry = properties.get(GatewayConstants.PropertyKeys.RETRY_COUNT);
+        if (retry instanceof Number) {
+            r.retryCount = ((Number) retry).intValue();
+        } else if (retry instanceof String) {
+            try {
+                r.retryCount = Integer.parseInt((String) retry);
+            } catch (NumberFormatException ignored) {
+            }
         }
-        properties.put(GatewayConstants.PropertyKeys.WRAP_RESPONSE, wrapResponse);
-    }
 
-    /**
-     * 内部ID生成方法
-     */
-    private void generateIdsInternal() {
-        if (path != null && method != null) {
-            // 生成 routeId: path + method 的哈希值，确保唯一性
-            this.routeId = generateRouteId(path, method);
-            // 生成 routeName: 基于 path 的友好名称
-            this.routeName = generateRouteName(path, method);
+        Object wrap = properties.get(GatewayConstants.PropertyKeys.WRAP_RESPONSE);
+        if (wrap instanceof Boolean) {
+            r.wrapResponse = (Boolean) wrap;
+        } else if (wrap instanceof String) {
+            r.wrapResponse = Boolean.parseBoolean((String) wrap);
         }
+
+        return r;
     }
 
-    /**
-     *
-     * @return property value of routeId
-     */
-    public String getRouteId() {
-        if (path != null && method != null) {
-            // 生成 routeId: path + method 的哈希值，确保唯一性
-            return generateRouteId(path, method);
-        }
-        return null;
-    }
-
-    /**
-     *
-     * @return property value of routeName
-     */
-    public String getRouteName() {
-        if (path != null && method != null) {
-            // 生成 routeName: 基于 path 的友好名称
-            return generateRouteName(path, method);
-        }
-        return null;
-    }
-
-    /**
-     * 生成路由ID
-     */
-    private String generateRouteId(String path, String method) {
+    private static String generateRouteId(String path, String method) {
         String combined = path + ":" + method;
-        // 使用简单的哈希算法生成ID，也可以直接使用组合字符串
         return "route-" + Math.abs(combined.hashCode());
     }
 
-    /**
-     * 生成路由名称
-     */
-    private String generateRouteName(String path, String method) {
-        // 将路径转换为友好的名称
-        String name = path.replaceAll("^/", "")  // 移除开头的 /
-                .replaceAll("/", " ")   // 将 / 替换为空格
-                .replaceAll("-", " ")   // 将 - 替换为空格
+    private static String generateRouteName(String path, String method) {
+        String name = path.replaceAll("^/", "")
+                .replaceAll("/", " ")
+                .replaceAll("-", " ")
                 .trim();
-
-        if (name.isEmpty()) {
-            name = "root";
-        }
-
-        // 首字母大写
+        if (name.isEmpty()) name = "root";
         name = Character.toUpperCase(name.charAt(0)) + name.substring(1);
-
         return name + " (" + method + ")";
     }
 
-
     /**
-     * 解析目标配置（内部使用）
-     */
-    private void parseTargetInternal() {
-        if (target == null || target.trim().isEmpty()) {
-            return;
-        }
-        if (StringUtils.startsWithIgnoreCase(target, GatewayConstants.Protocol.HTTP + "://") ||
-                StringUtils.startsWithIgnoreCase(target, GatewayConstants.Protocol.HTTP + "s://")) {
-            this.protocol = GatewayConstants.Protocol.HTTP;
-            this.targetUrl = target;
-            this.targetBean = null;
-            this.targetMethod = null;
-        } else if (StringUtils.startsWithIgnoreCase(target, GatewayConstants.Protocol.BEAN + "://")) {
-            this.protocol = GatewayConstants.Protocol.BEAN;
-            String beanTarget = target.substring(7); // 移除 "bean://" 前缀
-            String[] parts = beanTarget.split(":");
-            if (parts.length >= 2) {
-                this.targetBean = parts[0];
-                this.targetMethod = parts[1];
-            }
-            this.targetUrl = null;
-        } else if (StringUtils.startsWithIgnoreCase(target, GatewayConstants.Protocol.RPC + "://")) {
-            this.protocol = GatewayConstants.Protocol.RPC;
-            this.targetUrl = target.substring(6); // 移除 "rpc://" 前缀
-            this.targetBean = null;
-            this.targetMethod = null;
-        }
-    }
-
-    /**
-     * 自定义 Builder 类，支持自动解析和生成ID
-     * 注意：routeId 和 routeName 不能通过 builder 设置，只能内部生成
+     * 手工 Builder（替代 Lombok 的自动 Builder），在 build 时完成所有解析和拷贝，返回不可变对象
      */
     public static class RouteConfigBuilder {
         private String path;
@@ -406,9 +312,7 @@ public class RouteConfig {
             return this;
         }
 
-
         public RouteConfig build() {
-            // 验证必填字段
             if (StringUtils.isBlank(this.path)) {
                 throw new IllegalArgumentException("path is required and cannot be empty");
             }
@@ -416,27 +320,33 @@ public class RouteConfig {
                 throw new IllegalArgumentException("target is required and cannot be empty");
             }
 
-            RouteConfig config = new RouteConfig();
-            config.path = this.path;
-            config.method = this.method != null ? this.method : "POST"; // 使用默认值
-            config.protocol = this.protocol;
-            config.target = this.target;
-            config.requestTemplate = this.requestTemplate;
-            config.responseTemplate = this.responseTemplate;
-            config.enabled = this.enabled; //默认 true
-            config.properties = this.properties;
-
-            // 构建完成后自动解析目标配置
-            if (config.target != null && !config.target.trim().isEmpty()) {
-                config.parseTargetInternal();
-            }
-
-            // 构建完成后自动生成ID（routeId 和 routeName 只能通过这里生成）
-            if (config.path != null && config.method != null) {
-                config.generateIdsInternal();
-            }
-
-            return config;
+            return new RouteConfig(this);
         }
+    }
+
+    /**
+     * Compatibility helper to obtain a new builder (replaces Lombok's builder())
+     */
+    public static RouteConfigBuilder builder() {
+        return new RouteConfigBuilder();
+    }
+
+    /**
+     * Compatibility helper to create a builder pre-populated from an existing instance.
+     */
+    public static RouteConfigBuilder builderFrom(RouteConfig rc) {
+        RouteConfigBuilder b = new RouteConfigBuilder();
+        if (rc == null) return b;
+        b.path(rc.getPath());
+        b.method(rc.getMethod());
+        b.protocol(rc.getProtocol());
+        b.target(rc.getTarget());
+        b.requestTemplate(rc.getRequestTemplate());
+        b.responseTemplate(rc.getResponseTemplate());
+        b.enabled(rc.isEnabled());
+        if (rc.getProperties() != null) {
+            b.properties(new HashMap<>(rc.getProperties()));
+        }
+        return b;
     }
 }

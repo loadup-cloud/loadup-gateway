@@ -10,12 +10,12 @@ package com.github.loadup.gateway.test.unit;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -24,26 +24,26 @@ package com.github.loadup.gateway.test.unit;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.loadup.gateway.core.action.ActionDispatcher;
+import com.github.loadup.gateway.core.plugin.PluginManager;
 import com.github.loadup.gateway.core.router.RouteResolver;
 import com.github.loadup.gateway.core.template.TemplateEngine;
-import com.github.loadup.gateway.core.plugin.PluginManager;
 import com.github.loadup.gateway.facade.config.GatewayProperties;
+import com.github.loadup.gateway.facade.constants.GatewayConstants;
 import com.github.loadup.gateway.facade.model.GatewayRequest;
 import com.github.loadup.gateway.facade.model.GatewayResponse;
 import com.github.loadup.gateway.facade.model.RouteConfig;
-import com.github.loadup.gateway.facade.constants.GatewayConstants;
 import com.github.loadup.gateway.test.BaseGatewayTest;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Optional;
 
 import static com.github.loadup.gateway.facade.exception.ErrorCode.ROUTE_NOT_FOUND;
-import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Action分发器单元测试
@@ -163,7 +163,7 @@ public class ActionDispatcherTest extends BaseGatewayTest {
         GatewayRequest request = createHttpRequest("/api/test", "POST", "{\"name\":\"test\"}");
         RouteConfig route = createTestRoute("/api/test", "POST",
                 "http://localhost:8080");
-        route.setRequestTemplate("test_request_template");
+
 
         GatewayRequest processedRequest = createHttpRequest("/api/test", "POST", "{\"name\":\"test\",\"processed\":true}");
         GatewayResponse mockResponse = GatewayResponse.builder()
@@ -193,7 +193,6 @@ public class ActionDispatcherTest extends BaseGatewayTest {
         GatewayRequest request = createHttpRequest("/api/test", "GET", null);
         RouteConfig route = createTestRoute("/api/test", "GET",
                 "http://localhost:8080");
-        route.setResponseTemplate("test_response_template");
 
         GatewayResponse originalResponse = GatewayResponse.builder()
                 .requestId(testRequestId)

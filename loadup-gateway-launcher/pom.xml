@@ -24,7 +24,7 @@
 
         <dependency>
             <groupId>com.github.loadup</groupId>
-            <artifactId>repository-file-plugin</artifactId>
+            <artifactId>repository-database-plugin</artifactId>
         </dependency>
 
         <dependency>

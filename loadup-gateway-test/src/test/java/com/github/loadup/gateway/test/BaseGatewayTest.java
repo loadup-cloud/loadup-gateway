@@ -10,12 +10,12 @@ package com.github.loadup.gateway.test;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -83,6 +83,8 @@ public abstract class BaseGatewayTest {
         // 创建 RouteConfig 实例
         RouteConfig route = RouteConfig.builder().path(path)
                 .method(method).enabled(true).target(target)
+                .requestTemplate("test_request_template")
+                .responseTemplate("test_response_template")
                 .properties(properties).build();
         return route;
     }
@@ -103,7 +105,7 @@ public abstract class BaseGatewayTest {
     protected void assertSuccessResponse(GatewayResponse response) {
         assertValidResponse(response);
         assertTrue(response.getStatusCode() >= 200 && response.getStatusCode() < 300,
-               "Should be success status code, but was: " + response.getStatusCode());
+                "Should be success status code, but was: " + response.getStatusCode());
     }
 
     /**
@@ -112,6 +114,6 @@ public abstract class BaseGatewayTest {
     protected void assertErrorResponse(GatewayResponse response, int expectedStatus) {
         assertValidResponse(response);
         assertEquals(expectedStatus, response.getStatusCode(),
-               "Expected status " + expectedStatus + ", but was: " + response.getStatusCode());
+                "Expected status " + expectedStatus + ", but was: " + response.getStatusCode());
     }
 }

@@ -29,6 +29,7 @@ import com.github.loadup.gateway.facade.model.GatewayResponse;
 import com.github.loadup.gateway.facade.model.PluginConfig;
 import com.github.loadup.gateway.facade.model.RouteConfig;
 import com.github.loadup.gateway.facade.spi.RepositoryPlugin;
+import com.github.loadup.gateway.facade.utils.JsonUtils;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 import jakarta.annotation.Resource;
@@ -309,32 +310,44 @@ public class FileRepositoryPlugin implements RepositoryPlugin {
             }
         }
 
-        routes.forEach(rc -> applyTemplates(rc));
+        // apply templates immutably: replace each route with possibly modified instance
+        List<RouteConfig> processed = new ArrayList<>();
+        for (RouteConfig rc : routes) {
+            processed.add(applyTemplates(rc));
+        }
 
-        return routes;
+        return processed;
     }
 
     /**
      * Replace requestTemplate/responseTemplate values that are template file names with their file contents.
-     * If a template value does not correspond to an existing file, it will be left as-is.
+     * Returns the same instance if no changes are needed, otherwise returns a new RouteConfig instance with templates
+     * replaced (using RouteConfig.builderFrom(rc)).
      */
-    private void applyTemplates(RouteConfig rc) {
-        if (rc == null) return;
+    private RouteConfig applyTemplates(RouteConfig rc) {
+        if (rc == null) return null;
         try {
             String req = rc.getRequestTemplate();
+            String newReq = req;
             if (req != null && !req.trim().isEmpty()) {
                 String loaded = loadTemplateContent(req.trim());
-                if (loaded != null) rc.setRequestTemplate(loaded);
+                if (loaded != null) newReq = loaded;
             }
 
             String resp = rc.getResponseTemplate();
+            String newResp = resp;
             if (resp != null && !resp.trim().isEmpty()) {
                 String loaded = loadTemplateContent(resp.trim());
-                if (loaded != null) rc.setResponseTemplate(loaded);
+                if (loaded != null) newResp = loaded;
+            }
+
+            if (!Objects.equals(req, newReq) || !Objects.equals(resp, newResp)) {
+                return RouteConfig.builderFrom(rc).requestTemplate(newReq).responseTemplate(newResp).build();
             }
         } catch (Exception e) {
             log.warn("Error applying templates for route {}: {}", rc.getRouteId(), e.getMessage());
         }
+        return rc;
     }
 
     /**
@@ -413,40 +426,6 @@ public class FileRepositoryPlugin implements RepositoryPlugin {
         return null;
     }
 
-    /**
-     * 简单的 JSON 解析器（解析简单的键值对）
-     */
-    private Map<String, Object> parseSimpleJson(String json) {
-        Map<String, Object> result = new HashMap<>();
-
-        // 移除大括号
-        String content = json.substring(1, json.length() - 1);
-
-        // 按逗号分割
-        String[] pairs = content.split(",");
-
-        for (String pair : pairs) {
-            String[] keyValue = pair.split(":");
-            if (keyValue.length == 2) {
-                String key = keyValue[0].trim().replaceAll("\"", "");
-                String value = keyValue[1].trim().replaceAll("\"", "");
-
-                // 尝试转换为数字
-                try {
-                    if (value.contains(".")) {
-                        result.put(key, Double.parseDouble(value));
-                    } else {
-                        result.put(key, Long.parseLong(value));
-                    }
-                } catch (NumberFormatException e) {
-                    // 保持为字符串
-                    result.put(key, value);
-                }
-            }
-        }
-
-        return result;
-    }
 
     /**
      * 简单的属性解析器（支持键值对格式）
@@ -462,7 +441,7 @@ public class FileRepositoryPlugin implements RepositoryPlugin {
 
         // 检查是否是 JSON 格式
         if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
-            return parseSimpleJson(trimmed);
+            return JsonUtils.toMap(trimmed);
         }
 
         // 解析键值对格式：timeout=30000;retryCount=3 (使用分号分隔)
@@ -644,4 +623,5 @@ public class FileRepositoryPlugin implements RepositoryPlugin {
         return false;
     }
 }
+
 

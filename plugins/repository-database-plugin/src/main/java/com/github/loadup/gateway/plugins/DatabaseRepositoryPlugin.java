@@ -36,6 +36,7 @@ import com.github.loadup.gateway.plugins.manager.TemplateManager;
 import com.github.loadup.gateway.plugins.mapper.RouteMapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -165,28 +166,58 @@ public class DatabaseRepositoryPlugin implements RepositoryPlugin {
      */
     private RouteConfig convertToModel(RouteEntity entity) {
         Map<String, Object> properties = new HashMap<>();
-        if (entity.getProperties() != null) {
-            properties = JsonUtils.toMap(entity.getProperties());
+        String propertiesStr = entity.getProperties();
+        if (StringUtils.isNotBlank(propertiesStr)) {
+            String trimmed = propertiesStr.trim();
+
+            // 检查是否是 JSON 格式
+            if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
+                properties = JsonUtils.toMap(trimmed);
+            }
+            // 解析键值对格式：timeout=30000;retryCount=3 (使用分号分隔)
+            String[] pairs = trimmed.split(";");
+
+            for (String pair : pairs) {
+                String[] keyValue = pair.trim().split("=");
+                if (keyValue.length == 2) {
+                    String key = keyValue[0].trim();
+                    String value = keyValue[1].trim();
+
+                    // 尝试转换为合适的数据类型
+                    try {
+                        if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
+                            properties.put(key, Boolean.parseBoolean(value));
+                        } else if (value.contains(".")) {
+                            properties.put(key, Double.parseDouble(value));
+                        } else {
+                            properties.put(key, Long.parseLong(value));
+                        }
+                    } catch (NumberFormatException e) {
+                        // 保持为字符串
+                        properties.put(key, value);
+                    }
+                }
+            }
         }
+
 
         // 确保 properties 中包含 timeout 和 retryCount
         if (!properties.containsKey("timeout")) {
-            properties.put("timeout", entity.getTimeout());
+            properties.put("timeout", 30000L);
         }
         if (!properties.containsKey("retryCount")) {
-            properties.put("retryCount", entity.getRetryCount());
+            properties.put("retryCount", 3);
         }
 
+        boolean enabled = Boolean.TRUE.equals(entity.getEnabled());
+
         RouteConfig config = RouteConfig.builder()
-                .routeId(entity.getRouteId())
-                .routeName(entity.getRouteName())
                 .path(entity.getPath())
                 .method(entity.getMethod())
-                .protocol(entity.getProtocol())
                 .target(entity.getTarget())
                 .requestTemplate(entity.getRequestTemplate())
                 .responseTemplate(entity.getResponseTemplate())
-                .enabled(entity.isEnabled())
+                .enabled(enabled)
                 .properties(properties)
                 .build();
 

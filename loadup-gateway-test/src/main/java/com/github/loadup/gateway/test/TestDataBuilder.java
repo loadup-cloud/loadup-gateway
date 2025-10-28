@@ -10,26 +10,25 @@ package com.github.loadup.gateway.test;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
 
+import com.github.loadup.gateway.facade.constants.GatewayConstants;
 import com.github.loadup.gateway.facade.model.GatewayRequest;
 import com.github.loadup.gateway.facade.model.GatewayResponse;
 import com.github.loadup.gateway.facade.model.RouteConfig;
-import com.github.loadup.gateway.facade.constants.GatewayConstants;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -77,14 +76,10 @@ public class TestDataBuilder {
      */
     public static RouteConfig createTestRoute(String path, String protocol) {
         return RouteConfig.builder()
-                .routeId("test-route-" + System.currentTimeMillis())
-                .routeName("Test Route")
                 .path(path)
                 .method("GET")
                 .protocol(protocol)
-                .targetUrl("http://localhost:8080/api/test")
-                .targetBean("testService")
-                .targetMethod("testMethod")
+                .target("http://localhost:8080/api/test")
                 .requestTemplate(createTestRequestTemplate())
                 .responseTemplate(createTestResponseTemplate())
                 .enabled(true)

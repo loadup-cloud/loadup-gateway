@@ -140,7 +140,6 @@ public class RouteConfigTargetTest extends BaseGatewayTest {
                 .protocol(GatewayConstants.Protocol.HTTP)
                 .build();
 
-        route.setTargetUrl("http://localhost:8080/api/test");
 
         assertEquals("http://existing.com", route.getTarget());
     }

@@ -25,10 +25,9 @@ package com.github.loadup.gateway.plugins.entity;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * 路由实体
@@ -37,44 +36,52 @@ import java.util.Date;
 @Setter
 @Table("gateway_routes")
 public class RouteEntity {
-    @Id
-    private Long id;
-
-    // unique/nullable constraints should be enforced at DB schema level
-    private String routeId;
-
-    private String routeName;
-
-    @Column("path")
-    private String path;
-
-    @Column("method")
-    private String method;
-
-    @Column("protocol")
-    private String protocol;
-
+    //path,method,target,requestTemplate,responseTemplate,enabled,properties
     /**
-     * 统一目标配置 (支持前缀格式: http://..., bean://service:method, rpc://class:method:version)
+     * id
+     */
+    @Id
+    private String routeId;
+    /**
+     * name
+     */
+    private String routeName;
+    /**
+     * request path
+     */
+    private String path;
+    /**
+     * request method
+     * GET, POST, PUT, DELETE, etc.
+     */
+    private String method;
+    /**
+     * http://..., bean://service:method, rpc://class:method:version
      */
     private String target;
-
-    // 兼容字段，用于迁移期间
-    private String targetUrl;
-    private String targetBean;
-    private String targetMethod;
-
+    /**
+     * request template
+     */
     private String requestTemplate;
-
+    /**
+     * response template
+     */
     private String responseTemplate;
-
-    private boolean enabled = true;
-
-    private long timeout = 30000;
-    private int retryCount = 3;
-
+    /**
+     * enabled status
+     */
+    private Boolean enabled;
+    /**
+     * additional properties
+     */
     private String properties;
-
-    private Date updatedAt;
+    /**
+     * updated at
+     */
+    private LocalDateTime updatedAt;
+    /**
+     * created at
+     */
+    private LocalDateTime createdAt;
 
 }
