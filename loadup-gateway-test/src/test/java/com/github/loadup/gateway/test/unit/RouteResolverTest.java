@@ -125,7 +125,7 @@ public class RouteResolverTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("应该处理仓储异常")
+    @DisplayName("Should handle repository exception")
     public void shouldHandleRepositoryException() throws Exception {
         // Given
         String path = "/api/test";

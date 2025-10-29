@@ -383,7 +383,7 @@ public class FileRepositoryPlugin implements RepositoryPlugin {
             return null;
         }
 
-        // 最新Format：path,method,target,requestTemplate,responseTemplate,enabled,properties
+        // LatestFormat：path,method,target,requestTemplate,responseTemplate,enabled,properties
         if (line.length >= 3) {
             // Build a FileRouteEntity DTO and delegate conversion to convertToRouteConfig
             FileRouteEntity entity = new FileRouteEntity();
@@ -449,7 +449,7 @@ public class FileRepositoryPlugin implements RepositoryPlugin {
     }
 
     /**
-     * Create routeCSV文件
+     * Create routeCSVFile
      */
     private void createRoutesFile(Path routesFile) throws IOException {
         try (CSVWriter writer = new CSVWriter(new FileWriter(routesFile.toFile()))) {

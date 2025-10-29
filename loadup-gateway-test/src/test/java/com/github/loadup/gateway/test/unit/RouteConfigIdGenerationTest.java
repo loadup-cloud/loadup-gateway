@@ -32,7 +32,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * RouteConfig Auto generate ID 功能Test
+ * RouteConfig Auto generate ID FunctionalityTest
  */
 public class RouteConfigIdGenerationTest extends BaseGatewayTest {
 

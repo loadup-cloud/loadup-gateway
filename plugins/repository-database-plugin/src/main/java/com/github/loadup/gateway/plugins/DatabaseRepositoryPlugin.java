@@ -168,7 +168,7 @@ public class DatabaseRepositoryPlugin implements RepositoryPlugin {
                             properties.put(key, Long.parseLong(value));
                         }
                     } catch (NumberFormatException e) {
-                        // 保持为字符串
+                        // Keep as string
                         properties.put(key, value);
                     }
                 }
@@ -176,7 +176,7 @@ public class DatabaseRepositoryPlugin implements RepositoryPlugin {
         }
 
 
-        // 确保 properties 中包含 timeout 和 retryCount
+        // Ensure properties Contains in timeout And retryCount
         if (!properties.containsKey("timeout")) {
             properties.put("timeout", 30000L);
         }

@@ -41,7 +41,7 @@ import java.util.HashMap;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * SpringBeanProxyPlugin 集成Test
+ * SpringBeanProxyPlugin IntegrationTest
  */
 @SpringBootTest(classes = {SpringBeanProxyPluginIntegrationTest.TestConfiguration.class})
 @ActiveProfiles("test")
@@ -69,7 +69,7 @@ public class SpringBeanProxyPluginIntegrationTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("应该成功调用实际的Spring Bean方法")
+    @DisplayName("Should successfully invoke actualSpring BeanMethod")
     void shouldSuccessfullyCallRealSpringBeanMethod() throws Exception {
         // When
         GatewayResponse response = plugin.proxy(testRequest, "testBusinessService:processPayment");
@@ -88,7 +88,7 @@ public class SpringBeanProxyPluginIntegrationTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("应该成功调用返回集合类型的方法")
+    @DisplayName("Should successfully invoke method that returns collection type")
     void shouldSuccessfullyCallMethodReturningCollection() throws Exception {
         // When
         GatewayResponse response = plugin.proxy(testRequest, "testBusinessService:getUserTransactions");
@@ -104,7 +104,7 @@ public class SpringBeanProxyPluginIntegrationTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("应该成功调用带复杂参数的方法")
+    @DisplayName("Should successfully invoke method with complex parameters")
     void shouldSuccessfullyCallMethodWithComplexParameters() throws Exception {
         // Given
         GatewayRequest complexRequest = GatewayRequest.builder()
@@ -127,7 +127,7 @@ public class SpringBeanProxyPluginIntegrationTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("应该正确处理业务异常")
+    @DisplayName("Should correctly handle business exception")
     void shouldHandleBusinessException() throws Exception {
         // Given
         GatewayRequest invalidRequest = GatewayRequest.builder()
@@ -151,14 +151,14 @@ public class SpringBeanProxyPluginIntegrationTest extends BaseGatewayTest {
     @Test
     @DisplayName("Should support method overloading")
     void shouldSupportMethodOverloading() throws Exception {
-        // When - 调用无参数版本
+        // When - Invoke version without parameters
         GatewayResponse response1 = plugin.proxy(testRequest, "testBusinessService:getStatus");
 
         // Then
         assertEquals(GatewayConstants.Status.SUCCESS, response1.getStatusCode());
         assertTrue(response1.getBody().contains("DEFAULT"));
 
-        // When - 调用带参数版本（由于方法查找机制，会找到第一个匹配的方法）
+        // When - Invoke version with parameters（Due to method lookup mechanism，Will find the first matching method）
         GatewayResponse response2 = plugin.proxy(testRequest, "testBusinessService:getStatus");
 
         // Then
@@ -266,7 +266,7 @@ public class SpringBeanProxyPluginIntegrationTest extends BaseGatewayTest {
     }
 
     /**
-     * 支付结果类
+     * Payment result class
      */
     public static class PaymentResult {
         private String status;

@@ -56,7 +56,7 @@ public class FileRepositoryPluginTest extends BaseGatewayTest {
         super.setUp();
         fileRepositoryPlugin = new FileRepositoryPlugin();
 
-        // 配置插件使用临时目录
+        // Configure plugin to use temporary directory
         Map<String, Object> properties = new HashMap<>();
         properties.put("basePath", tempDir.toString());
 

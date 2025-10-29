@@ -30,14 +30,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Test Configuration Class，Provide testBean和服务
+ * Test Configuration Class，Provide testBeanAnd service
  */
 @Configuration
 @Profile("test")
 public class TestConfiguration {
 
     /**
-     * Test serviceBean，用于TestBeanProxy functionality
+     * Test serviceBean，Used forTestBeanProxy functionality
      */
     @Bean
     public TestService testService() {

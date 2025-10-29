@@ -32,7 +32,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * RouteConfig properties 字段功能Test
+ * RouteConfig properties Field functionalityTest
  */
 public class RouteConfigPropertiesTest extends BaseGatewayTest {
 
@@ -44,13 +44,13 @@ public class RouteConfigPropertiesTest extends BaseGatewayTest {
                 .target("http://localhost:8080/users")
                 .build();
 
-        // Test设置和Get timeout
+        // TestSet andGet timeout
         assertEquals(60000, route.getTimeout());
 
-        // Test设置和Get retryCount
+        // TestSet andGet retryCount
         assertEquals(5, route.getRetryCount());
 
-        // Verify properties 已正确设置
+        // Verify properties Has been correctly set
         assertNotNull(route.getProperties());
         assertEquals(60000L, route.getProperties().get("timeout"));
         assertEquals(5, route.getProperties().get("retryCount"));
@@ -64,7 +64,7 @@ public class RouteConfigPropertiesTest extends BaseGatewayTest {
                 .target("http://localhost:8080/users")
                 .build();
 
-        // Test默认值
+        // TestDefault value
         assertEquals(30000L, route.getTimeout());
         assertEquals(3, route.getRetryCount());
     }
@@ -77,7 +77,7 @@ public class RouteConfigPropertiesTest extends BaseGatewayTest {
                 .target("http://localhost:8080/users")
                 .build();
 
-        // 设置自定义Properties
+        // Set customProperties
 
         // VerifyProperties
     }
@@ -102,10 +102,10 @@ public class RouteConfigPropertiesTest extends BaseGatewayTest {
 
     @Test
     public void testPropertiesStringParsing() {
-        // Test不同Data类型的Parse
+        // TestDifferentDataType ofParse
         Map<String, Object> properties = new HashMap<>();
-        properties.put("timeout", "60000");  // 字符串数字
-        properties.put("retryCount", "5");   // 字符串数字
+        properties.put("timeout", "60000");  // String number
+        properties.put("retryCount", "5");   // String number
         properties.put("enabled", "true");   // String boolean value
         properties.put("rate", "1.5");       // String decimal
 
@@ -116,7 +116,7 @@ public class RouteConfigPropertiesTest extends BaseGatewayTest {
                 .properties(properties)
                 .build();
 
-        // Verify数字字符串被正确Parse
+        // VerifyNumber string is correctlyParse
         assertEquals(60000L, route.getTimeout());
         assertEquals(5, route.getRetryCount());
     }
