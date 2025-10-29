@@ -28,13 +28,13 @@ import com.github.loadup.gateway.facade.model.GatewayResponse;
 import com.github.loadup.gateway.facade.model.PluginConfig;
 import com.github.loadup.gateway.facade.spi.ProxyPlugin;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,7 +46,8 @@ import java.util.Map;
 @Component
 public class HttpProxyPlugin implements ProxyPlugin {
 
-    private RestTemplate restTemplate = new RestTemplate();
+    private final RestClient restClient = RestClient.create();
+
 
     @Override
     public String getName() {
@@ -71,16 +72,16 @@ public class HttpProxyPlugin implements ProxyPlugin {
     @Override
     public void initialize(PluginConfig config) {
         log.info("HttpProxyPlugin initialized with config: {}", config);
-        // You can configure RestTemplate timeouts, connection pool, etc. here
+        // RestClient can be configured centrally via its @Bean
     }
 
     @Override
-    public GatewayResponse execute(GatewayRequest request) throws Exception {
+    public GatewayResponse execute(GatewayRequest request) {
         throw new UnsupportedOperationException("Use proxy method instead");
     }
 
     @Override
-    public GatewayResponse proxy(GatewayRequest request, String target) throws Exception {
+    public GatewayResponse proxy(GatewayRequest request, String target) {
         try {
             // Build request headers
             HttpHeaders headers = new HttpHeaders();
@@ -88,20 +89,60 @@ public class HttpProxyPlugin implements ProxyPlugin {
                 request.getHeaders().forEach(headers::set);
             }
 
-            // Build request body
-            HttpEntity<String> entity = new HttpEntity<>(request.getBody(), headers);
-
             // Determine HTTP method
             HttpMethod httpMethod = HttpMethod.valueOf(request.getMethod().toUpperCase());
 
-            // Build full URL
+            // Build full URL using UriComponentsBuilder to ensure encoding
             String fullUrl = buildFullUrl(target, request);
 
             log.debug("Proxying {} request to: {}", httpMethod, fullUrl);
 
-            // Execute HTTP request
-            ResponseEntity<String> response = restTemplate.exchange(
-                    fullUrl, httpMethod, entity, String.class);
+            // Execute HTTP request using RestClient fluent API per method
+            ResponseEntity<String> response;
+            URI uri = URI.create(fullUrl);
+
+            if (httpMethod == HttpMethod.GET) {
+                response = restClient.get()
+                        .uri(uri)
+                        .headers(h -> h.putAll(headers))
+                        .retrieve()
+                        .toEntity(String.class);
+            } else if (httpMethod == HttpMethod.POST) {
+                response = restClient.post()
+                        .uri(uri)
+                        .headers(h -> h.putAll(headers))
+                        .body(request.getBody())
+                        .retrieve()
+                        .toEntity(String.class);
+            } else if (httpMethod == HttpMethod.PUT) {
+                response = restClient.put()
+                        .uri(uri)
+                        .headers(h -> h.putAll(headers))
+                        .body(request.getBody())
+                        .retrieve()
+                        .toEntity(String.class);
+            } else if (httpMethod == HttpMethod.DELETE) {
+                response = restClient.delete()
+                        .uri(uri)
+                        .headers(h -> h.putAll(headers))
+                        .retrieve()
+                        .toEntity(String.class);
+            } else if (httpMethod == HttpMethod.PATCH) {
+                response = restClient.patch()
+                        .uri(uri)
+                        .headers(h -> h.putAll(headers))
+                        .body(request.getBody())
+                        .retrieve()
+                        .toEntity(String.class);
+            } else {
+                // Fallback to POST if method is unknown
+                response = restClient.post()
+                        .uri(uri)
+                        .headers(h -> h.putAll(headers))
+                        .body(request.getBody())
+                        .retrieve()
+                        .toEntity(String.class);
+            }
 
             // Build gateway response
             Map<String, String> responseHeaders = new HashMap<>();
@@ -113,7 +154,7 @@ public class HttpProxyPlugin implements ProxyPlugin {
 
             return GatewayResponse.builder()
                     .requestId(request.getRequestId())
-                    .statusCode(response.getStatusCodeValue())
+                    .statusCode(response.getStatusCode().value())
                     .headers(responseHeaders)
                     .body(response.getBody())
                     .contentType(responseHeaders.get("Content-Type"))
@@ -154,9 +195,7 @@ public class HttpProxyPlugin implements ProxyPlugin {
     private String buildFullUrl(String target, GatewayRequest request) {
         StringBuilder url = new StringBuilder(target);
 
-        // Add query parameters
         if (request.getQueryParameters() != null && !request.getQueryParameters().isEmpty()) {
-            url.append("?");
             request.getQueryParameters().forEach((key, values) -> {
                 for (String value : values) {
                     url.append(key).append("=").append(value).append("&");
