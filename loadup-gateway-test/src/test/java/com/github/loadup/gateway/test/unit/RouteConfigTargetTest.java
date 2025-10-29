@@ -30,7 +30,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * RouteConfig target 字段功能测试
+ * RouteConfig target field function test
  */
 public class RouteConfigTargetTest extends BaseGatewayTest {
 
@@ -146,14 +146,14 @@ public class RouteConfigTargetTest extends BaseGatewayTest {
 
     @Test
     public void testCreateTestRouteWithNewTargetFormat() {
-        // 测试 HTTP 协议
+        // Test HTTP Protocol
         RouteConfig httpRoute = createTestRoute("/api/test", "GET",
                 "http://localhost:8080/api/test");
         assertEquals("http://localhost:8080/api/test", httpRoute.getTarget());
         assertEquals(GatewayConstants.Protocol.HTTP, httpRoute.getProtocol());
         assertEquals("http://localhost:8080/api/test", httpRoute.getTargetUrl());
 
-        // 测试 BEAN 协议
+        // Test BEAN Protocol
         RouteConfig beanRoute = createTestRoute("/api/test", "GET",
                 "bean://userService:getUser");
         assertEquals("bean://userService:getUser", beanRoute.getTarget());
@@ -161,7 +161,7 @@ public class RouteConfigTargetTest extends BaseGatewayTest {
         assertEquals("userService", beanRoute.getTargetBean());
         assertEquals("getUser", beanRoute.getTargetMethod());
 
-        // 测试 RPC 协议
+        // Test RPC Protocol
         RouteConfig rpcRoute = createTestRoute("/api/test", "GET",
                 "rpc://com.example.UserService:getUser:1.0.0");
         assertEquals("rpc://com.example.UserService:getUser:1.0.0", rpcRoute.getTarget());

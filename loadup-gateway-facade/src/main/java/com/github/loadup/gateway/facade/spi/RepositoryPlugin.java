@@ -29,32 +29,32 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * 存储插件SPI接口
+ * Storage plugin SPI interface
  */
 public interface RepositoryPlugin extends GatewayPlugin {
 
     /**
-     * 根据路由ID获取路由配置
+     * Get route configuration by route ID
      */
     Optional<RouteConfig> getRoute(String routeId) throws Exception;
 
     /**
-     * 根据路径和方法获取路由配置
+     * Get route configuration by path and method
      */
     Optional<RouteConfig> getRouteByPath(String path, String method) throws Exception;
 
     /**
-     * 获取所有路由配置
+     * Get all route configurations
      */
     List<RouteConfig> getAllRoutes() throws Exception;
 
     /**
-     * 获取模板
+     * Get template
      */
     Optional<String> getTemplate(String templateId, String templateType) throws Exception;
 
     /**
-     * 获取支持的存储类型
+     * Get supported storage type
      */
     String getSupportedStorageType();
 

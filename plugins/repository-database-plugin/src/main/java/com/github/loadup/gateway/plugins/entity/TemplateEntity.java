@@ -29,7 +29,7 @@ import org.springframework.data.relational.core.mapping.Table;
 import java.util.Date;
 
 /**
- * 模板实体
+ * Template entity
  */
 @Data
 @Table("gateway_templates")

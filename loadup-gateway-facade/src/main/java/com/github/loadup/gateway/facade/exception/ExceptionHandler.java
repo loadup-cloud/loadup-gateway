@@ -30,41 +30,41 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 
 /**
- * 异常处理工具类
- * 提供统一的异常处理和响应构建方法
+ * Exception handling utility class
+ * Provides unified exception handling and response building methods
  */
 @Slf4j
 public final class ExceptionHandler {
 
     private ExceptionHandler() {
-        // 工具类，不允许实例化
+        // Utility class, instantiation not allowed
     }
 
     /**
-     * 处理异常并构建统一的错误响应
+     * Handle exception and build unified error response
      *
-     * @param requestId 请求ID
-     * @param exception 异常对象
-     * @return 统一格式的错误响应
+     * @param requestId Request ID
+     * @param exception Exception object
+     * @return Unified format error response
      */
     public static GatewayResponse handleException(String requestId, Throwable exception) {
-        // 记录异常日志
+        // Log exception
         logException(exception);
 
-        // 将异常包装为网关异常
+        // Wrap exception as gateway exception
         GatewayException gatewayException = ensureGatewayException(exception);
 
-        // 构建错误响应
+        // Build error response
         return buildErrorResponse(requestId, gatewayException);
     }
 
     /**
-     * 处理异常并构建统一的错误响应（带处理时间）
+     * Handle exception and build unified error response (with processing time)
      *
-     * @param requestId 请求ID
-     * @param exception 异常对象
-     * @param processingTime 处理时间
-     * @return 统一格式的错误响应
+     * @param requestId Request ID
+     * @param exception Exception object
+     * @param processingTime Processing time
+     * @return Unified format error response
      */
     public static GatewayResponse handleException(String requestId, Throwable exception, long processingTime) {
         GatewayResponse response = handleException(requestId, exception);
@@ -73,25 +73,25 @@ public final class ExceptionHandler {
     }
 
     /**
-     * 确保异常是网关异常类型
+     * Ensure exception is of gateway exception type
      */
     private static GatewayException ensureGatewayException(Throwable exception) {
         if (exception instanceof GatewayException) {
             return (GatewayException) exception;
         }
 
-        // 包装为网关异常
+        // Wrap as gateway exception
         return GatewayExceptionFactory.wrap(exception, "UNKNOWN");
     }
 
     /**
-     * 构建错误响应
+     * Build error response
      */
     private static GatewayResponse buildErrorResponse(String requestId, GatewayException exception) {
-        // 根据错误类型确定HTTP状态码
+        // Determine HTTP status code based on error type
         int statusCode = mapToHttpStatus(exception.getErrorType());
 
-        // 构建错误响应体
+        // Build error response body
         String errorBody = buildErrorBody(exception);
 
         return GatewayResponse.builder()
@@ -106,7 +106,7 @@ public final class ExceptionHandler {
     }
 
     /**
-     * 构建错误响应体
+     * Build error response body
      */
     private static String buildErrorBody(GatewayException exception) {
         StringBuilder sb = new StringBuilder();
@@ -117,7 +117,7 @@ public final class ExceptionHandler {
         sb.append("\"module\":\"").append(exception.getModule()).append("\",");
         sb.append("\"message\":\"").append(escapeJsonString(exception.getMessage())).append("\"");
 
-        // 如果有原因异常，添加原因信息
+        // Add cause information if there is a cause exception
         if (exception.getCause() != null) {
             sb.append(",\"cause\":\"").append(escapeJsonString(exception.getCause().getMessage())).append("\"");
         }
@@ -130,7 +130,7 @@ public final class ExceptionHandler {
     }
 
     /**
-     * 根据错误类型映射到HTTP状态码
+     * Map error type to HTTP status code
      */
     private static int mapToHttpStatus(ErrorType errorType) {
         switch (errorType) {
@@ -161,7 +161,7 @@ public final class ExceptionHandler {
     }
 
     /**
-     * 记录异常日志
+     * Log exception
      */
     private static void logException(Throwable exception) {
         if (exception instanceof GatewayException) {
@@ -178,7 +178,7 @@ public final class ExceptionHandler {
     }
 
     /**
-     * 转义JSON字符串中的特殊字符
+     * Escape special characters in JSON string
      */
     private static String escapeJsonString(String str) {
         if (str == null) {
@@ -192,24 +192,24 @@ public final class ExceptionHandler {
     }
 
     /**
-     * 检查异常是否需要重试
+     * Check if exception is retryable
      */
     public static boolean isRetryable(Throwable exception) {
         if (exception instanceof GatewayException) {
             GatewayException ge = (GatewayException) exception;
-            // 网络错误和超时错误通常可以重试
+            // Network errors and timeout errors are usually retryable
             return ge.getErrorType() == ErrorType.NETWORK ||
                    ge.getErrorType() == ErrorType.TIMEOUT;
         }
 
-        // 对于标准异常，判断是否为网络相关异常
+        // For standard exceptions, check if it is a network-related exception
         return exception instanceof java.net.SocketTimeoutException ||
                exception instanceof java.net.ConnectException ||
                exception instanceof java.io.IOException;
     }
 
     /**
-     * 获取异常的错误级别
+     * Get log level of exception
      */
     public static String getLogLevel(Throwable exception) {
         if (exception instanceof GatewayException) {
@@ -218,15 +218,15 @@ public final class ExceptionHandler {
                 case VALIDATION:
                 case AUTHORIZATION:
                 case RATE_LIMIT:
-                    return "WARN"; // 客户端错误，警告级别
+                    return "WARN"; // Client error, warning level
                 case SYSTEM:
                 case CONFIGURATION:
                 case STORAGE:
-                    return "ERROR"; // 系统错误，错误级别
+                    return "ERROR"; // System error, error level
                 default:
-                    return "INFO"; // 其他情况，信息级别
+                    return "INFO"; // Other cases, info level
             }
         }
-        return "ERROR"; // 未知异常，错误级别
+        return "ERROR"; // Unknown exception, error level
     }
 }

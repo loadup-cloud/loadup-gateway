@@ -29,7 +29,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 /**
- * 路由数据库Repository
+ * Route database Repository
  */
 @Repository
 public interface RouteManager extends CrudRepository<RouteEntity, Long> {

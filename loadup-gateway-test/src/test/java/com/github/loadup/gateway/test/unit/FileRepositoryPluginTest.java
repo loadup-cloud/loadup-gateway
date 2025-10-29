@@ -41,9 +41,9 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * 文件存储插件单元测试
+ * File Storage Plugin Unit Test
  */
-@DisplayName("文件存储插件测试")
+@DisplayName("File Storage Plugin Test")
 public class FileRepositoryPluginTest extends BaseGatewayTest {
 
     @TempDir
@@ -56,7 +56,7 @@ public class FileRepositoryPluginTest extends BaseGatewayTest {
         super.setUp();
         fileRepositoryPlugin = new FileRepositoryPlugin();
 
-        // 配置插件使用临时目录
+        // Configure plugin to use temporary directory
         Map<String, Object> properties = new HashMap<>();
         properties.put("basePath", tempDir.toString());
 
@@ -72,7 +72,7 @@ public class FileRepositoryPluginTest extends BaseGatewayTest {
 
 
     @Test
-    @DisplayName("应该能够通过路径和方法获取路由")
+    @DisplayName("Should be able to get route by path and method")
     public void shouldGetRouteByPathAndMethod() throws Exception {
         // Given
         RouteConfig route = createTestRoute("/api/user", "GET",
@@ -89,7 +89,7 @@ public class FileRepositoryPluginTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("应该能够获取所有路由")
+    @DisplayName("Should be able to get all routes")
     public void shouldGetAllRoutes() throws Exception {
         // Given
         RouteConfig route1 = createTestRoute("/api/test1", "GET",
@@ -107,7 +107,7 @@ public class FileRepositoryPluginTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("应该能够删除路由")
+    @DisplayName("Should be able to delete route")
     public void shouldDeleteRoute() throws Exception {
         // Given
         RouteConfig route = createTestRoute("/api/test", "GET",
@@ -123,13 +123,13 @@ public class FileRepositoryPluginTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("应该能够保存和获取模板")
+    @DisplayName("Should be able to save andGetTemplate")
     public void shouldSaveAndGetTemplate() throws Exception {
         // Given
         String templateId = "test-template";
         String templateType = "REQUEST";
         String templateContent = """
-                // 测试模板
+                // Test template
                 request.headers.put("X-Test", "true")
                 return request
                 """;
@@ -144,7 +144,7 @@ public class FileRepositoryPluginTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("应该能够删除模板")
+    @DisplayName("Should be able to deleteTemplate")
     public void shouldDeleteTemplate() throws Exception {
         // Given
         String templateId = "delete-template";
@@ -161,7 +161,7 @@ public class FileRepositoryPluginTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("应该返回正确的支持的存储类型")
+    @DisplayName("Should return correct supported storage type")
     public void shouldReturnCorrectSupportedStorageType() {
         // When
         String storageType = fileRepositoryPlugin.getSupportedStorageType();

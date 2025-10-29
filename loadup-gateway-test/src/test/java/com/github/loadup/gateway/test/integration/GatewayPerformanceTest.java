@@ -41,17 +41,17 @@ import java.util.concurrent.Executors;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * 网关性能测试
+ * Gateway Performance Test
  */
 @SpringBootTest
-@DisplayName("网关性能测试")
+@DisplayName("Gateway Performance Test")
 public class GatewayPerformanceTest extends BaseGatewayTest {
 
     @Resource
     private ActionDispatcher actionDispatcher;
 
     @Test
-    @DisplayName("单线程性能测试")
+    @DisplayName("Single thread performanceTest")
     public void shouldPerformWellInSingleThread() {
         // Given
         int requestCount = 1000;
@@ -69,7 +69,7 @@ public class GatewayPerformanceTest extends BaseGatewayTest {
             long requestEnd = System.currentTimeMillis();
             responseTimes.add(requestEnd - requestStart);
 
-            // 验证响应正确性
+            // VerifyResponseCorrectness
             assertNotNull(response);
             assertEquals(404, response.getStatusCode());
         }
@@ -84,19 +84,19 @@ public class GatewayPerformanceTest extends BaseGatewayTest {
 
         double throughput = (requestCount * 1000.0) / totalTime; // requests per second
 
-        System.out.printf("单线程性能测试结果:%n");
-        System.out.printf("总请求数: %d%n", requestCount);
-        System.out.printf("总耗时: %d ms%n", totalTime);
-        System.out.printf("平均响应时间: %.2f ms%n", averageResponseTime);
-        System.out.printf("吞吐量: %.2f req/s%n", throughput);
+        System.out.printf("Single thread performanceTest results:%n");
+        System.out.printf("Total requests: %d%n", requestCount);
+        System.out.printf("Total time: %d ms%n", totalTime);
+        System.out.printf("AverageResponseTime: %.2f ms%n", averageResponseTime);
+        System.out.printf("Throughput: %.2f req/s%n", throughput);
 
-        // 断言性能指标
-        assertTrue(averageResponseTime < 100, "平均响应时间应该小于100ms");
-        assertTrue(throughput > 10, "吞吐量应该大于10 req/s");
+        // AssertPerformance metrics
+        assertTrue(averageResponseTime < 100, "AverageResponseTime should be less than100ms");
+        assertTrue(throughput > 10, "Throughput should be greater than10 req/s");
     }
 
     @Test
-    @DisplayName("并发性能测试")
+    @DisplayName("Concurrent performanceTest")
     public void shouldPerformWellUnderConcurrency() throws Exception {
         // Given
         int threadCount = 10;
@@ -129,7 +129,7 @@ public class GatewayPerformanceTest extends BaseGatewayTest {
             futures.add(future);
         }
 
-        // 等待所有请求完成
+        // Wait for all requests to complete
         List<Long> allResponseTimes = new ArrayList<>();
         for (CompletableFuture<List<Long>> future : futures) {
             allResponseTimes.addAll(future.get());
@@ -147,21 +147,21 @@ public class GatewayPerformanceTest extends BaseGatewayTest {
 
         double throughput = (totalRequests * 1000.0) / totalTime;
 
-        System.out.printf("并发性能测试结果:%n");
-        System.out.printf("线程数: %d%n", threadCount);
-        System.out.printf("每线程请求数: %d%n", requestsPerThread);
-        System.out.printf("总请求数: %d%n", totalRequests);
-        System.out.printf("总耗时: %d ms%n", totalTime);
-        System.out.printf("平均响应时间: %.2f ms%n", averageResponseTime);
-        System.out.printf("吞吐量: %.2f req/s%n", throughput);
+        System.out.printf("Concurrent performanceTest results:%n");
+        System.out.printf("Thread count: %d%n", threadCount);
+        System.out.printf("Requests per thread: %d%n", requestsPerThread);
+        System.out.printf("Total requests: %d%n", totalRequests);
+        System.out.printf("Total time: %d ms%n", totalTime);
+        System.out.printf("AverageResponseTime: %.2f ms%n", averageResponseTime);
+        System.out.printf("Throughput: %.2f req/s%n", throughput);
 
-        // 断言性能指标
-        assertTrue(averageResponseTime < 200, "并发场景下平均响应时间应该小于200ms");
-        assertTrue(throughput > 50, "并发吞吐量应该大于50 req/s");
+        // AssertPerformance metrics
+        assertTrue(averageResponseTime < 200, "Average in concurrent scenarioResponseTime should be less than200ms");
+        assertTrue(throughput > 50, "Concurrent throughput should be greater than50 req/s");
     }
 
     @RepeatedTest(5)
-    @DisplayName("重复性能测试")
+    @DisplayName("Repeated performanceTest")
     public void shouldMaintainConsistentPerformance() {
         // Given
         int warmupRequests = 50;
@@ -173,7 +173,7 @@ public class GatewayPerformanceTest extends BaseGatewayTest {
             actionDispatcher.dispatch(request);
         }
 
-        // When - 测试阶段
+        // When - TestPhase
         List<Long> responseTimes = new ArrayList<>();
         long startTime = System.currentTimeMillis();
 
@@ -199,56 +199,56 @@ public class GatewayPerformanceTest extends BaseGatewayTest {
 
         double throughput = (testRequests * 1000.0) / totalTime;
 
-        // 性能应该保持稳定
-        assertTrue(averageResponseTime < 50, "预热后响应时间应该很快");
-        assertTrue(throughput > 100, "预热后吞吐量应该很高");
+        // Performance should remain stable
+        assertTrue(averageResponseTime < 50, "After warmupResponseTime should be fast");
+        assertTrue(throughput > 100, "Throughput after warmup should be high");
 
-        // 检查响应时间的稳定性（99%的请求应该在合理时间内完成）
+        // CheckResponseTime stability（99%requests should complete within reasonable time）
         responseTimes.sort(Long::compareTo);
         long p99ResponseTime = responseTimes.get((int) (responseTimes.size() * 0.99));
-        assertTrue(p99ResponseTime < 100, "99%的请求应该在100ms内完成");
+        assertTrue(p99ResponseTime < 100, "99%requests should be within100msComplete within");
     }
 
     @Test
-    @DisplayName("内存使用测试")
+    @DisplayName("Memory usageTest")
     public void shouldNotLeakMemory() {
         // Given
         Runtime runtime = Runtime.getRuntime();
         int requestCount = 1000;
 
-        // 强制垃圾回收，获取基准内存
+        // Force garbage collection，Get baseline memory
         System.gc();
         long initialMemory = runtime.totalMemory() - runtime.freeMemory();
 
-        // When - 执行大量请求
+        // When - Execute large number of requests
         for (int i = 0; i < requestCount; i++) {
             GatewayRequest request = createHttpRequest("/api/memory-test-" + i, "POST",
-                    "{\"data\":\"" + "x".repeat(1000) + "\"}"); // 1KB数据
+                    "{\"data\":\"" + "x".repeat(1000) + "\"}"); // 1KBData
             GatewayResponse response = actionDispatcher.dispatch(request);
 
             assertNotNull(response);
 
-            // 每100个请求检查一次内存
+            // Per100requestsCheckOne memory
             if (i % 100 == 0) {
-                System.gc(); // 建议垃圾回收
+                System.gc(); // Suggest garbage collection
             }
         }
 
-        // 最终垃圾回收和内存检查
+        // Final garbage collection and memoryCheck
         System.gc();
-        Thread.yield(); // 让GC有机会运行
+        Thread.yield(); // LetGChave chance to run
 
         long finalMemory = runtime.totalMemory() - runtime.freeMemory();
         long memoryIncrease = finalMemory - initialMemory;
 
         // Then
-        System.out.printf("内存使用测试结果:%n");
-        System.out.printf("初始内存: %d KB%n", initialMemory / 1024);
-        System.out.printf("最终内存: %d KB%n", finalMemory / 1024);
-        System.out.printf("内存增长: %d KB%n", memoryIncrease / 1024);
+        System.out.printf("Memory usageTest results:%n");
+        System.out.printf("Initial memory: %d KB%n", initialMemory / 1024);
+        System.out.printf("Final memory: %d KB%n", finalMemory / 1024);
+        System.out.printf("Memory growth: %d KB%n", memoryIncrease / 1024);
 
-        // 内存增长应该在合理范围内（小于10MB）
+        // Memory growthShould be within reasonable range（Less than10MB）
         assertTrue(memoryIncrease < 10 * 1024 * 1024,
-                "内存增长应该小于10MB，实际增长: " + (memoryIncrease / 1024 / 1024) + "MB");
+                "Memory growthShould be less than10MB，Actual growth: " + (memoryIncrease / 1024 / 1024) + "MB");
     }
 }

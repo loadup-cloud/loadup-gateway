@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Gateway 配置属性（与 application.yml 中的 loadup.gateway 对应）
+ * Gateway configuration properties (corresponds to loadup.gateway in application.yml)
  */
 @Data
 @Component
@@ -18,32 +18,32 @@ import java.util.Map;
 public class GatewayProperties {
 
     /**
-     * 是否启用 Gateway
+     * Whether to enable Gateway
      */
     private boolean enabled = true;
 
     /**
-     * 路由刷新间隔（秒）
+     * Route refresh interval (seconds)
      */
     private int routeRefreshInterval = 5;
 
     /**
-     * 模板缓存大小
+     * Template cache size
      */
     private int templateCacheSize = 100;
 
     /**
-     * 默认超时时间（毫秒）
+     * Default timeout (milliseconds)
      */
     private long defaultTimeout = 10000L;
 
     /**
-     * 默认重试次数
+     * Default retry count
      */
     private int defaultRetryCount = 1;
 
     /**
-     * 存储相关配置
+     * Storage related configuration
      */
 
     // Replace the generic map with a strongly-typed Plugins holder so IDEs can provide YAML autocompletion

@@ -46,9 +46,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 /**
- * Action分发器单元测试
+ * ActionDispatcher Unit Test
  */
-@DisplayName("Action分发器测试")
+@DisplayName("Action Dispatcher Test")
 public class ActionDispatcherTest extends BaseGatewayTest {
 
     @Mock
@@ -80,7 +80,7 @@ public class ActionDispatcherTest extends BaseGatewayTest {
         responseProps.setWrap(true);
         when(gatewayProperties.getResponse()).thenReturn(responseProps);
 
-        // 使用反射注入mock对象
+        // Use reflection to injectmockObject
         try {
             var routeResolverField = ActionDispatcher.class.getDeclaredField("routeResolver");
             routeResolverField.setAccessible(true);
@@ -107,7 +107,7 @@ public class ActionDispatcherTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("应该成功分发并处理请求")
+    @DisplayName("Should successfully dispatch and process request")
     public void shouldSuccessfullyDispatchRequest() throws Exception {
         // Given
         GatewayRequest request = createHttpRequest("/api/test", "GET", null);
@@ -138,7 +138,7 @@ public class ActionDispatcherTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("应该返回404当路由不存在时")
+    @DisplayName("Should return404When route does not exist")
     public void shouldReturn404WhenRouteNotFound() {
         // Given
         GatewayRequest request = createHttpRequest("/api/nonexistent", "GET", null);
@@ -157,7 +157,7 @@ public class ActionDispatcherTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("应该处理请求模板")
+    @DisplayName("Should process request template")
     public void shouldProcessRequestTemplate() throws Exception {
         // Given
         GatewayRequest request = createHttpRequest("/api/test", "POST", "{\"name\":\"test\"}");
@@ -187,7 +187,7 @@ public class ActionDispatcherTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("应该处理响应模板")
+    @DisplayName("Should process response template")
     public void shouldProcessResponseTemplate() throws Exception {
         // Given
         GatewayRequest request = createHttpRequest("/api/test", "GET", null);
@@ -221,7 +221,7 @@ public class ActionDispatcherTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("应该处理代理执行异常")
+    @DisplayName("Should handle proxy execution exception")
     public void shouldHandleProxyExecutionException() throws Exception {
         // Given
         GatewayRequest request = createHttpRequest("/api/test", "GET", null);

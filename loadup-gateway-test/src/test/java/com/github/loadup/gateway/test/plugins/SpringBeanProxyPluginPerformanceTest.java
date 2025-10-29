@@ -45,11 +45,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * SpringBeanProxyPlugin 性能测试
+ * SpringBeanProxyPlugin PerformanceTest
  */
 @SpringBootTest(classes = {SpringBeanProxyPluginPerformanceTest.TestConfiguration.class})
 @ActiveProfiles("test")
-@DisplayName("SpringBean代理插件性能测试")
+@DisplayName("SpringBean Proxy Plugin Performance Test")
 public class SpringBeanProxyPluginPerformanceTest extends BaseGatewayTest {
 
     @Resource
@@ -67,7 +67,7 @@ public class SpringBeanProxyPluginPerformanceTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("应该在高并发场景下正常工作")
+    @DisplayName("Should work normally in high concurrency scenario")
     void shouldWorkUnderHighConcurrency() throws Exception {
         // Given
         int threadCount = 50;
@@ -83,7 +83,7 @@ public class SpringBeanProxyPluginPerformanceTest extends BaseGatewayTest {
             Future<List<GatewayResponse>> future = executorService.submit(() -> {
                 List<GatewayResponse> responses = new ArrayList<>();
                 try {
-                    startLatch.await(); // 等待所有线程就绪
+                    startLatch.await(); // Wait for all threads to be ready
 
                     for (int j = 0; j < requestsPerThread; j++) {
                         GatewayRequest request = GatewayRequest.builder()
@@ -108,13 +108,13 @@ public class SpringBeanProxyPluginPerformanceTest extends BaseGatewayTest {
         }
 
         long startTime = System.currentTimeMillis();
-        startLatch.countDown(); // 启动所有线程
+        startLatch.countDown(); // Start all threads
 
         boolean completed = endLatch.await(30, TimeUnit.SECONDS);
         long endTime = System.currentTimeMillis();
 
         // Then
-        assertTrue(completed, "所有线程应该在30秒内完成");
+        assertTrue(completed, "All threads should within30completed in seconds");
 
         int successCount = 0;
         for (Future<List<GatewayResponse>> future : futures) {
@@ -126,31 +126,31 @@ public class SpringBeanProxyPluginPerformanceTest extends BaseGatewayTest {
             }
         }
 
-        assertEquals(totalRequests, successCount, "所有请求都应该成功");
+        assertEquals(totalRequests, successCount, "All requests should succeed");
 
         long totalTime = endTime - startTime;
         double throughput = (double) totalRequests / totalTime * 1000; // requests per second
 
-        System.out.println("并发性能测试结果:");
-        System.out.println("线程数: " + threadCount);
-        System.out.println("每线程请求数: " + requestsPerThread);
-        System.out.println("总请求数: " + totalRequests);
-        System.out.println("总耗时: " + totalTime + " ms");
-        System.out.println("吞吐量: " + String.format("%.2f", throughput) + " req/s");
+        System.out.println("Concurrent performanceTest results:");
+        System.out.println("Thread count: " + threadCount);
+        System.out.println("Requests per thread: " + requestsPerThread);
+        System.out.println("Total requests: " + totalRequests);
+        System.out.println("Total time: " + totalTime + " ms");
+        System.out.println("Throughput: " + String.format("%.2f", throughput) + " req/s");
 
-        // 验证性能指标
-        assertTrue(throughput > 100, "吞吐量应该大于100 req/s，实际: " + throughput);
-        assertTrue(totalTime < 20000, "总耗时应该小于20秒，实际: " + totalTime + "ms");
+        // VerifyPerformance metrics
+        assertTrue(throughput > 100, "Throughput should be greater than100 req/s，Actual: " + throughput);
+        assertTrue(totalTime < 20000, "Total timeShould be less than20seconds，Actual: " + totalTime + "ms");
     }
 
     @Test
-    @DisplayName("应该正确处理内存使用")
+    @DisplayName("Should correctly handleMemory usage")
     void shouldHandleMemoryUsageProperly() throws Exception {
         // Given
         Runtime runtime = Runtime.getRuntime();
         long initialMemory = runtime.totalMemory() - runtime.freeMemory();
 
-        // When - 执行大量请求
+        // When - Execute large number of requests
         for (int i = 0; i < 1000; i++) {
             GatewayRequest request = GatewayRequest.builder()
                     .requestId("memory-test-" + i)
@@ -163,7 +163,7 @@ public class SpringBeanProxyPluginPerformanceTest extends BaseGatewayTest {
             GatewayResponse response = plugin.proxy(request, "performanceTestService:processLargeData");
             assertEquals(GatewayConstants.Status.SUCCESS, response.getStatusCode());
 
-            // 每100次请求强制垃圾回收
+            // Per100RequestsForce garbage collection
             if (i % 100 == 0) {
                 System.gc();
                 Thread.sleep(10);
@@ -176,17 +176,17 @@ public class SpringBeanProxyPluginPerformanceTest extends BaseGatewayTest {
         long finalMemory = runtime.totalMemory() - runtime.freeMemory();
         long memoryIncrease = finalMemory - initialMemory;
 
-        System.out.println("内存使用测试结果:");
-        System.out.println("初始内存: " + (initialMemory / 1024) + " KB");
-        System.out.println("最终内存: " + (finalMemory / 1024) + " KB");
-        System.out.println("内存增长: " + (memoryIncrease / 1024) + " KB");
+        System.out.println("Memory usageTest results:");
+        System.out.println("Initial memory: " + (initialMemory / 1024) + " KB");
+        System.out.println("Final memory: " + (finalMemory / 1024) + " KB");
+        System.out.println("Memory growth: " + (memoryIncrease / 1024) + " KB");
 
-        // 验证内存增长在合理范围内（小于50MB）
-        assertTrue(memoryIncrease < 50 * 1024 * 1024, "内存增长应该小于50MB，实际: " + (memoryIncrease / 1024 / 1024) + "MB");
+        // VerifyMemory growthWithin reasonable range（Less than50MB）
+        assertTrue(memoryIncrease < 50 * 1024 * 1024, "Memory growthShould be less than50MB，Actual: " + (memoryIncrease / 1024 / 1024) + "MB");
     }
 
     @Test
-    @DisplayName("应该在单线程场景下有良好性能")
+    @DisplayName("Should have good performance in single-thread scenario")
     void shouldHaveGoodPerformanceInSingleThread() throws Exception {
         // Given
         int requestCount = 1000;
@@ -217,19 +217,19 @@ public class SpringBeanProxyPluginPerformanceTest extends BaseGatewayTest {
         double averageResponseTime = responseTimes.stream().mapToLong(Long::longValue).average().orElse(0.0);
         double throughput = (double) requestCount / totalTime * 1000;
 
-        System.out.println("单线程性能测试结果:");
-        System.out.println("总请求数: " + requestCount);
-        System.out.println("总耗时: " + totalTime + " ms");
-        System.out.println("平均响应时间: " + String.format("%.2f", averageResponseTime) + " ms");
-        System.out.println("吞吐量: " + String.format("%.2f", throughput) + " req/s");
+        System.out.println("Single thread performanceTest results:");
+        System.out.println("Total requests: " + requestCount);
+        System.out.println("Total time: " + totalTime + " ms");
+        System.out.println("AverageResponseTime: " + String.format("%.2f", averageResponseTime) + " ms");
+        System.out.println("Throughput: " + String.format("%.2f", throughput) + " req/s");
 
-        // 验证性能指标
-        assertTrue(averageResponseTime < 10, "平均响应时间应该小于10ms，实际: " + averageResponseTime);
-        assertTrue(throughput > 200, "吞吐量应该大于200 req/s，实际: " + throughput);
+        // VerifyPerformance metrics
+        assertTrue(averageResponseTime < 10, "AverageResponseTime should be less than10ms，Actual: " + averageResponseTime);
+        assertTrue(throughput > 200, "Throughput should be greater than200 req/s，Actual: " + throughput);
     }
 
     @Test
-    @DisplayName("应该正确处理异常场景的性能")
+    @DisplayName("Should correctly handle performance in exception scenario")
     void shouldHandleExceptionScenariosPerformance() throws Exception {
         // Given
         int requestCount = 100;
@@ -263,18 +263,18 @@ public class SpringBeanProxyPluginPerformanceTest extends BaseGatewayTest {
         // Then
         long totalTime = endTime - startTime;
 
-        System.out.println("异常场景性能测试结果:");
-        System.out.println("总请求数: " + requestCount);
-        System.out.println("成功请求数: " + successCount.get());
-        System.out.println("错误请求数: " + errorCount.get());
-        System.out.println("总耗时: " + totalTime + " ms");
+        System.out.println("Exception scenario performanceTest results:");
+        System.out.println("Total requests: " + requestCount);
+        System.out.println("Successful requests: " + successCount.get());
+        System.out.println("ErrorRequest count: " + errorCount.get());
+        System.out.println("Total time: " + totalTime + " ms");
 
-        assertEquals(requestCount, successCount.get() + errorCount.get(), "所有请求都应该被处理");
-        assertTrue(totalTime < 5000, "即使有异常，处理时间也应该在合理范围内");
+        assertEquals(requestCount, successCount.get() + errorCount.get(), "All requests should be processed");
+        assertTrue(totalTime < 5000, "Even with exceptions，ProcessTimeAlsoShould be within reasonable range");
     }
 
     /**
-     * 测试配置类
+     * Test Configuration Class
      */
     @Configuration
     static class TestConfiguration {
@@ -291,14 +291,14 @@ public class SpringBeanProxyPluginPerformanceTest extends BaseGatewayTest {
     }
 
     /**
-     * 性能测试服务类
+     * PerformanceTest serviceClass
      */
     public static class PerformanceTestService {
 
         private final AtomicInteger counter = new AtomicInteger(0);
 
         public ProcessResult processData(ProcessRequest request) {
-            // 模拟一些处理时间
+            // Simulate some processingTime
             try {
                 Thread.sleep(1);
             } catch (InterruptedException e) {
@@ -314,13 +314,13 @@ public class SpringBeanProxyPluginPerformanceTest extends BaseGatewayTest {
         }
 
         public String processLargeData(LargeDataRequest request) {
-            // 模拟处理大数据
+            // Simulate processing largeData
             String data = request.getData();
             return "Processed large data of length: " + data.length();
         }
 
         public String quickProcess(QuickRequest request) {
-            // 快速处理，不添加延迟
+            // Quick processing，No delay added
             return "Quick result for index: " + request.getIndex();
         }
 
@@ -333,7 +333,7 @@ public class SpringBeanProxyPluginPerformanceTest extends BaseGatewayTest {
     }
 
     /**
-     * 处理请求类
+     * Process request class
      */
     public static class ProcessRequest {
         private int threadId;
@@ -360,7 +360,7 @@ public class SpringBeanProxyPluginPerformanceTest extends BaseGatewayTest {
     }
 
     /**
-     * 处理结果类
+     * Processing result class
      */
     public static class ProcessResult {
         private String id;
@@ -413,7 +413,7 @@ public class SpringBeanProxyPluginPerformanceTest extends BaseGatewayTest {
     }
 
     /**
-     * 大数据请求类
+     * LargeDataRequest class
      */
     public static class LargeDataRequest {
         private String data;
@@ -431,7 +431,7 @@ public class SpringBeanProxyPluginPerformanceTest extends BaseGatewayTest {
     }
 
     /**
-     * 快速请求类
+     * Quick request class
      */
     public static class QuickRequest {
         private int index;
@@ -449,7 +449,7 @@ public class SpringBeanProxyPluginPerformanceTest extends BaseGatewayTest {
     }
 
     /**
-     * 错误测试请求类
+     * ErrorTestRequest class
      */
     public static class ErrorTestRequest {
         private boolean shouldFail;

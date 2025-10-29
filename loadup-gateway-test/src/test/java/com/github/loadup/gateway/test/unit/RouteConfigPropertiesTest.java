@@ -32,7 +32,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * RouteConfig properties 字段功能测试
+ * RouteConfig properties Field functionalityTest
  */
 public class RouteConfigPropertiesTest extends BaseGatewayTest {
 
@@ -44,13 +44,13 @@ public class RouteConfigPropertiesTest extends BaseGatewayTest {
                 .target("http://localhost:8080/users")
                 .build();
 
-        // 测试设置和获取 timeout
+        // TestSet andGet timeout
         assertEquals(60000, route.getTimeout());
 
-        // 测试设置和获取 retryCount
+        // TestSet andGet retryCount
         assertEquals(5, route.getRetryCount());
 
-        // 验证 properties 已正确设置
+        // Verify properties Has been correctly set
         assertNotNull(route.getProperties());
         assertEquals(60000L, route.getProperties().get("timeout"));
         assertEquals(5, route.getProperties().get("retryCount"));
@@ -64,7 +64,7 @@ public class RouteConfigPropertiesTest extends BaseGatewayTest {
                 .target("http://localhost:8080/users")
                 .build();
 
-        // 测试默认值
+        // TestDefault value
         assertEquals(30000L, route.getTimeout());
         assertEquals(3, route.getRetryCount());
     }
@@ -77,9 +77,9 @@ public class RouteConfigPropertiesTest extends BaseGatewayTest {
                 .target("http://localhost:8080/users")
                 .build();
 
-        // 设置自定义属性
+        // Set customProperties
 
-        // 验证属性
+        // VerifyProperties
     }
 
     @Test
@@ -102,12 +102,12 @@ public class RouteConfigPropertiesTest extends BaseGatewayTest {
 
     @Test
     public void testPropertiesStringParsing() {
-        // 测试不同数据类型的解析
+        // TestDifferentDataType ofParse
         Map<String, Object> properties = new HashMap<>();
-        properties.put("timeout", "60000");  // 字符串数字
-        properties.put("retryCount", "5");   // 字符串数字
-        properties.put("enabled", "true");   // 字符串布尔值
-        properties.put("rate", "1.5");       // 字符串小数
+        properties.put("timeout", "60000");  // String number
+        properties.put("retryCount", "5");   // String number
+        properties.put("enabled", "true");   // String boolean value
+        properties.put("rate", "1.5");       // String decimal
 
         RouteConfig route = RouteConfig.builder()
                 .path("/api/test")
@@ -116,14 +116,14 @@ public class RouteConfigPropertiesTest extends BaseGatewayTest {
                 .properties(properties)
                 .build();
 
-        // 验证数字字符串被正确解析
+        // VerifyNumber string is correctlyParse
         assertEquals(60000L, route.getTimeout());
         assertEquals(5, route.getRetryCount());
     }
 
     @Test
     public void testUltraSimplifiedConfig() {
-        // 测试最简化的配置创建
+        // Test minimal config creation
         RouteConfig route = RouteConfig.builder()
                 .path("/api/users")
                 .method("GET")
@@ -131,11 +131,11 @@ public class RouteConfigPropertiesTest extends BaseGatewayTest {
                 .enabled(true)
                 .build();
 
-        // 设置扩展属性
+        // Set extended properties
 
-        // 生成ID和解析target
+        // GenerateIDand parsingtarget
 
-        // 验证所有字段都正确设置
+        // VerifyAll fields are correctly set
         assertNotNull(route.getRouteId());
         assertNotNull(route.getRouteName());
         assertEquals("/api/users", route.getPath());

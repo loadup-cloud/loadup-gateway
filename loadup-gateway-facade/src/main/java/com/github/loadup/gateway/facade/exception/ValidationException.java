@@ -23,7 +23,7 @@ package com.github.loadup.gateway.facade.exception;
  */
 
 /**
- * 参数验证异常
+ * Parameter validation exception
  */
 public class ValidationException extends GatewayException {
 
@@ -37,16 +37,16 @@ public class ValidationException extends GatewayException {
         super(errorCode.getCode(), ErrorType.VALIDATION, MODULE, errorCode.getMessage() + ":" + message, cause);
     }
 
-    // 便捷方法
+    // Convenience methods
     public static ValidationException required(String paramName) {
         return new ValidationException(ErrorCode.PARAM_REQUIRED, paramName);
     }
 
     public static ValidationException invalidFormat(String paramName, String expectedFormat) {
-        return new ValidationException(ErrorCode.PARAM_INVALID_FORMAT, paramName + "，Expected format: " + expectedFormat);
+        return new ValidationException(ErrorCode.PARAM_INVALID_FORMAT, paramName + ", Expected format: " + expectedFormat);
     }
 
     public static ValidationException outOfRange(String paramName, String range) {
-        return new ValidationException(ErrorCode.PARAM_OUT_OF_RANGE, paramName + "，Valid range: " + range);
+        return new ValidationException(ErrorCode.PARAM_OUT_OF_RANGE, paramName + ", Valid range: " + range);
     }
 }

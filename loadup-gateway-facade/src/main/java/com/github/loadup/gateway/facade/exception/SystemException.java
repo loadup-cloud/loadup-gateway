@@ -23,7 +23,7 @@ package com.github.loadup.gateway.facade.exception;
  */
 
 /**
- * 系统异常
+ * System exception
  */
 public class SystemException extends GatewayException {
 
@@ -37,7 +37,7 @@ public class SystemException extends GatewayException {
         super(errorCode.getCode(), ErrorType.SYSTEM, MODULE, errorCode.getMessage() + ":" + message, cause);
     }
 
-    // 便捷方法
+    // Convenience methods
     public static SystemException configurationError(String message) {
         return new SystemException(ErrorCode.CONFIGURATION_ERROR, message);
     }

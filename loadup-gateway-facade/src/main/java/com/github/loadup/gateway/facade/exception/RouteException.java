@@ -23,7 +23,7 @@ package com.github.loadup.gateway.facade.exception;
  */
 
 /**
- * 路由相关异常
+ * Route related exception
  */
 public class RouteException extends GatewayException {
 
@@ -37,7 +37,7 @@ public class RouteException extends GatewayException {
         super(errorCode.getCode(), ErrorType.ROUTING, MODULE, errorCode.getMessage() + ":" + message, cause);
     }
 
-    // 便捷方法
+    // Convenience methods
     public static RouteException notFound(String path) {
         return new RouteException(ErrorCode.ROUTE_NOT_FOUND, path);
     }

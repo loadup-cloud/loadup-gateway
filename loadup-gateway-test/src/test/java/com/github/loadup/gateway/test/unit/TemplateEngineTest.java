@@ -34,9 +34,9 @@ import org.junit.jupiter.api.DisplayName;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * 模板引擎单元测试
+ * Template Engine Unit Test
  */
-@DisplayName("模板引擎测试")
+@DisplayName("Template Engine Test")
 public class TemplateEngineTest extends BaseGatewayTest {
 
     private TemplateEngine templateEngine;
@@ -47,16 +47,16 @@ public class TemplateEngineTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("应该能够处理请求模板")
+    @DisplayName("Should be able to process request template")
     public void shouldProcessRequestTemplate() {
         // Given
         GatewayRequest request = createHttpRequest("/api/test", "POST", "{\"name\":\"test\"}");
         String templateScript = """
-            // 添加请求头
+            // Add request header
             request.headers.put("X-Processed", "true")
             request.headers.put("X-Template", "request")
             
-            // 修改请求体
+            // Modify request body
             if (request.body != null) {
                 def bodyMap = new groovy.json.JsonSlurper().parseText(request.body)
                 bodyMap.put("processed", true)
@@ -77,16 +77,16 @@ public class TemplateEngineTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("应该能够处理响应模板")
+    @DisplayName("Should be able to process response template")
     public void shouldProcessResponseTemplate() {
         // Given
         GatewayResponse response = TestDataBuilder.createTestResponse(testRequestId);
         String templateScript = """
-            // 添加响应头
+            // Add response header
             response.headers.put("X-Processed", "true")
             response.headers.put("X-Template", "response")
             
-            // 包装响应体
+            // Wrap response body
             if (response.body != null) {
                 def originalBody = response.body
                 def wrappedResponse = [
@@ -112,7 +112,7 @@ public class TemplateEngineTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("应该处理模板脚本异常")
+    @DisplayName("Should handle template script exception")
     public void shouldHandleTemplateScriptException() {
         // Given
         GatewayRequest request = createHttpRequest("/api/test", "GET", null);
@@ -121,13 +121,13 @@ public class TemplateEngineTest extends BaseGatewayTest {
         // When & Then
         assertDoesNotThrow(() -> {
             GatewayRequest result = templateEngine.processRequestTemplate(request, invalidScript);
-            // 应该返回原始请求
+            // Should return original request
             assertEquals(request, result);
         });
     }
 
     @Test
-    @DisplayName("应该缓存编译后的脚本")
+    @DisplayName("Should cache compiled scripts")
     public void shouldCacheCompiledScripts() {
         // Given
         GatewayRequest request = createHttpRequest("/api/test", "GET", null);
@@ -135,10 +135,10 @@ public class TemplateEngineTest extends BaseGatewayTest {
 
         // When
         templateEngine.processRequestTemplate(request, script);
-        templateEngine.processRequestTemplate(request, script); // 第二次调用应该使用缓存
+        templateEngine.processRequestTemplate(request, script); // Second call should use cache
 
         // Then
-        // 验证脚本被缓存（通过性能测试或其他方式）
+        // Verify script is cached（through performance testing or other means）
         assertDoesNotThrow(() -> templateEngine.clearScriptCache());
     }
 }

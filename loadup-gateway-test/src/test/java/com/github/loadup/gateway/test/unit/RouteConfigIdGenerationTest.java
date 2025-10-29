@@ -32,7 +32,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * RouteConfig 自动生成 ID 功能测试
+ * RouteConfig Auto generate ID FunctionalityTest
  */
 public class RouteConfigIdGenerationTest extends BaseGatewayTest {
 
@@ -110,21 +110,21 @@ public class RouteConfigIdGenerationTest extends BaseGatewayTest {
                 .build();
 
 
-        // 相同的路径和方法应该生成相同的ID
+        // Same path and method should generate sameID
         assertEquals(route1.getRouteId(), route2.getRouteId());
         assertEquals(route1.getRouteName(), route2.getRouteName());
     }
 
     @Test
     public void testSimplifiedCsvFormat() {
-        // 创建 properties 包含扩展配置
+        // Create properties Including extended config
         Map<String, Object> properties = new HashMap<>();
         properties.put("timeout", 5000L);
         properties.put("retryCount", 2);
         properties.put("maxConnections", 50);
         properties.put("compression", true);
 
-        // 测试简化的配置创建
+        // Test simplified config creation
         RouteConfig route = RouteConfig.builder()
                 .path("/api/user")
                 .method("GET")
@@ -133,9 +133,9 @@ public class RouteConfigIdGenerationTest extends BaseGatewayTest {
                 .properties(properties)
                 .build();
 
-        // 生成ID和解析target
+        // GenerateIDand parsingtarget
 
-        // 验证所有字段都正确设置
+        // VerifyAll fields are correctly set
         assertNotNull(route.getRouteId());
         assertNotNull(route.getRouteName());
         assertEquals("/api/user", route.getPath());

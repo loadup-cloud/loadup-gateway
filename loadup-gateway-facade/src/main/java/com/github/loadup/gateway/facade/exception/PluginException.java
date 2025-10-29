@@ -23,7 +23,7 @@ package com.github.loadup.gateway.facade.exception;
  */
 
 /**
- * 插件相关异常
+ * Plugin related exception
  */
 public class PluginException extends GatewayException {
 
@@ -37,7 +37,7 @@ public class PluginException extends GatewayException {
         super(errorCode.getCode(), ErrorType.PLUGIN, MODULE, errorCode.getMessage() + ":" + message, cause);
     }
 
-    // 便捷方法
+    // Convenience methods
     public static PluginException notFound(String pluginName) {
         return new PluginException(ErrorCode.PLUGIN_NOT_FOUND, pluginName);
     }

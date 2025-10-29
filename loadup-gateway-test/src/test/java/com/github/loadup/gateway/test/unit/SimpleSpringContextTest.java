@@ -30,15 +30,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * 简单的Spring上下文测试
+ * SimpleSpringContext test
  */
-@DisplayName("Spring上下文测试")
+@DisplayName("SpringContext test")
 public class SimpleSpringContextTest extends BaseGatewayTest {
 
     @Test
-    @DisplayName("Spring上下文应该能正常启动")
+    @DisplayName("SpringContext should start normally")
     public void contextLoads() {
-        // 如果Spring上下文启动成功，这个测试就会通过
+        // IfSpringContext started successfully，This test will pass
         assertNotNull(testRequestId);
         assertTrue(testRequestId.startsWith("test-"));
     }
