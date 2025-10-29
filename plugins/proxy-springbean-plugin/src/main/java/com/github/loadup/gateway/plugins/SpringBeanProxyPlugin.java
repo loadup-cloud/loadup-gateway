@@ -93,7 +93,7 @@ public class SpringBeanProxyPlugin implements ProxyPlugin {
             String beanName = parts[0];
             String methodName = parts[1];
 
-            // 获取Spring Bean
+            // GetSpring Bean
             Object bean;
             try {
                 bean = applicationContext.getBean(beanName);
@@ -101,26 +101,26 @@ public class SpringBeanProxyPlugin implements ProxyPlugin {
                 throw GatewayExceptionFactory.beanNotFound(beanName);
             }
 
-            // 获取方法
+            // Get method
             Method method = findMethod(bean.getClass(), methodName);
             if (method == null) {
                 throw GatewayExceptionFactory.methodNotFound(beanName, methodName);
             }
 
-            // 准备参数
+            // Prepare parameters
             Object[] args = prepareMethodArgs(request, method);
 
-            // 调用方法
+            // Invoke method
             Object result;
             try {
                 result = method.invoke(bean, args);
             } catch (java.lang.reflect.InvocationTargetException e) {
-                // 提取原始异常并包装
+                // Extract original exception and wrap
                 Throwable cause = e.getCause() != null ? e.getCause() : e;
                 throw GatewayExceptionFactory.methodInvokeFailed(beanName, methodName, cause);
             }
 
-            // 构建响应
+            // Build response
             return GatewayResponse.builder()
                     .requestId(request.getRequestId())
                     .statusCode(GatewayConstants.Status.SUCCESS)
@@ -131,10 +131,10 @@ public class SpringBeanProxyPlugin implements ProxyPlugin {
                     .build();
 
         } catch (GatewayException e) {
-            // 网关异常直接使用异常处理器处理
+            // Gateway exceptions are handled directly using exception handler
             return ExceptionHandler.handleException(request.getRequestId(), e);
         } catch (Exception e) {
-            // 其他异常包装后处理
+            // Wrap and handle other exceptions
             GatewayException wrappedException = GatewayExceptionFactory.wrap(e, "SPRINGBEAN_PROXY");
             return ExceptionHandler.handleException(request.getRequestId(), wrappedException);
         }
@@ -147,7 +147,7 @@ public class SpringBeanProxyPlugin implements ProxyPlugin {
 
     @Override
     public boolean supports(GatewayRequest request) {
-        return true; // 支持所有请求
+        return true; // Support all requests
     }
 
     @Override
@@ -156,7 +156,7 @@ public class SpringBeanProxyPlugin implements ProxyPlugin {
     }
 
     /**
-     * 查找匹配的方法
+     * Find matching method
      */
     private Method findMethod(Class<?> clazz, String methodName) {
         for (Method method : clazz.getDeclaredMethods()) {
@@ -168,7 +168,7 @@ public class SpringBeanProxyPlugin implements ProxyPlugin {
     }
 
     /**
-     * 准备方法参数
+     * Prepare method parameters
      */
     private Object[] prepareMethodArgs(GatewayRequest request, Method method) {
         Class<?>[] paramTypes = method.getParameterTypes();
@@ -180,7 +180,7 @@ public class SpringBeanProxyPlugin implements ProxyPlugin {
             } else if (paramTypes[i] == String.class) {
                 args[i] = request.getBody();
             } else {
-                // 尝试从请求体JSON解析
+                // TryFromRequest bodyJSONParse
                 try {
                     args[i] = JsonUtils.fromJson(request.getBody(), paramTypes[i]);
                 } catch (Exception e) {

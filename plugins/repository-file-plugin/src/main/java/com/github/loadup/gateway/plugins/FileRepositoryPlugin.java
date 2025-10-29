@@ -251,7 +251,7 @@ public class FileRepositoryPlugin implements RepositoryPlugin {
 
     @Override
     public boolean supports(GatewayRequest request) {
-        return false; // Repository plugin不直接处理请求
+        return false; // Repository pluginDoes not directly handle requests
     }
 
     
@@ -376,14 +376,14 @@ public class FileRepositoryPlugin implements RepositoryPlugin {
     }
 
     /**
-     * 从 CSV 行解析路由配置，支持新旧格式
+     * From CSV Row parse route config，Support new and old formats
      */
     private RouteConfig parseRouteFromCsvLine(String[] line) {
         if (line.length < 2) {
             return null;
         }
 
-        // 最新格式：path,method,target,requestTemplate,responseTemplate,enabled,properties
+        // 最新Format：path,method,target,requestTemplate,responseTemplate,enabled,properties
         if (line.length >= 3) {
             // Build a FileRouteEntity DTO and delegate conversion to convertToRouteConfig
             FileRouteEntity entity = new FileRouteEntity();
@@ -449,7 +449,7 @@ public class FileRepositoryPlugin implements RepositoryPlugin {
     }
 
     /**
-     * 创建路由CSV文件
+     * Create routeCSV文件
      */
     private void createRoutesFile(Path routesFile) throws IOException {
         try (CSVWriter writer = new CSVWriter(new FileWriter(routesFile.toFile()))) {

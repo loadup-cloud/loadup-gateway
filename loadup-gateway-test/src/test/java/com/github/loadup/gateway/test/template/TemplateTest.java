@@ -38,9 +38,9 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * 模板功能专项测试
+ * Template functionality specialTest
  */
-@DisplayName("模板功能测试")
+@DisplayName("Template functionalityTest")
 public class TemplateTest extends BaseGatewayTest {
 
     private TemplateEngine templateEngine;
@@ -51,11 +51,11 @@ public class TemplateTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("测试复杂请求模板处理")
+    @DisplayName("TestComplex request template processing")
     public void shouldProcessComplexRequestTemplate() throws Exception {
         // Given
         GatewayRequest request = createHttpRequest("/api/user", "POST",
-            "{\"name\":\"张三\",\"age\":25,\"email\":\"zhangsan@example.com\"}");
+            "{\"name\":\"Zhang San\",\"age\":25,\"email\":\"zhangsan@example.com\"}");
 
         String templateContent = Files.readString(
             Paths.get("src/test/resources/templates/test_request_template.groovy"));
@@ -68,7 +68,7 @@ public class TemplateTest extends BaseGatewayTest {
         assertEquals("true", result.getHeaders().get("X-Gateway-Processed"));
         assertEquals(testRequestId, result.getHeaders().get("X-Request-Id"));
 
-        // 验证请求体被正确处理
+        // VerifyRequest body is correctly processed
         if (result.getBody() != null) {
             var bodyMap = JsonUtils.toMap(result.getBody());
             assertTrue(bodyMap.containsKey("_system"));
@@ -79,13 +79,13 @@ public class TemplateTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("测试复杂响应模板处理")
+    @DisplayName("Test complex response template processing")
     public void shouldProcessComplexResponseTemplate() throws Exception {
         // Given
         GatewayResponse response = GatewayResponse.builder()
                 .requestId(testRequestId)
                 .statusCode(200)
-                .body("{\"userId\":123,\"name\":\"张三\",\"status\":\"active\"}")
+                .body("{\"userId\":123,\"name\":\"Zhang San\",\"status\":\"active\"}")
                 .processingTime(150L)
                 .build();
 
@@ -99,7 +99,7 @@ public class TemplateTest extends BaseGatewayTest {
         assertNotNull(result);
         assertEquals("true", result.getHeaders().get("X-Gateway-Response-Processed"));
 
-        // 验证响应体被统一格式化
+        // VerifyResponseBody is unifiedFormatization
         var responseBody = JsonUtils.toMap(result.getBody());
         assertEquals(200, responseBody.get("code"));
         assertEquals("success", responseBody.get("message"));
@@ -112,11 +112,11 @@ public class TemplateTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("测试数据验证模板")
+    @DisplayName("Test dataVerifyTemplate")
     public void shouldValidateDataInTemplate() {
         // Given
         GatewayRequest request = createHttpRequest("/api/user", "POST",
-            "{\"name\":\"这是一个非常长的名字，超过了50个字符的限制，应该被标记为验证失败\",\"age\":25}");
+            "{\"name\":\"This is a very long name，Exceeded50character limit，Should be marked asVerifyFailed\",\"age\":25}");
 
         String validationTemplate = """
             import com.github.loadup.gateway.facade.utils.JsonUtils
@@ -124,12 +124,12 @@ public class TemplateTest extends BaseGatewayTest {
             if (request.body != null) {
                 def bodyMap = JsonUtils.toMap(request.body)
                 
-                // 名字长度验证
+                // Name lengthVerify
                 if (bodyMap.containsKey("name") && bodyMap.name.length() > 20) {
                     bodyMap.put("_validation", ["nameLength": "too_long"])
                 }
                 
-                // 年龄范围验证
+                // Age rangeVerify
                 if (bodyMap.containsKey("age")) {
                     def age = bodyMap.age as Integer
                     if (age < 0 || age > 150) {
@@ -157,7 +157,7 @@ public class TemplateTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("测试错误响应模板")
+    @DisplayName("TestErrorResponseTemplate")
     public void shouldProcessErrorResponseTemplate() throws Exception {
         // Given
         GatewayResponse errorResponse = GatewayResponse.builder()
@@ -187,23 +187,23 @@ public class TemplateTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("测试模板性能和缓存")
+    @DisplayName("Test templatePerformance and caching")
     public void shouldCacheTemplateForPerformance() {
         // Given
         GatewayRequest request = createHttpRequest("/api/test", "GET", null);
         String simpleTemplate = "request.headers.put('X-Cached', 'true'); return request";
 
-        // When - 多次执行相同模板
+        // When - Execute same template multiple times
         long startTime = System.currentTimeMillis();
         for (int i = 0; i < 100; i++) {
             templateEngine.processRequestTemplate(request, simpleTemplate);
         }
         long duration = System.currentTimeMillis() - startTime;
 
-        // Then - 应该很快完成（缓存生效）
+        // Then - Should complete quickly（Cache takes effect）
         assertTrue(duration < 1000, "Template processing should be fast with caching");
 
-        // 验证结果正确
+        // VerifyResult correct
         GatewayRequest result = templateEngine.processRequestTemplate(request, simpleTemplate);
         assertEquals("true", result.getHeaders().get("X-Cached"));
     }

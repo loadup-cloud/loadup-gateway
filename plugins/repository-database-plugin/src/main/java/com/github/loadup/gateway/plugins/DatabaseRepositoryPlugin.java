@@ -145,11 +145,11 @@ public class DatabaseRepositoryPlugin implements RepositoryPlugin {
         if (StringUtils.isNotBlank(propertiesStr)) {
             String trimmed = propertiesStr.trim();
 
-            // 检查是否是 JSON 格式
+            // Check if it is JSON Format
             if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
                 properties = JsonUtils.toMap(trimmed);
             }
-            // 解析键值对格式：timeout=30000;retryCount=3 (使用分号分隔)
+            // Parse key-value format：timeout=30000;retryCount=3 (Use semicolon separator)
             String[] pairs = trimmed.split(";");
 
             for (String pair : pairs) {
@@ -158,7 +158,7 @@ public class DatabaseRepositoryPlugin implements RepositoryPlugin {
                     String key = keyValue[0].trim();
                     String value = keyValue[1].trim();
 
-                    // 尝试转换为合适的数据类型
+                    // Try to convert to appropriate data type
                     try {
                         if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
                             properties.put(key, Boolean.parseBoolean(value));

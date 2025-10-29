@@ -206,13 +206,13 @@ public class ActionDispatcher {
             response.setBody(objectMapper.writeValueAsString(root));
             response.setContentType("application/json;charset=UTF-8");
         } catch (Exception e) {
-            // 包装失败，降级为原始body
+            // Wrap failed，Fallback to originalbody
         }
         return response;
     }
 
     /**
-     * 构建404响应
+     * Build404Response
      */
     private GatewayResponse buildNotFoundResponse(GatewayRequest request) {
         return GatewayResponse.builder()
@@ -225,7 +225,7 @@ public class ActionDispatcher {
     }
 
     /**
-     * 构建错误响应
+     * Build error response
      */
     private GatewayResponse buildErrorResponse(GatewayRequest request, Exception e, long processingTime) {
         return GatewayResponse.builder()

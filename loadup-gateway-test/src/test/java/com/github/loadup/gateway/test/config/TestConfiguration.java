@@ -30,14 +30,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 测试配置类，提供测试用的Bean和服务
+ * Test Configuration Class，Provide testBean和服务
  */
 @Configuration
 @Profile("test")
 public class TestConfiguration {
 
     /**
-     * 测试服务Bean，用于测试Bean代理功能
+     * Test serviceBean，用于TestBeanProxy functionality
      */
     @Bean
     public TestService testService() {
@@ -45,7 +45,7 @@ public class TestConfiguration {
     }
 
     /**
-     * 测试数据存储Bean
+     * Test dataStorageBean
      */
     @Bean
     public TestDataStore testDataStore() {
@@ -53,7 +53,7 @@ public class TestConfiguration {
     }
 
     /**
-     * 测试服务实现
+     * Test service implementation
      */
     public static class TestService {
 
@@ -101,7 +101,7 @@ public class TestConfiguration {
     }
 
     /**
-     * 测试数据存储
+     * Test dataStorage
      */
     public static class TestDataStore {
 

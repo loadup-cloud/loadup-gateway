@@ -40,9 +40,9 @@ import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * 路由解析器单元测试
+ * Route Resolver Unit Test
  */
-@DisplayName("路由解析器测试")
+@DisplayName("Route Resolver Test")
 public class RouteResolverTest extends BaseGatewayTest {
 
     @Mock
@@ -55,7 +55,7 @@ public class RouteResolverTest extends BaseGatewayTest {
         super.setUp();
         MockitoAnnotations.openMocks(this);
         routeResolver = new RouteResolver();
-        // 使用反射注入mock对象
+        // Use reflection to injectmockObject
         try {
             var field = RouteResolver.class.getDeclaredField("repositoryPlugin");
             field.setAccessible(true);
@@ -66,7 +66,7 @@ public class RouteResolverTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("应该能够解析存在的路由")
+    @DisplayName("Should be able to resolve existing route")
     public void shouldResolveExistingRoute() throws Exception {
         // Given
         String path = "/api/test";
@@ -88,7 +88,7 @@ public class RouteResolverTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("应该返回空当路由不存在时")
+    @DisplayName("Should return empty when route does not exist")
     public void shouldReturnEmptyWhenRouteNotExists() throws Exception {
         // Given
         String path = "/api/nonexistent";
@@ -107,7 +107,7 @@ public class RouteResolverTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("应该刷新路由缓存")
+    @DisplayName("Should refresh route cache")
     public void shouldRefreshRouteCache() throws Exception {
         // Given
         RouteConfig route1 = createTestRoute("/api/test1", "GET", "http://localhost:8080");

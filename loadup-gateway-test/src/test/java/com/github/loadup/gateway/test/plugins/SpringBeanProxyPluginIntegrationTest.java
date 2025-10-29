@@ -41,11 +41,11 @@ import java.util.HashMap;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * SpringBeanProxyPlugin 集成测试
+ * SpringBeanProxyPlugin 集成Test
  */
 @SpringBootTest(classes = {SpringBeanProxyPluginIntegrationTest.TestConfiguration.class})
 @ActiveProfiles("test")
-@DisplayName("SpringBean代理插件集成测试")
+@DisplayName("SpringBean Proxy Plugin Integration Test")
 public class SpringBeanProxyPluginIntegrationTest extends BaseGatewayTest {
 
     @Resource
@@ -80,7 +80,7 @@ public class SpringBeanProxyPluginIntegrationTest extends BaseGatewayTest {
         assertEquals(GatewayConstants.Status.SUCCESS, response.getStatusCode());
         assertEquals(GatewayConstants.ContentType.JSON, response.getContentType());
 
-        // 验证响应内容
+        // VerifyResponseContent
         assertTrue(response.getBody().contains("PROCESSED"));
         assertTrue(response.getBody().contains("user123"));
         assertTrue(response.getBody().contains("100.5"));
@@ -97,7 +97,7 @@ public class SpringBeanProxyPluginIntegrationTest extends BaseGatewayTest {
         assertNotNull(response);
         assertEquals(GatewayConstants.Status.SUCCESS, response.getStatusCode());
 
-        // 验证返回的是数组格式
+        // VerifyReturns in array format
         assertTrue(response.getBody().startsWith("["));
         assertTrue(response.getBody().endsWith("]"));
         assertTrue(response.getBody().contains("user123"));
@@ -149,7 +149,7 @@ public class SpringBeanProxyPluginIntegrationTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("应该支持方法重载")
+    @DisplayName("Should support method overloading")
     void shouldSupportMethodOverloading() throws Exception {
         // When - 调用无参数版本
         GatewayResponse response1 = plugin.proxy(testRequest, "testBusinessService:getStatus");
@@ -166,7 +166,7 @@ public class SpringBeanProxyPluginIntegrationTest extends BaseGatewayTest {
     }
 
     /**
-     * 测试配置类
+     * Test Configuration Class
      */
     @Configuration
     static class TestConfiguration {
@@ -183,7 +183,7 @@ public class SpringBeanProxyPluginIntegrationTest extends BaseGatewayTest {
     }
 
     /**
-     * 测试业务服务类
+     * Test business service class
      */
     public static class TestBusinessService {
 
@@ -229,7 +229,7 @@ public class SpringBeanProxyPluginIntegrationTest extends BaseGatewayTest {
     }
 
     /**
-     * 支付请求类
+     * Payment request class
      */
     public static class PaymentRequest {
         private String userId;
@@ -358,7 +358,7 @@ public class SpringBeanProxyPluginIntegrationTest extends BaseGatewayTest {
     }
 
     /**
-     * 交易记录类
+     * Transaction record class
      */
     public static class Transaction {
         private String transactionId;
@@ -401,7 +401,7 @@ public class SpringBeanProxyPluginIntegrationTest extends BaseGatewayTest {
     }
 
     /**
-     * 订单请求类
+     * Order request class
      */
     public static class OrderRequest {
         private String productId;
@@ -462,7 +462,7 @@ public class SpringBeanProxyPluginIntegrationTest extends BaseGatewayTest {
     }
 
     /**
-     * 订单结果类
+     * Order result class
      */
     public static class OrderResult {
         private String status;
