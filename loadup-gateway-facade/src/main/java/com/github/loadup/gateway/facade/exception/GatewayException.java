@@ -23,33 +23,33 @@ package com.github.loadup.gateway.facade.exception;
  */
 
 /**
- * 网关异常基类
- * 所有网关相关异常都应该继承此类
+ * Base gateway exception
+ * All gateway-related exceptions should extend this class
  */
 public class GatewayException extends RuntimeException {
 
     /**
-     * 错误码
+     * Error code
      */
     private final String errorCode;
 
     /**
-     * 错误类型
+     * Error type
      */
     private final ErrorType errorType;
 
     /**
-     * 模块名称
+     * Module name
      */
     private final String module;
 
     /**
-     * 构造函数
+     * Constructor
      *
-     * @param errorCode 错误码
-     * @param errorType 错误类型
-     * @param module 模块名称
-     * @param message 错误消息
+     * @param errorCode error code
+     * @param errorType error type
+     * @param module    module name
+     * @param message   error message
      */
     public GatewayException(String errorCode, ErrorType errorType, String module, String message) {
         super(message);
@@ -59,13 +59,13 @@ public class GatewayException extends RuntimeException {
     }
 
     /**
-     * 构造函数（带原因异常）
+     * Constructor with cause
      *
-     * @param errorCode 错误码
-     * @param errorType 错误类型
-     * @param module 模块名称
-     * @param message 错误消息
-     * @param cause 原因异常
+     * @param errorCode error code
+     * @param errorType error type
+     * @param module    module name
+     * @param message   error message
+     * @param cause     cause throwable
      */
     public GatewayException(String errorCode, ErrorType errorType, String module, String message, Throwable cause) {
         super(message, cause);
@@ -75,28 +75,28 @@ public class GatewayException extends RuntimeException {
     }
 
     /**
-     * 获取错误码
+     * Get error code
      */
     public String getErrorCode() {
         return errorCode;
     }
 
     /**
-     * 获取错误类型
+     * Get error type
      */
     public ErrorType getErrorType() {
         return errorType;
     }
 
     /**
-     * 获取模块名称
+     * Get module name
      */
     public String getModule() {
         return module;
     }
 
     /**
-     * 获取完整的错误信息
+     * Get the full error message
      */
     public String getFullErrorMessage() {
         return String.format("[%s] %s:%s - %s", module, errorType, errorCode, getMessage());

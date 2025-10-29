@@ -41,7 +41,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 /**
- * 路由解析器
+ * Route resolver
  */
 @Slf4j
 @Component
@@ -70,27 +70,27 @@ public class RouteResolver {
                 .build();
         repositoryPlugin.initialize(pluginConfig);
         this.refreshRoutes();
-        // 定时刷新路由缓存（热更新支持）
+        // Periodically refresh route cache (hot reload support)
 //        scheduler.scheduleAtFixedRate(this::refreshRoutes, 30, 30, TimeUnit.SECONDS);
     }
 
     /**
-     * 解析请求对应的路由配置
+     * Resolve the route configuration for the given request
      */
     public Optional<RouteConfig> resolve(GatewayRequest request) {
         String routeKey = buildRouteKey(request.getPath(), request.getMethod());
 
-        // 先从缓存查找
+        // First check cache
         RouteConfig cachedRoute = routeCache.get(routeKey);
         if (cachedRoute != null && cachedRoute.isEnabled()) {
             return Optional.of(cachedRoute);
         }
 
-        // 从存储中查找
+        // Look up from storage
         try {
             Optional<RouteConfig> routeOpt = repositoryPlugin.getRouteByPath(request.getPath(), request.getMethod());
             if (routeOpt.isPresent() && routeOpt.get().isEnabled()) {
-                // 更新缓存
+                // Update cache
                 routeCache.put(routeKey, routeOpt.get());
                 return routeOpt;
             }
@@ -102,16 +102,16 @@ public class RouteResolver {
     }
 
     /**
-     * 刷新路由缓存
+     * Refresh route cache
      */
     public void refreshRoutes() {
         try {
             List<RouteConfig> allRoutes = repositoryPlugin.getAllRoutes();
 
-            // 清空旧缓存
+            // Clear old cache
             routeCache.clear();
 
-            // 重新加载路由
+            // Reload routes
             for (RouteConfig route : allRoutes) {
                 if (route.isEnabled()) {
                     String routeKey = buildRouteKey(route.getPath(), route.getMethod());
@@ -127,14 +127,14 @@ public class RouteResolver {
     }
 
     /**
-     * 构建路由缓存键
+     * Build route cache key
      */
     private String buildRouteKey(String path, String method) {
         return method + ":" + path;
     }
 
     /**
-     * 获取缓存的路由数量
+     * Get the number of cached routes
      */
     public int getCachedRouteCount() {
         return routeCache.size();

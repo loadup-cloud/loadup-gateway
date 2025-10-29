@@ -23,7 +23,7 @@ package com.github.loadup.gateway.facade.exception;
  */
 
 /**
- * 代理相关异常
+ * Proxy-related exceptions
  */
 public class ProxyException extends GatewayException {
 
@@ -37,7 +37,7 @@ public class ProxyException extends GatewayException {
         super(errorCode.getCode(), ErrorType.PROXY, MODULE, errorCode.getMessage() + ":" + message, cause);
     }
 
-    // 便捷方法 - SpringBean代理异常
+    // Convenience methods - SpringBean proxy exceptions
     public static ProxyException beanNotFound(String beanName) {
         return new ProxyException(ErrorCode.BEAN_NOT_FOUND, beanName);
     }
@@ -51,10 +51,10 @@ public class ProxyException extends GatewayException {
     }
 
     public static ProxyException invalidTarget(String target) {
-        return new ProxyException(ErrorCode.BEAN_TARGET_FORMAT_INVALID, target + "，Expected format is beanName:methodName");
+        return new ProxyException(ErrorCode.BEAN_TARGET_FORMAT_INVALID, target + ", Expected format is beanName:methodName");
     }
 
-    // 便捷方法 - HTTP代理异常
+    // Convenience methods - HTTP proxy exceptions
     public static ProxyException httpRequestFailed(String url, Throwable cause) {
         return new ProxyException(ErrorCode.HTTP_REQUEST_FAILED, url, cause);
     }
@@ -63,22 +63,22 @@ public class ProxyException extends GatewayException {
         return new ProxyException(ErrorCode.HTTP_CONNECTION_TIMEOUT, url);
     }
 
-    // 便捷方法 - RPC代理异常
+    // Convenience methods - RPC proxy exceptions
     public static ProxyException rpcServiceNotFound(String serviceName) {
         return new ProxyException(ErrorCode.RPC_SERVICE_NOT_FOUND, serviceName);
     }
 
     public static ProxyException rpcCallFailed(String serviceName, String methodName, Throwable cause) {
         return new ProxyException(ErrorCode.RPC_CALL_FAILED,
-                "RPC调用失败: " + serviceName + "." + methodName, cause);
+                "RPC call failed: " + serviceName + "." + methodName, cause);
     }
 
-    // 通用代理异常
+    // General proxy exceptions
     public static ProxyException executionFailed(String target, Throwable cause) {
-        return new ProxyException(ErrorCode.PROXY_EXECUTION_FAILED, "代理执行失败: " + target, cause);
+        return new ProxyException(ErrorCode.PROXY_EXECUTION_FAILED, "Proxy execution failed: " + target, cause);
     }
 
     public static ProxyException timeout(String target) {
-        return new ProxyException(ErrorCode.PROXY_TIMEOUT, "代理超时: " + target);
+        return new ProxyException(ErrorCode.PROXY_TIMEOUT, "Proxy timeout: " + target);
     }
 }

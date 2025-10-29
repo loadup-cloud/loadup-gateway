@@ -10,29 +10,29 @@ package com.github.loadup.gateway.facade.model;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
 
-import lombok.Data;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.util.Map;
-import java.util.List;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 /**
- * 网关请求模型
+ * Gateway request model
  */
 @Data
 @Builder
@@ -41,62 +41,62 @@ import java.time.LocalDateTime;
 public class GatewayRequest {
 
     /**
-     * 请求ID
+     * Request ID
      */
     private String requestId;
 
     /**
-     * 请求路径
+     * Request path
      */
     private String path;
 
     /**
-     * HTTP方法
+     * HTTP method
      */
     private String method;
 
     /**
-     * 请求头
+     * Request headers
      */
     private Map<String, String> headers;
 
     /**
-     * 查询参数
+     * Query parameters
      */
     private Map<String, List<String>> queryParameters;
 
     /**
-     * 路径参数
+     * Path parameters
      */
     private Map<String, String> pathParameters;
 
     /**
-     * 请求体
+     * Request body
      */
     private String body;
 
     /**
-     * 内容类型
+     * Content type
      */
     private String contentType;
 
     /**
-     * 客户端IP
+     * Client IP
      */
     private String clientIp;
 
     /**
-     * 用户代理
+     * User agent
      */
     private String userAgent;
 
     /**
-     * 请求时间
+     * Request time
      */
     private LocalDateTime requestTime;
 
     /**
-     * 扩展属性
+     * Extension attributes
      */
     private Map<String, Object> attributes;
 }

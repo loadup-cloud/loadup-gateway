@@ -23,7 +23,7 @@ package com.github.loadup.gateway.facade.exception;
  */
 
 /**
- * 模板处理异常
+ * Template processing exception
  */
 public class TemplateException extends GatewayException {
 
@@ -37,7 +37,7 @@ public class TemplateException extends GatewayException {
         super(errorCode.getCode(), ErrorType.TEMPLATE, MODULE, errorCode.getMessage() + ":" + message, cause);
     }
 
-    // 便捷方法
+    // Convenience methods
     public static TemplateException notFound(String templateName) {
         return new TemplateException(ErrorCode.TEMPLATE_NOT_FOUND, templateName);
     }

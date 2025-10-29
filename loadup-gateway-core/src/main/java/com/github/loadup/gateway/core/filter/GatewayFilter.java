@@ -48,7 +48,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * 网关核心过滤器
+ * Core gateway filter
  */
 @Slf4j
 @Component
@@ -101,16 +101,16 @@ public class GatewayFilter implements Filter {
         try (Scope scope = span.makeCurrent()) {
 
             try {
-                // 构建网关请求对象
+                // Build gateway request object
                 GatewayRequest gatewayRequest = buildGatewayRequest(httpRequest, requestId);
 
                 log.info("Gateway processing request: {} {} with ID: {}",
                         gatewayRequest.getMethod(), gatewayRequest.getPath(), requestId);
 
-                // 分发到Action处理器
+                // Dispatch to Action handler
                 GatewayResponse gatewayResponse = actionDispatcher.dispatch(gatewayRequest);
 
-                // 写入响应
+                // Write response
                 writeResponse(httpResponse, gatewayResponse);
 
             } catch (Exception e) {
@@ -125,12 +125,12 @@ public class GatewayFilter implements Filter {
     }
 
     /**
-     * 构建网关请求对象
+     * Build gateway request object
      */
     private GatewayRequest buildGatewayRequest(HttpServletRequest request, String requestId)
             throws IOException {
 
-        // 获取请求头
+        // Get request headers
         Map<String, String> headers = new HashMap<>();
         Enumeration<String> headerNames = request.getHeaderNames();
         while (headerNames.hasMoreElements()) {
@@ -138,7 +138,7 @@ public class GatewayFilter implements Filter {
             headers.put(headerName, request.getHeader(headerName));
         }
 
-        // 获取查询参数
+        // Get query parameters
         Map<String, List<String>> queryParams = new HashMap<>();
         if (request.getQueryString() != null) {
             Arrays.stream(request.getQueryString().split("&"))
@@ -150,7 +150,7 @@ public class GatewayFilter implements Filter {
                     });
         }
 
-        // 读取请求体
+        // Read body
         String body = request.getReader().lines().collect(Collectors.joining("\n"));
 
         return GatewayRequest.builder()
@@ -169,24 +169,24 @@ public class GatewayFilter implements Filter {
     }
 
     /**
-     * 写入响应
+     * Write the HTTP response
      */
     private void writeResponse(HttpServletResponse response, GatewayResponse gatewayResponse)
             throws IOException {
 
         response.setStatus(gatewayResponse.getStatusCode());
 
-        // 设置响应头
+        // Set response headers
         if (gatewayResponse.getHeaders() != null) {
             gatewayResponse.getHeaders().forEach(response::setHeader);
         }
 
-        // 设置内容类型
+        // Set content type
         if (gatewayResponse.getContentType() != null) {
             response.setContentType(gatewayResponse.getContentType());
         }
 
-        // 写入响应体
+        // Write body
         if (gatewayResponse.getBody() != null) {
             response.getWriter().write(gatewayResponse.getBody());
         }
@@ -195,7 +195,7 @@ public class GatewayFilter implements Filter {
     }
 
     /**
-     * 处理错误
+     * Handle errors
      */
     private void handleError(HttpServletResponse response, String requestId, Exception e)
             throws IOException {
@@ -214,7 +214,7 @@ public class GatewayFilter implements Filter {
     }
 
     /**
-     * 获取客户端IP
+     * Get client IP address
      */
     private String getClientIp(HttpServletRequest request) {
         String ip = request.getHeader("X-Forwarded-For");

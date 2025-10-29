@@ -41,13 +41,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
- * SpringBeanProxyPlugin 单元测试
+ * Unit tests for SpringBeanProxyPlugin
  */
 @ExtendWith(MockitoExtension.class)
-@DisplayName("SpringBean代理插件测试")
+@DisplayName("SpringBean proxy plugin tests")
 public class SpringBeanProxyPluginTest extends BaseGatewayTest {
 
     @Mock
@@ -74,7 +75,7 @@ public class SpringBeanProxyPluginTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("应该返回正确的插件元数据")
+    @DisplayName("Should return correct plugin metadata")
     void shouldReturnCorrectPluginMetadata() {
         assertEquals("SpringBeanProxyPlugin", plugin.getName());
         assertEquals("PROXY", plugin.getType());
@@ -85,7 +86,7 @@ public class SpringBeanProxyPluginTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("应该正确初始化插件")
+    @DisplayName("Should initialize plugin correctly")
     void shouldInitializePlugin() {
         PluginConfig config = PluginConfig.builder()
                 .pluginName("SpringBeanProxyPlugin")
@@ -96,15 +97,15 @@ public class SpringBeanProxyPluginTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("execute方法应该抛出UnsupportedOperationException")
+    @DisplayName("execute should throw UnsupportedOperationException")
     void shouldThrowUnsupportedOperationExceptionForExecute() {
         // The execute method should throw a GatewayException with specific message
         assertThrows(Exception.class, () -> plugin.execute(testRequest),
-            "execute方法应该抛出异常，提示使用proxy方法");
+                "execute should throw an exception indicating to use the proxy method");
     }
 
     @Test
-    @DisplayName("应该成功调用无参数方法")
+    @DisplayName("Should successfully call method with no parameters")
     void shouldSuccessfullyCallMethodWithNoParameters() throws Exception {
         // Given
         when(applicationContext.getBean("testService")).thenReturn(testService);
@@ -124,7 +125,7 @@ public class SpringBeanProxyPluginTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("应该成功调用带String参数的方法")
+    @DisplayName("Should successfully call method with String parameter")
     void shouldSuccessfullyCallMethodWithStringParameter() throws Exception {
         // Given
         when(applicationContext.getBean("testService")).thenReturn(testService);
@@ -141,7 +142,7 @@ public class SpringBeanProxyPluginTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("应该成功调用带GatewayRequest参数的方法")
+    @DisplayName("Should successfully call method with GatewayRequest parameter")
     void shouldSuccessfullyCallMethodWithGatewayRequestParameter() throws Exception {
         // Given
         when(applicationContext.getBean("testService")).thenReturn(testService);
@@ -158,7 +159,7 @@ public class SpringBeanProxyPluginTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("应该成功调用带自定义对象参数的方法")
+    @DisplayName("Should successfully call method with custom object parameter")
     void shouldSuccessfullyCallMethodWithCustomObjectParameter() throws Exception {
         // Given
         when(applicationContext.getBean("testService")).thenReturn(testService);
@@ -176,7 +177,7 @@ public class SpringBeanProxyPluginTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("应该处理无效的目标格式")
+    @DisplayName("Should handle invalid target format")
     void shouldHandleInvalidTargetFormat() {
         // Test missing colon - should return error response, not throw exception
         assertDoesNotThrow(() -> {
@@ -194,11 +195,11 @@ public class SpringBeanProxyPluginTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("应该处理Bean不存在的情况")
+    @DisplayName("Should handle bean not found")
     void shouldHandleBeanNotFound() throws Exception {
         // Given
         when(applicationContext.getBean("nonExistentBean"))
-            .thenThrow(new RuntimeException("Bean not found"));
+                .thenThrow(new RuntimeException("Bean not found"));
 
         // When
         GatewayResponse response = plugin.proxy(testRequest, "nonExistentBean:someMethod");
@@ -209,13 +210,13 @@ public class SpringBeanProxyPluginTest extends BaseGatewayTest {
         assertEquals(GatewayConstants.Status.INTERNAL_ERROR, response.getStatusCode());
         // Check either error message or response body contains error info
         assertTrue((response.getErrorMessage() != null && response.getErrorMessage().contains("Bean not found")) ||
-                   (response.getBody() != null && response.getBody().contains("error")));
+                (response.getBody() != null && response.getBody().contains("error")));
 
         verify(applicationContext).getBean("nonExistentBean");
     }
 
     @Test
-    @DisplayName("应该处理方法不存在的情况")
+    @DisplayName("Should handle method not found")
     void shouldHandleMethodNotFound() throws Exception {
         // Given
         when(applicationContext.getBean("testService")).thenReturn(testService);
@@ -229,15 +230,15 @@ public class SpringBeanProxyPluginTest extends BaseGatewayTest {
         assertEquals(GatewayConstants.Status.INTERNAL_ERROR, response.getStatusCode());
         // Check either error message or response body contains error info
         assertTrue((response.getErrorMessage() != null &&
-                   (response.getErrorMessage().contains("Method not found") ||
-                    response.getErrorMessage().contains("nonExistentMethod"))) ||
-                   (response.getBody() != null && response.getBody().contains("error")));
+                (response.getErrorMessage().contains("Method not found") ||
+                        response.getErrorMessage().contains("nonExistentMethod"))) ||
+                (response.getBody() != null && response.getBody().contains("error")));
 
         verify(applicationContext).getBean("testService");
     }
 
     @Test
-    @DisplayName("应该处理方法调用异常")
+    @DisplayName("Should handle method invocation exception")
     void shouldHandleMethodInvocationException() throws Exception {
         // Given
         when(applicationContext.getBean("testService")).thenReturn(testService);
@@ -250,20 +251,20 @@ public class SpringBeanProxyPluginTest extends BaseGatewayTest {
         assertEquals(testRequestId, response.getRequestId());
         assertEquals(GatewayConstants.Status.INTERNAL_ERROR, response.getStatusCode());
         assertTrue(response.getBody().contains("Test exception") ||
-                   response.getErrorMessage().contains("Test exception"));
+                response.getErrorMessage().contains("Test exception"));
         assertNotNull(response.getErrorMessage());
 
         verify(applicationContext).getBean("testService");
     }
 
     @Test
-    @DisplayName("应该正确销毁插件")
+    @DisplayName("Should destroy plugin correctly")
     void shouldDestroyPlugin() {
         assertDoesNotThrow(() -> plugin.destroy());
     }
 
     @Test
-    @DisplayName("应该处理JSON解析失败的情况")
+    @DisplayName("Should handle JSON parsing failure gracefully")
     void shouldHandleJsonParsingFailure() throws Exception {
         // Given
         GatewayRequest invalidJsonRequest = GatewayRequest.builder()
@@ -282,14 +283,14 @@ public class SpringBeanProxyPluginTest extends BaseGatewayTest {
         // Then
         assertNotNull(response);
         assertEquals(GatewayConstants.Status.SUCCESS, response.getStatusCode());
-        // 方法应该被调用，但参数为null
+        // The method should be called but the parameter will be null
         assertTrue(response.getBody().contains("null"));
 
         verify(applicationContext).getBean("testService");
     }
 
     /**
-     * 测试用的服务类
+     * Test service used in tests
      */
     public static class TestService {
 
@@ -322,22 +323,34 @@ public class SpringBeanProxyPluginTest extends BaseGatewayTest {
     }
 
     /**
-     * 测试数据类
+     * Data class used in tests
      */
     public static class TestData {
         private String name;
         private int value;
 
-        public TestData() {}
+        public TestData() {
+        }
 
         public TestData(String name, int value) {
             this.name = name;
             this.value = value;
         }
 
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
-        public int getValue() { return value; }
-        public void setValue(int value) { this.value = value; }
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public int getValue() {
+            return value;
+        }
+
+        public void setValue(int value) {
+            this.value = value;
+        }
     }
 }

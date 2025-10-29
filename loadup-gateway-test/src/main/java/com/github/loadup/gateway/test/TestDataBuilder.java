@@ -32,12 +32,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 测试工具类，提供测试数据构建方法
+ * Test utility class that provides methods to build test data
  */
 public class TestDataBuilder {
 
     /**
-     * 创建测试用的GatewayRequest
+     * Create a GatewayRequest for testing
      */
     public static GatewayRequest createTestRequest(String path, String method) {
         return GatewayRequest.builder()
@@ -57,7 +57,7 @@ public class TestDataBuilder {
     }
 
     /**
-     * 创建测试用的GatewayResponse
+     * Create a GatewayResponse for testing
      */
     public static GatewayResponse createTestResponse(String requestId) {
         return GatewayResponse.builder()
@@ -72,7 +72,7 @@ public class TestDataBuilder {
     }
 
     /**
-     * 创建测试用的RouteConfig
+     * Create a RouteConfig for testing
      */
     public static RouteConfig createTestRoute(String path, String protocol) {
         return RouteConfig.builder()
@@ -88,7 +88,7 @@ public class TestDataBuilder {
     }
 
     /**
-     * 创建测试请求头
+     * Create test request headers
      */
     private static Map<String, String> createTestHeaders() {
         Map<String, String> headers = new HashMap<>();
@@ -99,33 +99,33 @@ public class TestDataBuilder {
     }
 
     /**
-     * 创建测试请求模板
+     * Create a sample Groovy script template for request processing
      */
     private static String createTestRequestTemplate() {
         return """
-                // 处理请求的Groovy脚本示例
+                // Example Groovy script to process the request
                 import com.github.loadup.gateway.facade.model.GatewayRequest
                 
-                // 修改请求头
+                // Modify request headers
                 request.headers.put("X-Processed", "true")
                 
-                // 返回处理后的请求
+                // Return the processed request
                 return request
                 """;
     }
 
     /**
-     * 创建测试响应模板
+     * Create a sample Groovy script template for response processing
      */
     private static String createTestResponseTemplate() {
         return """
-                // 处理响应的Groovy脚本示例
+                // Example Groovy script to process the response
                 import com.github.loadup.gateway.facade.model.GatewayResponse
                 
-                // 修改响应头
+                // Modify response headers
                 response.headers.put("X-Gateway-Processed", "true")
                 
-                // 返回处理后的响应
+                // Return the processed response
                 return response
                 """;
     }

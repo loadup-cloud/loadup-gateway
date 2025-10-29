@@ -10,12 +10,12 @@ package com.github.loadup.gateway.core.template;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -33,7 +33,7 @@ import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 模板引擎 - 支持Groovy脚本
+ * Template engine - supports Groovy scripts
  */
 @Slf4j
 @Component
@@ -43,7 +43,7 @@ public class TemplateEngine {
     private final GroovyShell groovyShell = new GroovyShell();
 
     /**
-     * 处理请求模板
+     * Process request template
      */
     public GatewayRequest processRequestTemplate(GatewayRequest request, String templateScript) {
         try {
@@ -75,7 +75,7 @@ public class TemplateEngine {
     }
 
     /**
-     * 处理响应模板
+     * Process response template
      */
     public GatewayResponse processResponseTemplate(GatewayResponse response, String templateScript) {
         try {
@@ -104,7 +104,7 @@ public class TemplateEngine {
     }
 
     /**
-     * 获取编译后的脚本（带缓存）
+     * Get compiled script with caching
      */
     private groovy.lang.Script getCompiledScript(String scriptText) {
         String scriptHash = String.valueOf(scriptText.hashCode());
@@ -112,7 +112,7 @@ public class TemplateEngine {
     }
 
     /**
-     * 清空脚本缓存
+     * Clear script cache
      */
     public void clearScriptCache() {
         scriptCache.clear();

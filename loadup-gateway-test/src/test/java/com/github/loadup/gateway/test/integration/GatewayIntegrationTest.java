@@ -46,11 +46,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 /**
- * 网关集成测试
+ * Gateway integration tests
  */
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application-test.yml")
-@DisplayName("网关集成测试")
+@DisplayName("Gateway integration tests")
 public class GatewayIntegrationTest extends BaseGatewayTest {
 
     @Resource
@@ -65,12 +65,12 @@ public class GatewayIntegrationTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("完整的HTTP代理流程测试")
+    @DisplayName("Complete HTTP proxy flow test")
     public void shouldCompleteHttpProxyFlow() throws Exception {
         // Given
         GatewayRequest request = createHttpRequest("/api/test/http", "GET", null);
 
-        // 创建 properties 包含 timeout 和 retryCount
+        // Create properties including timeout and retryCount
         Map<String, Object> properties = new HashMap<>();
         properties.put(GatewayConstants.PropertyKeys.TIMEOUT, 30000L);
         properties.put(GatewayConstants.PropertyKeys.RETRY_COUNT, 3);
@@ -99,12 +99,12 @@ public class GatewayIntegrationTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("完整的Bean代理流程测试")
+    @DisplayName("Complete Bean proxy flow test")
     public void shouldCompleteBeanProxyFlow() throws Exception {
         // Given
         GatewayRequest request = createHttpRequest("/api/test/bean", "POST", "{\"name\":\"test\"}");
 
-        // 创建 properties 包含 timeout 和 retryCount
+        // Create properties including timeout and retryCount
         Map<String, Object> properties = new HashMap<>();
         properties.put(GatewayConstants.PropertyKeys.TIMEOUT, 30000L);
         properties.put(GatewayConstants.PropertyKeys.RETRY_COUNT, 3);
@@ -125,19 +125,19 @@ public class GatewayIntegrationTest extends BaseGatewayTest {
         GatewayResponse response = actionDispatcher.dispatch(request);
 
         // Then
-        // Bean可能不存在，但应该有明确的错误响应
+        // Bean may not exist, but there should be a clear error response
         assertNotNull(response);
         assertEquals(testRequestId, response.getRequestId());
         assertTrue(response.getProcessingTime() >= 0);
     }
 
     @Test
-    @DisplayName("带模板的完整流程测试")
+    @DisplayName("Complete flow with templates test")
     public void shouldCompleteFlowWithTemplates() throws Exception {
         // Given
         GatewayRequest request = createHttpRequest("/api/test/template", "POST", "{\"data\":\"test\"}");
 
-        // 创建 properties 包含 timeout 和 retryCount
+        // Create properties including timeout and retryCount
         Map<String, Object> properties = new HashMap<>();
         properties.put(GatewayConstants.PropertyKeys.TIMEOUT, 30000L);
         properties.put(GatewayConstants.PropertyKeys.RETRY_COUNT, 3);
@@ -173,7 +173,7 @@ public class GatewayIntegrationTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("错误处理流程测试")
+    @DisplayName("Error handling flow test")
     public void shouldHandleErrorFlow() throws Exception {
         // Given
         GatewayRequest request = createHttpRequest("/api/nonexistent", "GET", null);
@@ -191,21 +191,21 @@ public class GatewayIntegrationTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("超时处理测试")
+    @DisplayName("Timeout handling test")
     public void shouldHandleTimeout() throws Exception {
         // Given
         GatewayRequest request = createHttpRequest("/api/test/timeout", "GET", null);
 
-        // 创建 properties 包含 timeout 和 retryCount
+        // Create properties including timeout and retryCount
         Map<String, Object> properties = new HashMap<>();
-        properties.put(GatewayConstants.PropertyKeys.TIMEOUT, 1000L); // 1秒超时
+        properties.put(GatewayConstants.PropertyKeys.TIMEOUT, 1000L); // 1 second timeout
         properties.put(GatewayConstants.PropertyKeys.RETRY_COUNT, 1);
 
         RouteConfig route = RouteConfig.builder()
                 .path("/api/test/timeout")
                 .method("GET")
                 .protocol(GatewayConstants.Protocol.HTTP)
-                .target("http://httpbin.org/delay/5") // 5秒延迟
+                .target("http://httpbin.org/delay/5") // 5 seconds delay
                 .enabled(true)
                 .properties(properties)
                 .build();
@@ -221,7 +221,7 @@ public class GatewayIntegrationTest extends BaseGatewayTest {
         // Then
         assertNotNull(response);
         assertEquals(testRequestId, response.getRequestId());
-        // 请求应该在合理时间内完成（不会等待5秒）
+        // Request should complete within a reasonable time (should not wait 5 seconds)
         assertTrue(duration < 10000, "Request should not take more than 10 seconds");
     }
 }

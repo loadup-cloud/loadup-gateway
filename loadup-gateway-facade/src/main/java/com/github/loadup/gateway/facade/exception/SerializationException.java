@@ -23,7 +23,7 @@ package com.github.loadup.gateway.facade.exception;
  */
 
 /**
- * 序列化异常
+ * Serialization exception
  */
 public class SerializationException extends GatewayException {
 
@@ -37,7 +37,7 @@ public class SerializationException extends GatewayException {
         super(errorCode.getCode(), ErrorType.SERIALIZATION, MODULE, errorCode.getMessage() + ":" + message, cause);
     }
 
-    // 便捷方法
+    // Convenience methods
     public static SerializationException jsonParseError(String json, Throwable cause) {
         return new SerializationException(ErrorCode.JSON_PARSE_ERROR, json, cause);
     }

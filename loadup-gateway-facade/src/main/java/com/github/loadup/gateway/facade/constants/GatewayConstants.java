@@ -23,7 +23,7 @@ package com.github.loadup.gateway.facade.constants;
  */
 
 /**
- * Gateway常量定义
+ * Gateway constant definitions
  */
 public final class GatewayConstants {
 
@@ -32,7 +32,7 @@ public final class GatewayConstants {
 
 
     /**
-     * 协议类型
+     * Protocol types
      */
     public static final class Protocol {
         public static final String HTTP = "HTTP";
@@ -41,7 +41,7 @@ public final class GatewayConstants {
     }
 
     /**
-     * 存储类型
+     * Storage types
      */
     public static final class Storage {
         public static final String FILE = "FILE";
@@ -49,7 +49,7 @@ public final class GatewayConstants {
     }
 
     /**
-     * 模板类型
+     * Template types
      */
     public static final class Template {
         public static final String REQUEST = "REQUEST";
@@ -57,7 +57,7 @@ public final class GatewayConstants {
     }
 
     /**
-     * 内容类型
+     * Content types
      */
     public static final class ContentType {
         public static final String JSON = "application/json";
@@ -66,7 +66,7 @@ public final class GatewayConstants {
     }
 
     /**
-     * HTTP方法
+     * HTTP methods
      */
     public static final class HttpMethod {
         public static final String GET = "GET";
@@ -77,7 +77,7 @@ public final class GatewayConstants {
     }
 
     /**
-     * 状态码
+     * Status codes
      */
     public static final class Status {
         public static final int SUCCESS = 200;
@@ -90,7 +90,7 @@ public final class GatewayConstants {
     }
 
     /**
-     * 配置键名
+     * Configuration keys
      */
     public static final class Config {
         public static final String GATEWAY_PREFIX = "loadup.gateway";
@@ -101,7 +101,7 @@ public final class GatewayConstants {
     }
 
     /**
-     * 路由配置属性键
+     * Route configuration property keys
      */
     public static final class PropertyKeys {
         public static final String TIMEOUT = "timeout";

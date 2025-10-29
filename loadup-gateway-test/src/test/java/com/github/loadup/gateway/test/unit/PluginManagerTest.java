@@ -10,12 +10,12 @@ package com.github.loadup.gateway.test.unit;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -23,27 +23,28 @@ package com.github.loadup.gateway.test.unit;
  */
 
 import com.github.loadup.gateway.core.plugin.PluginManager;
+import com.github.loadup.gateway.facade.constants.GatewayConstants;
 import com.github.loadup.gateway.facade.model.GatewayRequest;
 import com.github.loadup.gateway.facade.model.GatewayResponse;
 import com.github.loadup.gateway.facade.model.RouteConfig;
 import com.github.loadup.gateway.facade.spi.ProxyPlugin;
-import com.github.loadup.gateway.facade.constants.GatewayConstants;
 import com.github.loadup.gateway.test.BaseGatewayTest;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
 
-import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
- * 插件管理器单元测试
+ * PluginManager unit tests
  */
-@DisplayName("插件管理器测试")
+@DisplayName("PluginManager tests")
 public class PluginManagerTest extends BaseGatewayTest {
 
     @Mock
@@ -62,14 +63,14 @@ public class PluginManagerTest extends BaseGatewayTest {
         super.setUp();
         MockitoAnnotations.openMocks(this);
 
-        // 配置mock插件
+        // Configure mock plugins
         when(httpPlugin.getSupportedProtocol()).thenReturn(GatewayConstants.Protocol.HTTP);
         when(beanPlugin.getSupportedProtocol()).thenReturn(GatewayConstants.Protocol.BEAN);
         when(rpcPlugin.getSupportedProtocol()).thenReturn(GatewayConstants.Protocol.RPC);
 
         pluginManager = new PluginManager();
 
-        // 使用反射注入mock插件列表
+        // Inject mock plugin list via reflection
         try {
             var field = PluginManager.class.getDeclaredField("proxyPlugins");
             field.setAccessible(true);
@@ -80,7 +81,7 @@ public class PluginManagerTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("应该能够执行HTTP代理")
+    @DisplayName("Should execute HTTP proxy")
     public void shouldExecuteHttpProxy() throws Exception {
         // Given
         GatewayRequest request = createHttpRequest("/api/test", "GET", null);
@@ -107,14 +108,14 @@ public class PluginManagerTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("应该能够执行Bean代理")
+    @DisplayName("Should execute Bean proxy")
     public void shouldExecuteBeanProxy() throws Exception {
         // Given
         GatewayRequest request = createHttpRequest("/api/test", "POST", "{\"data\":\"test\"}");
         RouteConfig route = createTestRoute("/api/test", "POST",
                 "bean://testService:getData");
 
-        // 目标配置现在会自动解析，无需手动调用 parseTarget()
+        // Target parsing is now automatic; no need to manually call parseTarget()
 
         GatewayResponse expectedResponse = GatewayResponse.builder()
                 .requestId(testRequestId)
@@ -136,7 +137,7 @@ public class PluginManagerTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("应该抛出异常当找不到对应协议的插件时")
+    @DisplayName("Should throw when no plugin found for protocol")
     public void shouldThrowExceptionWhenNoPluginFound() {
         // Given
         GatewayRequest request = createHttpRequest("/api/test", "GET", null);
@@ -151,14 +152,14 @@ public class PluginManagerTest extends BaseGatewayTest {
     }
 
     @Test
-    @DisplayName("应该处理插件执行异常")
+    @DisplayName("Should handle plugin execution exception")
     public void shouldHandlePluginExecutionException() throws Exception {
         // Given
         GatewayRequest request = createHttpRequest("/api/test", "GET", null);
         RouteConfig route = createTestRoute("/api/test", "GET",
                 "http://localhost:8080/api/test");
 
-        // 目标配置现在会自动解析，无需手动调用 parseTarget()
+        // Target parsing is now automatic; no need to manually call parseTarget()
 
         when(httpPlugin.proxy(request, "http://localhost:8080/api/test"))
                 .thenThrow(new RuntimeException("Network error"));

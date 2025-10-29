@@ -10,27 +10,27 @@ package com.github.loadup.gateway.facade.model;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
 
-import lombok.Data;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Map;
 
 /**
- * 插件配置模型
+ * Plugin configuration model
  */
 @Data
 @Builder
@@ -39,37 +39,37 @@ import java.util.Map;
 public class PluginConfig {
 
     /**
-     * 插件名称
+     * Plugin name
      */
     private String pluginName;
 
     /**
-     * 插件类型
+     * Plugin type
      */
     private String pluginType;
 
     /**
-     * 插件版本
+     * Plugin version
      */
     private String version;
 
     /**
-     * 是否启用
+     * Enabled flag
      */
     private boolean enabled;
 
     /**
-     * 优先级（数值越小优先级越高）
+     * Priority (lower value means higher priority)
      */
     private int priority;
 
     /**
-     * 插件配置参数
+     * Plugin configuration parameters
      */
     private Map<String, Object> properties;
 
     /**
-     * 插件描述
+     * Plugin description
      */
     private String description;
 }

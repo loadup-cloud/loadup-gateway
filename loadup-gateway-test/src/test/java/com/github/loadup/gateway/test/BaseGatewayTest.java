@@ -35,7 +35,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * 测试基类，提供通用的测试设置和工具方法
+ * Base test class that provides common test setup and helper methods
  */
 @ActiveProfiles("test")
 public abstract class BaseGatewayTest {
@@ -48,7 +48,7 @@ public abstract class BaseGatewayTest {
     }
 
     /**
-     * 创建测试HTTP请求
+     * Create a test HTTP request
      */
     protected GatewayRequest createHttpRequest(String path, String method, String body) {
         Map<String, String> headers = new HashMap<>();
@@ -73,14 +73,14 @@ public abstract class BaseGatewayTest {
     }
 
     /**
-     * 创建测试路由配置
+     * Create a test RouteConfig
      */
     protected RouteConfig createTestRoute(String path, String method, String target) {
         Map<String, Object> properties = new HashMap<>();
         properties.put("timeout", 30000L);
         properties.put("retryCount", 3);
 
-        // 创建 RouteConfig 实例
+        // Create RouteConfig instance
         RouteConfig route = RouteConfig.builder().path(path)
                 .method(method).enabled(true).target(target)
                 .requestTemplate("test_request_template")
@@ -90,7 +90,7 @@ public abstract class BaseGatewayTest {
     }
 
     /**
-     * 验证响应基本格式
+     * Validate response basic format
      */
     protected void assertValidResponse(GatewayResponse response) {
         assertNotNull(response, "Response should not be null");
@@ -100,7 +100,7 @@ public abstract class BaseGatewayTest {
     }
 
     /**
-     * 验证成功响应
+     * Validate successful response
      */
     protected void assertSuccessResponse(GatewayResponse response) {
         assertValidResponse(response);
@@ -109,7 +109,7 @@ public abstract class BaseGatewayTest {
     }
 
     /**
-     * 验证错误响应
+     * Validate error response
      */
     protected void assertErrorResponse(GatewayResponse response, int expectedStatus) {
         assertValidResponse(response);

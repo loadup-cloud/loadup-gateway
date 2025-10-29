@@ -40,7 +40,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Dubbo RPC代理插件
+ * Dubbo RPC proxy plugin
  */
 @Slf4j
 @Component
@@ -74,14 +74,14 @@ public class RpcProxyPlugin implements ProxyPlugin {
     public void initialize(PluginConfig config) {
         log.info("RpcProxyPlugin initialized with config: {}", config);
 
-        // 初始化Dubbo配置
+        // Initialize Dubbo configuration
         applicationConfig = new ApplicationConfig();
         applicationConfig.setName("loadup-gateway");
 
         registryConfig = new RegistryConfig();
         registryConfig.setAddress("zookeeper://127.0.0.1:2181");
 
-        // 可以从config中读取注册中心地址等配置
+        // You can read registry address and other settings from config
         if (config.getProperties() != null) {
             String registryAddress = (String) config.getProperties().get("registry.address");
             if (registryAddress != null) {
@@ -98,7 +98,7 @@ public class RpcProxyPlugin implements ProxyPlugin {
     @Override
     public GatewayResponse proxy(GatewayRequest request, String target) throws Exception {
         try {
-            // 解析target格式: interfaceName:methodName:version
+            // Parse target format: interfaceName:methodName:version
             String[] parts = target.split(":");
             if (parts.length < 2) {
                 throw new IllegalArgumentException("Invalid RPC target format. Expected: interfaceName:methodName[:version]");
@@ -108,17 +108,17 @@ public class RpcProxyPlugin implements ProxyPlugin {
             String methodName = parts[1];
             String version = parts.length > 2 ? parts[2] : null;
 
-            // 获取泛化服务
+            // Get generic service
             GenericService genericService = getGenericService(interfaceName, version);
 
-            // 准备参数
+            // Prepare arguments
             Object[] args = prepareRpcArgs(request);
             String[] parameterTypes = getParameterTypes(request);
 
-            // 调用RPC服务
+            // Invoke RPC service
             Object result = genericService.$invoke(methodName, parameterTypes, args);
 
-            // 构建响应
+            // Build response
             return GatewayResponse.builder()
                     .requestId(request.getRequestId())
                     .statusCode(GatewayConstants.Status.SUCCESS)
@@ -158,7 +158,7 @@ public class RpcProxyPlugin implements ProxyPlugin {
     }
 
     /**
-     * 获取泛化服务
+     * Get generic service
      */
     private GenericService getGenericService(String interfaceName, String version) {
         String cacheKey = interfaceName + ":" + (version != null ? version : "");
@@ -178,7 +178,7 @@ public class RpcProxyPlugin implements ProxyPlugin {
     }
 
     /**
-     * 准备RPC调用参数
+     * Prepare RPC call arguments
      */
     private Object[] prepareRpcArgs(GatewayRequest request) {
         if (request.getBody() == null || request.getBody().trim().isEmpty()) {
@@ -186,11 +186,11 @@ public class RpcProxyPlugin implements ProxyPlugin {
         }
 
         try {
-            // 尝试解析为JSON数组
+            // Try parsing as JSON array
             if (request.getBody().trim().startsWith("[")) {
                 return JsonUtils.fromJson(request.getBody(), Object[].class);
             } else {
-                // 单个参数
+                // Single argument
                 return new Object[]{JsonUtils.toMap(request.getBody())};
             }
         } catch (Exception e) {
@@ -200,10 +200,10 @@ public class RpcProxyPlugin implements ProxyPlugin {
     }
 
     /**
-     * 获取参数类型
+     * Get parameter types
      */
     private String[] getParameterTypes(GatewayRequest request) {
-        // 简化处理，实际应用中可能需要更复杂的类型推断
+        // Simplified handling; real-world usage may require more complex type inference
         Object[] args = prepareRpcArgs(request);
         String[] types = new String[args.length];
 

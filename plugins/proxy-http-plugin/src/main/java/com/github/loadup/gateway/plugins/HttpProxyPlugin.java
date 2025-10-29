@@ -10,25 +10,28 @@ package com.github.loadup.gateway.plugins;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
 
+import com.github.loadup.gateway.facade.constants.GatewayConstants;
 import com.github.loadup.gateway.facade.model.GatewayRequest;
 import com.github.loadup.gateway.facade.model.GatewayResponse;
 import com.github.loadup.gateway.facade.model.PluginConfig;
 import com.github.loadup.gateway.facade.spi.ProxyPlugin;
-import com.github.loadup.gateway.facade.constants.GatewayConstants;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -37,7 +40,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * HTTP代理插件
+ * HTTP proxy plugin
  */
 @Slf4j
 @Component
@@ -68,7 +71,7 @@ public class HttpProxyPlugin implements ProxyPlugin {
     @Override
     public void initialize(PluginConfig config) {
         log.info("HttpProxyPlugin initialized with config: {}", config);
-        // 可以在这里配置RestTemplate的超时、连接池等
+        // You can configure RestTemplate timeouts, connection pool, etc. here
     }
 
     @Override
@@ -79,28 +82,28 @@ public class HttpProxyPlugin implements ProxyPlugin {
     @Override
     public GatewayResponse proxy(GatewayRequest request, String target) throws Exception {
         try {
-            // 构建请求头
+            // Build request headers
             HttpHeaders headers = new HttpHeaders();
             if (request.getHeaders() != null) {
                 request.getHeaders().forEach(headers::set);
             }
 
-            // 构建请求体
+            // Build request body
             HttpEntity<String> entity = new HttpEntity<>(request.getBody(), headers);
 
-            // 确定HTTP方法
+            // Determine HTTP method
             HttpMethod httpMethod = HttpMethod.valueOf(request.getMethod().toUpperCase());
 
-            // 构建完整URL
+            // Build full URL
             String fullUrl = buildFullUrl(target, request);
 
             log.debug("Proxying {} request to: {}", httpMethod, fullUrl);
 
-            // 执行HTTP请求
+            // Execute HTTP request
             ResponseEntity<String> response = restTemplate.exchange(
                     fullUrl, httpMethod, entity, String.class);
 
-            // 构建网关响应
+            // Build gateway response
             Map<String, String> responseHeaders = new HashMap<>();
             response.getHeaders().forEach((key, values) -> {
                 if (!values.isEmpty()) {
@@ -146,12 +149,12 @@ public class HttpProxyPlugin implements ProxyPlugin {
     }
 
     /**
-     * 构建完整URL
+     * Build full URL
      */
     private String buildFullUrl(String target, GatewayRequest request) {
         StringBuilder url = new StringBuilder(target);
 
-        // 添加查询参数
+        // Add query parameters
         if (request.getQueryParameters() != null && !request.getQueryParameters().isEmpty()) {
             url.append("?");
             request.getQueryParameters().forEach((key, values) -> {
@@ -159,7 +162,7 @@ public class HttpProxyPlugin implements ProxyPlugin {
                     url.append(key).append("=").append(value).append("&");
                 }
             });
-            // 移除最后的&
+            // Remove trailing &
             if (url.charAt(url.length() - 1) == '&') {
                 url.deleteCharAt(url.length() - 1);
             }

@@ -29,7 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.Map;
 
 /**
- * JSON工具类
+ * JSON utility class
  */
 public final class JsonUtils {
 
@@ -39,7 +39,7 @@ public final class JsonUtils {
     }
 
     /**
-     * 对象转JSON字符串
+     * Convert an object to a JSON string
      */
     public static String toJson(Object obj) {
         try {
@@ -53,7 +53,7 @@ public final class JsonUtils {
     }
 
     /**
-     * JSON字符串转对象
+     * Convert JSON string to an object
      */
     public static <T> T fromJson(String json, Class<T> clazz) {
         try {
@@ -64,7 +64,7 @@ public final class JsonUtils {
     }
 
     /**
-     * JSON字符串转Map
+     * Convert JSON string to a Map
      */
     @SuppressWarnings("unchecked")
     public static Map<String, Object> toMap(String json) {
@@ -76,7 +76,7 @@ public final class JsonUtils {
     }
 
     /**
-     * JSON字符串转Map
+     * Convert an object to a Map via JSON
      */
     @SuppressWarnings("unchecked")
     public static Map<String, Object> toMap(Object obj) {
@@ -88,7 +88,7 @@ public final class JsonUtils {
     }
 
     /**
-     * 解析JSON节点
+     * Parse JSON node
      */
     public static JsonNode parseJson(String json) {
         try {
@@ -99,7 +99,7 @@ public final class JsonUtils {
     }
 
     /**
-     * 判断是否为有效JSON
+     * Check whether string is valid JSON
      */
     public static boolean isValidJson(String json) {
         if (StringUtils.isBlank(json)) {

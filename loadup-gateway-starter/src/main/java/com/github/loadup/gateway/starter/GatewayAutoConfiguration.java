@@ -36,7 +36,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Gateway自动配置类
+ * Gateway auto-configuration
  */
 @Configuration
 @EnableConfigurationProperties(GatewayProperties.class)

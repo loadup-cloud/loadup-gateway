@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
- * 通用工具类
+ * Common utility class
  */
 public final class CommonUtils {
 
@@ -42,7 +42,7 @@ public final class CommonUtils {
     }
 
     /**
-     * 生成请求ID（OpenTelemetry trace-id 格式：32 个小写十六进制字符，代表 16 字节）
+     * Generate request ID (OpenTelemetry trace-id format: 32 lowercase hex characters representing 16 bytes)
      */
     public static String generateRequestId() {
         byte[] bytes = new byte[16];
@@ -67,14 +67,14 @@ public final class CommonUtils {
     }
 
     /**
-     * 验证路径格式
+     * Validate path format
      */
     public static boolean isValidPath(String path) {
         return StringUtils.isNotBlank(path) && PATH_PATTERN.matcher(path).matches();
     }
 
     /**
-     * 规范化路径
+     * Normalize path
      */
     public static String normalizePath(String path) {
         if (StringUtils.isBlank(path)) {
@@ -90,21 +90,21 @@ public final class CommonUtils {
     }
 
     /**
-     * 安全地获取字符串
+     * Safely get string
      */
     public static String safeString(Object obj) {
         return obj == null ? "" : obj.toString();
     }
 
     /**
-     * 检查字符串是否为空或null
+     * Check if string is empty or null
      */
     public static boolean isEmpty(String str) {
         return StringUtils.isEmpty(str);
     }
 
     /**
-     * 检查字符串是否不为空
+     * Check if string is not empty
      */
     public static boolean isNotEmpty(String str) {
         return StringUtils.isNotEmpty(str);

@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * 插件管理器
+ * Plugin manager
  */
 @Slf4j
 @Component
@@ -46,7 +46,7 @@ public class PluginManager {
     private List<ProxyPlugin> proxyPlugins;
 
     /**
-     * 执行代理转发
+     * Execute proxy forwarding
      */
     public GatewayResponse executeProxy(GatewayRequest request, RouteConfig route) throws Exception {
         if (StringUtils.isBlank(route.getProtocol())) {
@@ -63,7 +63,7 @@ public class PluginManager {
     }
 
     /**
-     * 查找对应协议的代理插件
+     * Find the proxy plugin for the given protocol
      */
     private Optional<ProxyPlugin> findProxyPlugin(String protocol) {
         return proxyPlugins.stream()
@@ -72,7 +72,7 @@ public class PluginManager {
     }
 
     /**
-     * 确定代理目标
+     * Determine the proxy target
      */
     private String determineTarget(RouteConfig route) {
         switch (route.getProtocol()) {

@@ -10,28 +10,28 @@ package com.github.loadup.gateway.facade.model;
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
 
-import lombok.Data;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.util.Map;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 /**
- * 网关响应模型
+ * Gateway response model
  */
 @Data
 @Builder
@@ -40,47 +40,47 @@ import java.time.LocalDateTime;
 public class GatewayResponse {
 
     /**
-     * 请求ID
+     * Request ID
      */
     private String requestId;
 
     /**
-     * 状态码
+     * Status code
      */
     private int statusCode;
 
     /**
-     * 响应头
+     * Response headers
      */
     private Map<String, String> headers;
 
     /**
-     * 响应体
+     * Response body
      */
     private String body;
 
     /**
-     * 内容类型
+     * Content type
      */
     private String contentType;
 
     /**
-     * 响应时间
+     * Response time
      */
     private LocalDateTime responseTime;
 
     /**
-     * 处理时长(毫秒)
+     * Processing time in milliseconds
      */
     private long processingTime;
 
     /**
-     * 错误信息
+     * Error message
      */
     private String errorMessage;
 
     /**
-     * 扩展属性
+     * Extension attributes
      */
     private Map<String, Object> attributes;
 }

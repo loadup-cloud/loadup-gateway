@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 统一响应结果对象
+ * Unified response result object
  */
 @Data
 @Builder
@@ -14,16 +14,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Result {
     /**
-     * 业务码
+     * Business code
      */
     private String code;
     /**
-     * 状态
+     * Status
      */
     private String status;
     /**
-     * 提示信息
+     * Message
      */
     private String message;
 }
-
