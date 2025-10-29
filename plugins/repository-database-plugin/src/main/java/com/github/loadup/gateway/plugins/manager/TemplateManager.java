@@ -29,7 +29,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 /**
- * 模板数据库Repository
+ * Template database Repository
  */
 @Repository
 public interface TemplateManager extends CrudRepository<TemplateEntity, Long> {

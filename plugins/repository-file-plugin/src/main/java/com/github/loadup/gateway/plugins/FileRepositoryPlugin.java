@@ -54,7 +54,7 @@ import java.util.jar.JarFile;
 import java.util.stream.Stream;
 
 /**
- * 文件存储插件 - 使用CSV格式
+ * File storage plugin - Using CSV format
  */
 @Slf4j
 @Component

@@ -48,7 +48,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 /**
- * 数据库存储插件
+ * Database storage plugin
  */
 @Slf4j
 @Component

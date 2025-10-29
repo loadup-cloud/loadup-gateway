@@ -41,7 +41,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 
 /**
- * Spring Bean代理插件
+ * Spring Bean proxy plugin
  */
 @Slf4j
 @Component
@@ -77,7 +77,7 @@ public class SpringBeanProxyPlugin implements ProxyPlugin {
 
     @Override
     public GatewayResponse execute(GatewayRequest request) throws Exception {
-        // 这个方法在ProxyPlugin中不直接使用，而是通过proxy方法
+        // This method is not used directly in ProxyPlugin, but through proxy method
         throw GatewayExceptionFactory.operationNotSupported("Use proxy method instead");
     }
 
