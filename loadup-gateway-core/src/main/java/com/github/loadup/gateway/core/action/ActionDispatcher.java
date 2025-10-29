@@ -46,7 +46,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 /**
- * Action分发器
+ * Action dispatcher
  */
 @Slf4j
 @Component
@@ -68,16 +68,16 @@ public class ActionDispatcher {
     private ObjectMapper objectMapper;
 
     /**
-     * 分发请求到相应的处理器
+     * Dispatch request to appropriate handler
      */
     public GatewayResponse dispatch(GatewayRequest request) {
         StopWatch stopWatch = StopWatch.createStarted();
 
         try {
-            // 解析路由
+            // Resolve route
             Optional<RouteConfig> routeOpt = routeResolver.resolve(request);
             if (!routeOpt.isPresent()) {
-                // 使用统一异常处理构建404响应
+                // Use unified exception handling to build 404 response
                 RouteException routeException = GatewayExceptionFactory.routeNotFound(request.getPath());
                 return ExceptionHandler.handleException(request.getRequestId(), routeException,
                         stopWatch.getTime());
@@ -86,25 +86,25 @@ public class ActionDispatcher {
             RouteConfig route = routeOpt.get();
             log.debug("Route resolved: {} -> {}", request.getPath(), route.getRouteId());
 
-            // 请求预处理 - 应用请求模板
+            // Request preprocessing - Apply request template
             GatewayRequest processedRequest = preprocessRequest(request, route);
 
-            // 执行代理转发
+            // Execute proxy forwarding
             GatewayResponse response = executeProxy(processedRequest, route);
 
-            // 响应后处理 - 应用响应模板
+            // Response postprocessing - Apply response template
             GatewayResponse processedResponse = postprocessResponse(response, route);
 
             if (processedResponse.getResponseTime() == null) {
                 processedResponse.setResponseTime(LocalDateTime.now());
             }
 
-            // 设置处理时间
+            // Set processing time
             stopWatch.stop();
             long processingTime = stopWatch.getTime();
             processedResponse.setProcessingTime(processingTime);
 
-            // 统一响应格式处理
+            // Unified response format handling
             boolean wrap = gatewayProperties.getResponse() != null && gatewayProperties.getResponse().isWrap();
             if (route.getWrapResponse() != null) {
                 wrap = route.getWrapResponse();
@@ -116,11 +116,11 @@ public class ActionDispatcher {
             return processedResponse;
 
         } catch (GatewayException e) {
-            // 网关异常直接处理
+            // Handle gateway exception directly
             return ExceptionHandler.handleException(request.getRequestId(), e,
                     stopWatch.getTime());
         } catch (Exception e) {
-            // 其他异常包装后处理
+            // Wrap and handle other exceptions
             log.error("Request dispatch failed", e);
             GatewayException wrappedException = GatewayExceptionFactory.wrap(e, "DISPATCHER");
             return ExceptionHandler.handleException(request.getRequestId(), wrappedException,
@@ -129,7 +129,7 @@ public class ActionDispatcher {
     }
 
     /**
-     * 请求预处理
+     * Request preprocessing
      */
     private GatewayRequest preprocessRequest(GatewayRequest request, RouteConfig route) {
         if (route.getRequestTemplate() != null) {
@@ -144,22 +144,22 @@ public class ActionDispatcher {
     }
 
     /**
-     * 执行代理转发
+     * Execute proxy forwarding
      */
     private GatewayResponse executeProxy(GatewayRequest request, RouteConfig route) {
         try {
             return pluginManager.executeProxy(request, route);
         } catch (GatewayException e) {
-            // 网关异常直接抛出
+            // Throw gateway exception directly
             throw e;
         } catch (Exception e) {
             log.error("Proxy execution failed", e);
-            throw GatewayExceptionFactory.wrap(e, "PROXY_EXECUTION", "代理执行失败: " + route.getTarget());
+            throw GatewayExceptionFactory.wrap(e, "PROXY_EXECUTION", "Proxy execution failed: " + route.getTarget());
         }
     }
 
     /**
-     * 响应后处理
+     * Response postprocessing
      */
     private GatewayResponse postprocessResponse(GatewayResponse response, RouteConfig route) {
         if (route.getResponseTemplate() != null) {
@@ -174,12 +174,12 @@ public class ActionDispatcher {
     }
 
     /**
-     * 包装响应为统一格式
+     * Wrap response in unified format
      */
     private GatewayResponse wrapGatewayResponse(GatewayResponse response) {
         try {
             ObjectNode root = objectMapper.createObjectNode();
-            // 构建result对象
+            // Build result object
             Result result = Result.builder()
                     .code(String.valueOf(response.getStatusCode()))
                     .status(response.getStatusCode() == 200 ? "success" : "error")
@@ -187,7 +187,7 @@ public class ActionDispatcher {
                             ? response.getHeaders().get("X-Message") : "")
                     .build();
             root.set("result", objectMapper.valueToTree(result));
-            // 业务数据合并
+            // Merge business data
             if (response.getBody() != null && response.getContentType() != null && response.getContentType().contains("json")) {
                 try {
                     ObjectNode dataNode = (ObjectNode) objectMapper.readTree(response.getBody());
@@ -197,7 +197,7 @@ public class ActionDispatcher {
                         }
                     });
                 } catch (Exception e) {
-                    // body不是标准json，作为data字段返回
+                    // body is not standard json, return as data field
                     root.put("data", response.getBody());
                 }
             } else if (response.getBody() != null) {

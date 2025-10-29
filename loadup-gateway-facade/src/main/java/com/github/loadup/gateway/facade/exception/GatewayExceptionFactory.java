@@ -23,28 +23,28 @@ package com.github.loadup.gateway.facade.exception;
  */
 
 /**
- * 异常工厂类
- * 提供统一的异常创建方法
+ * Exception factory class
+ * Provides unified exception creation methods
  */
 public final class GatewayExceptionFactory {
 
     private GatewayExceptionFactory() {
-        // 工具类，不允许实例化
+        // Utility class, instantiation not allowed
     }
 
     /**
-     * 将标准异常包装为网关异常
+     * Wrap a standard exception as a gateway exception
      *
-     * @param cause 原始异常
-     * @param module 模块名称
-     * @return 包装后的网关异常
+     * @param cause Original exception
+     * @param module Module name
+     * @return Wrapped gateway exception
      */
     public static GatewayException wrap(Throwable cause, String module) {
         if (cause instanceof GatewayException) {
             return (GatewayException) cause;
         }
 
-        // 根据异常类型选择合适的错误码和类型
+        // Select appropriate error code and type based on exception type
         ErrorCode errorCode = mapToErrorCode(cause);
         ErrorType errorType = mapToErrorType(cause);
 
@@ -52,12 +52,12 @@ public final class GatewayExceptionFactory {
     }
 
     /**
-     * 将标准异常包装为网关异常（带自定义消息）
+     * Wrap a standard exception as a gateway exception (with custom message)
      *
-     * @param cause 原始异常
-     * @param module 模块名称
-     * @param message 自定义消息
-     * @return 包装后的网关异常
+     * @param cause Original exception
+     * @param module Module name
+     * @param message Custom message
+     * @return Wrapped gateway exception
      */
     public static GatewayException wrap(Throwable cause, String module, String message) {
         if (cause instanceof GatewayException) {
@@ -71,7 +71,7 @@ public final class GatewayExceptionFactory {
     }
 
     /**
-     * 创建路由异常
+     * Create route exception
      */
     public static RouteException routeNotFound(String path) {
         return RouteException.notFound(path);
@@ -82,7 +82,7 @@ public final class GatewayExceptionFactory {
     }
 
     /**
-     * 创建插件异常
+     * Create plugin exception
      */
     public static PluginException pluginNotFound(String pluginName) {
         return PluginException.notFound(pluginName);
@@ -93,7 +93,7 @@ public final class GatewayExceptionFactory {
     }
 
     /**
-     * 创建代理异常
+     * Create proxy exception
      */
     public static ProxyException beanNotFound(String beanName) {
         return ProxyException.beanNotFound(beanName);
@@ -120,7 +120,7 @@ public final class GatewayExceptionFactory {
     }
 
     /**
-     * 创建参数验证异常
+     * Create parameter validation exception
      */
     public static ValidationException paramRequired(String paramName) {
         return ValidationException.required(paramName);
@@ -131,7 +131,7 @@ public final class GatewayExceptionFactory {
     }
 
     /**
-     * 创建系统异常
+     * Create system exception
      */
     public static SystemException configurationError(String message) {
         return SystemException.configurationError(message);
@@ -146,7 +146,7 @@ public final class GatewayExceptionFactory {
     }
 
     /**
-     * 创建序列化异常
+     * Create serialization exception
      */
     public static SerializationException jsonParseError(String json, Throwable cause) {
         return SerializationException.jsonParseError(json, cause);
@@ -157,7 +157,7 @@ public final class GatewayExceptionFactory {
     }
 
     /**
-     * 创建模板异常
+     * Create template exception
      */
     public static TemplateException templateNotFound(String templateName) {
         return TemplateException.notFound(templateName);
@@ -167,7 +167,7 @@ public final class GatewayExceptionFactory {
         return TemplateException.executionError(templateName, cause);
     }
 
-    // 私有方法：根据异常类型映射到错误码
+    // Private method: Map exception type to error code
     private static ErrorCode mapToErrorCode(Throwable cause) {
         if (cause instanceof IllegalArgumentException) {
             return ErrorCode.PARAM_INVALID_FORMAT;
@@ -193,11 +193,11 @@ public final class GatewayExceptionFactory {
         if (cause instanceof com.fasterxml.jackson.core.JsonProcessingException) {
             return ErrorCode.JSON_PARSE_ERROR;
         }
-        // 默认返回内部错误
+        // Default return internal error
         return ErrorCode.INTERNAL_ERROR;
     }
 
-    // 私有方法：根据异常类型映射到错误类型
+    // Private method: Map exception type to error type
     private static ErrorType mapToErrorType(Throwable cause) {
         if (cause instanceof IllegalArgumentException || cause instanceof NullPointerException) {
             return ErrorType.VALIDATION;
@@ -213,7 +213,7 @@ public final class GatewayExceptionFactory {
         if (cause instanceof UnsupportedOperationException) {
             return ErrorType.SYSTEM;
         }
-        // 默认返回系统错误
+        // Default return system error
         return ErrorType.SYSTEM;
     }
 }

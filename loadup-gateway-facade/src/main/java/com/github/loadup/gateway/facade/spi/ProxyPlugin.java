@@ -26,17 +26,17 @@ import com.github.loadup.gateway.facade.model.GatewayRequest;
 import com.github.loadup.gateway.facade.model.GatewayResponse;
 
 /**
- * 代理插件SPI接口
+ * Proxy plugin SPI interface
  */
 public interface ProxyPlugin extends GatewayPlugin {
 
     /**
-     * 代理请求到目标服务
+     * Proxy request to target service
      */
     GatewayResponse proxy(GatewayRequest request, String target) throws Exception;
 
     /**
-     * 获取支持的协议类型
+     * Get supported protocol type
      */
     String getSupportedProtocol();
 }
