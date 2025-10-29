@@ -24,12 +24,14 @@ package com.github.loadup.gateway.plugins;
 
 import com.github.loadup.gateway.facade.config.GatewayProperties;
 import com.github.loadup.gateway.facade.constants.GatewayConstants;
+import com.github.loadup.gateway.facade.dto.RouteStructure;
 import com.github.loadup.gateway.facade.model.GatewayRequest;
 import com.github.loadup.gateway.facade.model.GatewayResponse;
 import com.github.loadup.gateway.facade.model.PluginConfig;
 import com.github.loadup.gateway.facade.model.RouteConfig;
 import com.github.loadup.gateway.facade.spi.RepositoryPlugin;
-import com.github.loadup.gateway.facade.utils.JsonUtils;
+import com.github.loadup.gateway.facade.utils.CommonUtils;
+import com.github.loadup.gateway.plugins.entity.FileRouteEntity;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 import jakarta.annotation.Resource;
@@ -252,32 +254,7 @@ public class FileRepositoryPlugin implements RepositoryPlugin {
         return false; // Repository plugin不直接处理请求
     }
 
-    @Override
-    public void saveRoute(RouteConfig routeConfig) throws Exception {
-        Path routesFile = Paths.get(basePath, ROUTES_FILE);
-
-        // 读取现有路由
-        List<RouteConfig> routes = getAllRoutes();
-
-        // 更新或添加路由
-        boolean updated = false;
-        for (int i = 0; i < routes.size(); i++) {
-            if (routes.get(i).getRouteId().equals(routeConfig.getRouteId())) {
-                routes.set(i, routeConfig);
-                updated = true;
-                break;
-            }
-        }
-
-        if (!updated) {
-            routes.add(routeConfig);
-        }
-
-        // 写回文件
-        writeRoutesToFile(routesFile, routes);
-        log.info("Route saved: {}", routeConfig.getRouteId());
-    }
-
+    
     @Override
     public Optional<RouteConfig> getRoute(String routeId) throws Exception {
         return getAllRoutes().stream().filter(route -> route.getRouteId().equals(routeId)).findFirst();
@@ -408,112 +385,36 @@ public class FileRepositoryPlugin implements RepositoryPlugin {
 
         // 最新格式：path,method,target,requestTemplate,responseTemplate,enabled,properties
         if (line.length >= 3) {
-            Map<String, Object> properties = new HashMap<>();
-
-            // 解析 properties 字段（支持键值对和JSON格式）
-            if (line.length > 6 && line[6] != null && !line[6].trim().isEmpty()) {
-                try {
-                    properties = parseProperties(line[6]);
-                } catch (Exception e) {
-                    log.warn("Failed to parse properties: {}", line[6], e);
-                }
+            // Build a FileRouteEntity DTO and delegate conversion to convertToRouteConfig
+            FileRouteEntity entity = new FileRouteEntity();
+            entity.setPath(line[0]);
+            entity.setMethod(line[1]);
+            entity.setTarget(line[2]);
+            entity.setRequestTemplate(line.length > 3 ? line[3] : "");
+            entity.setResponseTemplate(line.length > 4 ? line[4] : "");
+            if (line.length > 5 && line[5] != null && !line[5].isEmpty()) {
+                entity.setEnabled(Boolean.parseBoolean(line[5]));
+            } else {
+                entity.setEnabled(null); // unspecified
+            }
+            if (line.length > 6) {
+                entity.setProperties(line[6]);
+            } else {
+                entity.setProperties(null);
             }
 
-            return RouteConfig.builder().path(line[0]).method(line[1]).target(line[2]).requestTemplate(line.length > 3 ? line[3] : "").responseTemplate(line.length > 4 ? line[4] : "").enabled(line.length <= 5 || Boolean.parseBoolean(line[5])).properties(properties).build();
+            try {
+                return convertToRouteConfig(entity);
+            } catch (Exception e) {
+                log.warn("Failed to convert CSV row to RouteConfig: {}", e.getMessage());
+                return null;
+            }
         }
 
 
         return null;
     }
 
-
-    /**
-     * 简单的属性解析器（支持键值对格式）
-     */
-    private Map<String, Object> parseProperties(String propertiesStr) {
-        Map<String, Object> result = new HashMap<>();
-
-        if (propertiesStr == null || propertiesStr.trim().isEmpty()) {
-            return result;
-        }
-
-        String trimmed = propertiesStr.trim();
-
-        // 检查是否是 JSON 格式
-        if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
-            return JsonUtils.toMap(trimmed);
-        }
-
-        // 解析键值对格式：timeout=30000;retryCount=3 (使用分号分隔)
-        String[] pairs = trimmed.split(";");
-
-        for (String pair : pairs) {
-            String[] keyValue = pair.trim().split("=");
-            if (keyValue.length == 2) {
-                String key = keyValue[0].trim();
-                String value = keyValue[1].trim();
-
-                // 尝试转换为合适的数据类型
-                try {
-                    if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
-                        result.put(key, Boolean.parseBoolean(value));
-                    } else if (value.contains(".")) {
-                        result.put(key, Double.parseDouble(value));
-                    } else {
-                        result.put(key, Long.parseLong(value));
-                    }
-                } catch (NumberFormatException e) {
-                    // 保持为字符串
-                    result.put(key, value);
-                }
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * 生成 properties 字符串（使用分号分隔的键值对格式）
-     */
-    private String generatePropertiesString(RouteConfig route) {
-        Map<String, Object> properties = route.getProperties();
-        if (properties == null || properties.isEmpty()) {
-            // 生成默认的 properties
-            return "timeout=30000;retryCount=3";
-        }
-
-        StringBuilder result = new StringBuilder();
-        boolean first = true;
-
-        for (Map.Entry<String, Object> entry : properties.entrySet()) {
-            if (!first) {
-                result.append(";");
-            }
-            result.append(entry.getKey()).append("=").append(entry.getValue());
-            first = false;
-        }
-
-        return result.toString();
-    }
-
-    @Override
-    public void deleteRoute(String routeId) throws Exception {
-        List<RouteConfig> routes = getAllRoutes();
-        routes.removeIf(route -> route.getRouteId().equals(routeId));
-
-        Path routesFile = Paths.get(basePath, ROUTES_FILE);
-        writeRoutesToFile(routesFile, routes);
-        log.info("Route deleted: {}", routeId);
-    }
-
-    @Override
-    public void saveTemplate(String templateId, String templateType, String content) throws Exception {
-        String fileName = templateId + "_" + templateType.toLowerCase() + ".groovy";
-        Path templateFile = Paths.get(basePath, TEMPLATES_DIR, fileName);
-
-        FileUtils.writeStringToFile(templateFile.toFile(), content, "UTF-8");
-        log.info("Template saved: {} ({})", templateId, templateType);
-    }
 
     @Override
     public Optional<String> getTemplate(String templateId, String templateType) throws Exception {
@@ -528,20 +429,23 @@ public class FileRepositoryPlugin implements RepositoryPlugin {
         return Optional.empty();
     }
 
-    @Override
-    public void deleteTemplate(String templateId, String templateType) throws Exception {
-        String fileName = templateId + "_" + templateType.toLowerCase() + ".groovy";
-        Path templateFile = Paths.get(basePath, TEMPLATES_DIR, fileName);
-
-        if (Files.exists(templateFile)) {
-            Files.delete(templateFile);
-            log.info("Template deleted: {} ({})", templateId, templateType);
-        }
-    }
 
     @Override
     public String getSupportedStorageType() {
         return GatewayConstants.Storage.FILE;
+    }
+
+    @Override
+    public RouteConfig convertToRouteConfig(RouteStructure structure) throws Exception {
+        if (!(structure instanceof FileRouteEntity entity)) {
+            throw new IllegalArgumentException("Invalid RouteStructure type");
+        }
+
+        Map<String, Object> properties = CommonUtils.propertiesToMap(entity.getProperties());
+
+        boolean enabled = Boolean.TRUE.equals(entity.getEnabled()) || entity.getEnabled() == null;
+
+        return RouteConfig.builder().path(entity.getPath()).method(entity.getMethod() != null ? entity.getMethod() : "POST").target(entity.getTarget()).requestTemplate(entity.getRequestTemplate()).responseTemplate(entity.getResponseTemplate()).enabled(enabled).properties(properties).build();
     }
 
     /**
@@ -552,75 +456,6 @@ public class FileRepositoryPlugin implements RepositoryPlugin {
             String[] headers = {"path", "method", "target", "requestTemplate", "responseTemplate", "enabled", "properties"};
             writer.writeNext(headers);
         }
-    }
-
-    /**
-     * 写入路由到文件
-     */
-    private void writeRoutesToFile(Path routesFile, List<RouteConfig> routes) throws IOException {
-        try (CSVWriter writer = new CSVWriter(new FileWriter(routesFile.toFile()))) {
-            // 写入头部 - 使用最新的 properties 格式
-            String[] headers = {"path", "method", "target", "requestTemplate", "responseTemplate", "enabled", "properties"};
-            writer.writeNext(headers);
-
-            // 写入数据
-            for (RouteConfig route : routes) {
-                // 生成 properties 字符串（使用分号分隔格式）
-                String propertiesStr = generatePropertiesString(route);
-
-                // Ensure we don't persist raw template bodies into CSV: if template appears to be content, save it as a template file and reference its id instead
-                String reqField = route.getRequestTemplate() != null ? route.getRequestTemplate() : "";
-                String respField = route.getResponseTemplate() != null ? route.getResponseTemplate() : "";
-
-                try {
-                    if (looksLikeTemplateContent(reqField)) {
-                        String tplId = route.getRouteId() + "_req";
-                        // saveTemplate may throw; catch and fallback to writing raw
-                        try {
-                            saveTemplate(tplId, "request", reqField);
-                            reqField = tplId; // store id in CSV
-                        } catch (Exception e) {
-                            log.warn("Failed to save request template for route {}: {}", route.getRouteId(), e.getMessage());
-                        }
-                    }
-                } catch (Exception ignored) {
-                }
-
-                try {
-                    if (looksLikeTemplateContent(respField)) {
-                        String tplId = route.getRouteId() + "_resp";
-                        try {
-                            saveTemplate(tplId, "response", respField);
-                            respField = tplId;
-                        } catch (Exception e) {
-                            log.warn("Failed to save response template for route {}: {}", route.getRouteId(), e.getMessage());
-                        }
-                    }
-                } catch (Exception ignored) {
-                }
-
-                String[] data = {route.getPath(), route.getMethod(), route.getTarget() != null ? route.getTarget() : "", reqField, respField, String.valueOf(route.isEnabled()), propertiesStr};
-                writer.writeNext(data);
-            }
-        }
-    }
-
-    /**
-     * Heuristic to decide whether a template field is full content rather than a short id/filename.
-     */
-    private boolean looksLikeTemplateContent(String s) {
-        if (s == null) return false;
-        String t = s.trim();
-        if (t.isEmpty()) return false;
-        // If it contains newline or Groovy/JS keywords, looks like content
-        if (t.contains("\n") || t.contains("\r")) return true;
-        if (t.length() > 200) return true; // long text -> content
-        String lower = t.toLowerCase();
-        if (lower.contains("def ") || lower.contains("return ") || lower.contains("class ") || lower.contains("package ") || lower.contains("function "))
-            return true;
-        // If it contains symbols typical for templates, treat as content
-        if (t.contains("{") || t.contains("}") || t.contains("$")) return true;
-        return false;
     }
 }
 

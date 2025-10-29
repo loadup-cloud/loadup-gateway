@@ -22,6 +22,7 @@ package com.github.loadup.gateway.facade.spi;
  * #L%
  */
 
+import com.github.loadup.gateway.facade.dto.RouteStructure;
 import com.github.loadup.gateway.facade.model.RouteConfig;
 
 import java.util.List;
@@ -31,11 +32,6 @@ import java.util.Optional;
  * 存储插件SPI接口
  */
 public interface RepositoryPlugin extends GatewayPlugin {
-
-    /**
-     * 保存路由配置
-     */
-    void saveRoute(RouteConfig routeConfig) throws Exception;
 
     /**
      * 根据路由ID获取路由配置
@@ -53,27 +49,18 @@ public interface RepositoryPlugin extends GatewayPlugin {
     List<RouteConfig> getAllRoutes() throws Exception;
 
     /**
-     * 删除路由配置
-     */
-    void deleteRoute(String routeId) throws Exception;
-
-    /**
-     * 保存模板
-     */
-    void saveTemplate(String templateId, String templateType, String content) throws Exception;
-
-    /**
      * 获取模板
      */
     Optional<String> getTemplate(String templateId, String templateType) throws Exception;
 
     /**
-     * 删除模板
-     */
-    void deleteTemplate(String templateId, String templateType) throws Exception;
-
-    /**
      * 获取支持的存储类型
      */
     String getSupportedStorageType();
+
+    /**
+     *
+     * @return
+     */
+    RouteConfig convertToRouteConfig(RouteStructure structure) throws Exception;
 }

@@ -2,7 +2,7 @@ package com.github.loadup.gateway.plugins.entity;
 
 /*-
  * #%L
- * Repository Database Plugin
+ * Repository File Plugin
  * %%
  * Copyright (C) 2025 LoadUp Gateway Authors
  * %%
@@ -25,64 +25,23 @@ package com.github.loadup.gateway.plugins.entity;
 import com.github.loadup.gateway.facade.dto.RouteStructure;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.relational.core.mapping.Table;
-
-import java.time.LocalDateTime;
 
 /**
- * 路由实体
+ * Simple DTO representing a CSV route row in the file repository.
  */
 @Getter
 @Setter
-@Table("gateway_routes")
-public class RouteEntity extends RouteStructure {
-    //path,method,target,requestTemplate,responseTemplate,enabled,properties
-    /**
-     * id
-     */
-    @Id
+public class FileRouteEntity extends RouteStructure {
     private String routeId;
-    /**
-     * name
-     */
-    private String routeName;
-    /**
-     * request path
-     */
     private String path;
-    /**
-     * request method
-     * GET, POST, PUT, DELETE, etc.
-     */
     private String method;
-    /**
-     * http://..., bean://service:method, rpc://class:method:version
-     */
     private String target;
-    /**
-     * request template
-     */
     private String requestTemplate;
-    /**
-     * response template
-     */
     private String responseTemplate;
-    /**
-     * enabled status
-     */
     private Boolean enabled;
     /**
-     * additional properties
+     * Raw properties string as persisted in CSV (either JSON or key=value;...)
      */
     private String properties;
-    /**
-     * updated at
-     */
-    private LocalDateTime updatedAt;
-    /**
-     * created at
-     */
-    private LocalDateTime createdAt;
-
 }
+

@@ -70,21 +70,6 @@ public class FileRepositoryPluginTest extends BaseGatewayTest {
         fileRepositoryPlugin.initialize(config);
     }
 
-    @Test
-    @DisplayName("应该能够保存和获取路由配置")
-    public void shouldSaveAndGetRouteConfig() throws Exception {
-        // Given
-        RouteConfig route = createTestRoute("/api/test", "GET",
-                "http://localhost:8080");
-        // When
-        fileRepositoryPlugin.saveRoute(route);
-        Optional<RouteConfig> result = fileRepositoryPlugin.getRoute(route.getRouteId());
-
-        // Then
-        assertTrue(result.isPresent());
-        assertEquals("/api/test", result.get().getPath());
-        assertEquals(GatewayConstants.Protocol.HTTP, result.get().getProtocol());
-    }
 
     @Test
     @DisplayName("应该能够通过路径和方法获取路由")
@@ -94,7 +79,6 @@ public class FileRepositoryPluginTest extends BaseGatewayTest {
                 "userService:getUser");
 
         // When
-        fileRepositoryPlugin.saveRoute(route);
         Optional<RouteConfig> result = fileRepositoryPlugin.getRouteByPath("/api/user", "GET");
 
         // Then
@@ -114,8 +98,6 @@ public class FileRepositoryPluginTest extends BaseGatewayTest {
                 "testService:getData");
 
         // When
-        fileRepositoryPlugin.saveRoute(route1);
-        fileRepositoryPlugin.saveRoute(route2);
         List<RouteConfig> routes = fileRepositoryPlugin.getAllRoutes();
 
         // Then
@@ -132,10 +114,8 @@ public class FileRepositoryPluginTest extends BaseGatewayTest {
                 "http://localhost:8080");
 
         // When
-        fileRepositoryPlugin.saveRoute(route);
         assertTrue(fileRepositoryPlugin.getRoute(route.getRouteId()).isPresent());
 
-        fileRepositoryPlugin.deleteRoute(route.getRouteId());
         Optional<RouteConfig> result = fileRepositoryPlugin.getRoute(route.getRouteId());
 
         // Then
@@ -155,7 +135,6 @@ public class FileRepositoryPluginTest extends BaseGatewayTest {
                 """;
 
         // When
-        fileRepositoryPlugin.saveTemplate(templateId, templateType, templateContent);
         Optional<String> result = fileRepositoryPlugin.getTemplate(templateId, templateType);
 
         // Then
@@ -173,10 +152,8 @@ public class FileRepositoryPluginTest extends BaseGatewayTest {
         String templateContent = "return response";
 
         // When
-        fileRepositoryPlugin.saveTemplate(templateId, templateType, templateContent);
         assertTrue(fileRepositoryPlugin.getTemplate(templateId, templateType).isPresent());
 
-        fileRepositoryPlugin.deleteTemplate(templateId, templateType);
         Optional<String> result = fileRepositoryPlugin.getTemplate(templateId, templateType);
 
         // Then

@@ -23,6 +23,7 @@ package com.github.loadup.gateway.plugins;
  */
 
 import com.github.loadup.gateway.facade.constants.GatewayConstants;
+import com.github.loadup.gateway.facade.dto.RouteStructure;
 import com.github.loadup.gateway.facade.model.GatewayRequest;
 import com.github.loadup.gateway.facade.model.GatewayResponse;
 import com.github.loadup.gateway.facade.model.PluginConfig;
@@ -39,7 +40,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -99,50 +103,25 @@ public class DatabaseRepositoryPlugin implements RepositoryPlugin {
         return false;
     }
 
-    @Override
-    public void saveRoute(RouteConfig routeConfig) throws Exception {
-        RouteEntity entity = routeMapper.toEntity(routeConfig);
-        routeManager.save(entity);
-        log.info("Route saved to database: {}", routeConfig.getRouteId());
-    }
 
     @Override
     public Optional<RouteConfig> getRoute(String routeId) throws Exception {
         Optional<RouteEntity> entity = routeManager.findByRouteId(routeId);
-        return entity.map(this::convertToModel);
+        return entity.map(this::convertToRouteConfig);
     }
 
     @Override
     public Optional<RouteConfig> getRouteByPath(String path, String method) throws Exception {
         Optional<RouteEntity> entity = routeManager.findByPathAndMethod(path, method);
-        return entity.map(this::convertToModel);
+        return entity.map(this::convertToRouteConfig);
     }
 
     @Override
     public List<RouteConfig> getAllRoutes() throws Exception {
         Iterable<RouteEntity> entities = routeManager.findAll();
-        return StreamSupport.stream(entities.spliterator(), false)
-                .map(this::convertToModel)
-                .collect(Collectors.toList());
+        return StreamSupport.stream(entities.spliterator(), false).map(this::convertToRouteConfig).collect(Collectors.toList());
     }
 
-    @Override
-    public void deleteRoute(String routeId) throws Exception {
-        routeManager.deleteByRouteId(routeId);
-        log.info("Route deleted from database: {}", routeId);
-    }
-
-    @Override
-    public void saveTemplate(String templateId, String templateType, String content) throws Exception {
-        TemplateEntity entity = new TemplateEntity();
-        entity.setTemplateId(templateId);
-        entity.setTemplateType(templateType);
-        entity.setContent(content);
-        entity.setUpdatedAt(new Date());
-
-        templateManager.save(entity);
-        log.info("Template saved to database: {} ({})", templateId, templateType);
-    }
 
     @Override
     public Optional<String> getTemplate(String templateId, String templateType) throws Exception {
@@ -150,21 +129,17 @@ public class DatabaseRepositoryPlugin implements RepositoryPlugin {
         return entity.map(TemplateEntity::getContent);
     }
 
-    @Override
-    public void deleteTemplate(String templateId, String templateType) throws Exception {
-        templateManager.deleteByTemplateIdAndTemplateType(templateId, templateType);
-        log.info("Template deleted from database: {} ({})", templateId, templateType);
-    }
-
+   
     @Override
     public String getSupportedStorageType() {
         return GatewayConstants.Storage.DATABASE;
     }
 
-    /**
-     * 转换为模型
-     */
-    private RouteConfig convertToModel(RouteEntity entity) {
+    @Override
+    public RouteConfig convertToRouteConfig(RouteStructure structure) {
+        if (!(structure instanceof RouteEntity entity)) {
+            throw new IllegalArgumentException("Invalid RouteStructure type");
+        }
         Map<String, Object> properties = new HashMap<>();
         String propertiesStr = entity.getProperties();
         if (StringUtils.isNotBlank(propertiesStr)) {
@@ -211,16 +186,10 @@ public class DatabaseRepositoryPlugin implements RepositoryPlugin {
 
         boolean enabled = Boolean.TRUE.equals(entity.getEnabled());
 
-        RouteConfig config = RouteConfig.builder()
-                .path(entity.getPath())
-                .method(entity.getMethod())
-                .target(entity.getTarget())
-                .requestTemplate(entity.getRequestTemplate())
-                .responseTemplate(entity.getResponseTemplate())
-                .enabled(enabled)
-                .properties(properties)
-                .build();
+        RouteConfig config = RouteConfig.builder().path(entity.getPath()).method(entity.getMethod()).target(entity.getTarget()).requestTemplate(entity.getRequestTemplate()).responseTemplate(entity.getResponseTemplate()).enabled(enabled).properties(properties).build();
 
         return config;
     }
+
+
 }

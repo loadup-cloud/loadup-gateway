@@ -25,6 +25,8 @@ package com.github.loadup.gateway.facade.utils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.security.SecureRandom;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -106,5 +108,43 @@ public final class CommonUtils {
      */
     public static boolean isNotEmpty(String str) {
         return StringUtils.isNotEmpty(str);
+    }
+
+    public static Map<String, Object> propertiesToMap(String propertiesStr) {
+        Map<String, Object> properties = new HashMap<>();
+        try {
+            if (propertiesStr != null && !propertiesStr.trim().isEmpty()) {
+                String trimmed = propertiesStr.trim();
+
+                // JSON format
+                if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
+                    properties = JsonUtils.toMap(trimmed);
+                } else {
+                    // key=value;... format
+                    String[] pairs = trimmed.split(";");
+                    for (String pair : pairs) {
+                        String[] keyValue = pair.trim().split("=");
+                        if (keyValue.length == 2) {
+                            String key = keyValue[0].trim();
+                            String value = keyValue[1].trim();
+                            try {
+                                if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
+                                    properties.put(key, Boolean.parseBoolean(value));
+                                } else if (value.contains(".")) {
+                                    properties.put(key, Double.parseDouble(value));
+                                } else {
+                                    properties.put(key, Long.parseLong(value));
+                                }
+                            } catch (NumberFormatException e) {
+                                properties.put(key, value);
+                            }
+                        }
+                    }
+                }
+
+            }
+        } catch (Exception e) {
+        }
+        return properties;
     }
 }
