@@ -31,6 +31,14 @@
             <groupId>com.github.loadup</groupId>
             <artifactId>proxy-springbean-plugin</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.github.loadup</groupId>
+            <artifactId>proxy-http-plugin</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.loadup</groupId>
+            <artifactId>proxy-rpc-plugin</artifactId>
+        </dependency>
 
         <!-- Spring Boot Starter -->
         <dependency>

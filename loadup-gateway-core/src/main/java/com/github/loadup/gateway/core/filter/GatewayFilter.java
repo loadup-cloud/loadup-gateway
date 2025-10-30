@@ -176,22 +176,46 @@ public class GatewayFilter implements Filter {
 
         response.setStatus(gatewayResponse.getStatusCode());
 
-        // Set response headers
+        // Set response headers, but don't forward hop-by-hop or conflicting headers that the servlet container
+        // should manage (for example Content-Length or Transfer-Encoding) — forwarding an incorrect
+        // Content-Length from upstream can cause the client to receive truncated body.
         if (gatewayResponse.getHeaders() != null) {
-            gatewayResponse.getHeaders().forEach(response::setHeader);
+            gatewayResponse.getHeaders().forEach((k, v) -> {
+                if (k == null || v == null) return;
+                String lower = k.toLowerCase(Locale.ROOT);
+                if ("content-length".equals(lower) || "transfer-encoding".equals(lower)) {
+                    // skip these; container will set proper values
+                    return;
+                }
+                response.setHeader(k, v);
+            });
         }
 
-        // Set content type
+        // Set content type and ensure charset where appropriate (default to UTF-8 for JSON/text)
         if (gatewayResponse.getContentType() != null) {
             response.setContentType(gatewayResponse.getContentType());
+            String currentEncoding = response.getCharacterEncoding();
+            if ((currentEncoding == null || currentEncoding.isEmpty())) {
+                String ct = gatewayResponse.getContentType().toLowerCase(Locale.ROOT);
+                if (ct.startsWith("application/json") || ct.startsWith("text/") || ct.contains("json") || ct.contains("text")) {
+                    response.setCharacterEncoding("UTF-8");
+                }
+            }
+        } else {
+            // If no content type provided but body looks like JSON, default to application/json;charset=UTF-8
+            if (gatewayResponse.getBody() != null && gatewayResponse.getBody().trim().startsWith("{")) {
+                response.setContentType("application/json;charset=UTF-8");
+            }
         }
 
-        // Write body
+        // Write body using the writer (body is modeled as String). Flushing after write ensures data is sent.
         if (gatewayResponse.getBody() != null) {
             response.getWriter().write(gatewayResponse.getBody());
+            response.getWriter().flush();
+        } else {
+            // ensure writer is flushed even if no body
+            response.getWriter().flush();
         }
-
-        response.getWriter().flush();
     }
 
     /**
