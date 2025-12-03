@@ -12,20 +12,21 @@
     <name>LoadUp Gateway</name>
     <description>A flexible gateway framework with plugin architecture</description>
 
+    <inceptionYear>2026</inceptionYear>
     <properties>
         <java.version>17</java.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <spring-boot.version>3.2.0</spring-boot.version>
-        <lombok.version>1.18.30</lombok.version>
-        <jackson.version>2.15.3</jackson.version>
+        <spring-boot.version>3.5.8</spring-boot.version>
+        <lombok.version>1.18.42</lombok.version>
+        <jackson.version>2.19.4</jackson.version>
         <vavr.version>0.10.4</vavr.version>
         <org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
         <guava.version>32.1.3-jre</guava.version>
-        <commons-lang3.version>3.13.0</commons-lang3.version>
-        <commons-collections4.version>4.4</commons-collections4.version>
+        <commons-lang3.version>3.20.0</commons-lang3.version>
+        <commons-collections4.version>4.5.0</commons-collections4.version>
         <commons-io.version>2.15.0</commons-io.version>
         <velocity.version>2.3</velocity.version>
         <groovy.version>4.0.15</groovy.version>
@@ -211,48 +212,17 @@
                     </annotationProcessorPaths>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.4.0</version>
-                <executions>
-                    <execution>
-                        <id>create-build-year</id>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>timestamp-property</goal>
-                        </goals>
-                        <configuration>
-                            <name>buildYear</name>
-                            <pattern>yyyy</pattern>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>license-maven-plugin</artifactId>
                 <version>2.7.0</version>
                 <configuration>
-                    <header>${license.header.file}</header>
                     <organizationName>LoadUp Cloud</organizationName>
-                    <inceptionYear>${buildYear}</inceptionYear>
-                    <properties>
-                        <year>${buildYear}</year>
-                    </properties>
                     <licenseName>gpl_v3</licenseName>
                     <includes>
                         <include>**/*.java</include>
-                        <include>**/*.xml</include>
-                        <include>**/*.properties</include>
-                        <include>**/*.yml</include>
                     </includes>
-                    <mapping>
-                        <java>SLASHSTAR_STYLE</java>
-                        <xml>XML_STYLE</xml>
-                        <yml>SH_STYLE</yml>
-                        <properties>SH_STYLE</properties>
-                    </mapping>
                 </configuration>
                 <executions>
                     <execution>
