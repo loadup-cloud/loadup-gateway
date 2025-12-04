@@ -28,17 +28,10 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: 'maven'
+          cache-dependency-path: 'pom.xml'
           server-id: 'github'
           server-username: GITHUB_ACTOR
           server-password: GITHUB_TOKEN
-
-      - name: Show generated Maven settings (password masked)
-        run: |
-          if [ -f "$HOME/.m2/settings.xml" ]; then
-            sed 's/<password>.*<\/password>/<password>***<\/password>/' "$HOME/.m2/settings.xml" | sed -n '1,200p'
-          else
-            echo 'no settings.xml found'
-          fi
 
       - name: Build and package with Maven
         run: mvn clean verify  -DskipTests
