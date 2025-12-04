@@ -38,11 +38,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.github.loadup</groupId>
-            <artifactId>repository-database-plugin</artifactId>
-            <scope>test</scope>
-        </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>com.github.loadup</groupId>-->
+        <!--            <artifactId>repository-database-plugin</artifactId>-->
+        <!--            <scope>test</scope>-->
+        <!--        </dependency>-->
         <dependency>
             <groupId>com.github.loadup</groupId>
             <artifactId>repository-file-plugin</artifactId>
@@ -52,6 +52,11 @@
             <groupId>com.github.loadup</groupId>
             <artifactId>proxy-springbean-plugin</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
         </dependency>
     </dependencies>
 
