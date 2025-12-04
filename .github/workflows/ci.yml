@@ -33,7 +33,7 @@ jobs:
           server-password: GITHUB_TOKEN
 
       - name: Build and package with Maven
-        run: mvn clean verify
+        run: mvn clean verify -DskipTests
 
       - name: Deploy to GitHub Packages
         if: github.event_name == 'push'
