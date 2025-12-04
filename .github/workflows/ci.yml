@@ -39,9 +39,9 @@ jobs:
           else
             echo 'no settings.xml found'
           fi
-          
+
       - name: Build and package with Maven
-        run: mvn clean verify mvn clean verify -DskipTests
+        run: mvn clean verify  -DskipTests
 
       - name: Deploy to GitHub Packages
         if: github.event_name == 'push'
