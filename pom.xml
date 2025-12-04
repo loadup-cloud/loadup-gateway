@@ -30,8 +30,8 @@
         <commons-io.version>2.15.0</commons-io.version>
         <velocity.version>2.3</velocity.version>
         <groovy.version>4.0.15</groovy.version>
-        <opencsv.version>5.8</opencsv.version>
-        <mysql.version>8.0.33</mysql.version>
+        <opencsv.version>5.12.0</opencsv.version>
+        <mysql.version>9.5.0</mysql.version>
         <dubbo.version>3.2.8</dubbo.version>
         <junit.version>5.10.0</junit.version>
         <license.header.file>${project.basedir}/license-header.txt</license.header.file>
