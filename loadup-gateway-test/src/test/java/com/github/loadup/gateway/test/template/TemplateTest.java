@@ -27,10 +27,10 @@ import com.github.loadup.gateway.test.GatewayTestApplication;
 import com.github.loadup.testify.core.annotation.TestBean;
 import com.github.loadup.testify.core.base.TestifyTestBase;
 import com.github.loadup.testify.core.model.PrepareData;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.testng.annotations.Test;
-
 
 /**
  * Template functionality specialTest
@@ -40,8 +40,8 @@ import org.testng.annotations.Test;
 public class TemplateTest extends TestifyTestBase {
 
     @TestBean
+    @Autowired
     private TemplateEngine templateEngine;
-
 
     @Test(dataProvider = "TestifyProvider")
     public void processRequestTemplate(String caseId, PrepareData prepareData) {
