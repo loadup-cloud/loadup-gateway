@@ -24,10 +24,7 @@ package com.github.loadup.gateway.plugins;
 
 import com.github.loadup.gateway.facade.constants.GatewayConstants;
 import com.github.loadup.gateway.facade.dto.RouteStructure;
-import com.github.loadup.gateway.facade.model.GatewayRequest;
-import com.github.loadup.gateway.facade.model.GatewayResponse;
-import com.github.loadup.gateway.facade.model.PluginConfig;
-import com.github.loadup.gateway.facade.model.RouteConfig;
+import com.github.loadup.gateway.facade.model.*;
 import com.github.loadup.gateway.facade.spi.RepositoryPlugin;
 import com.github.loadup.gateway.facade.utils.JsonUtils;
 import com.github.loadup.gateway.plugins.entity.RouteEntity;
@@ -38,12 +35,10 @@ import com.github.loadup.gateway.plugins.mapper.RouteMapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -52,6 +47,7 @@ import java.util.stream.StreamSupport;
  */
 @Slf4j
 @Component
+@ConditionalOnProperty(prefix = "loadup.gateway.storage", name = "type", havingValue = "DATABASE")
 public class DatabaseRepositoryPlugin implements RepositoryPlugin {
 
     @Resource
@@ -103,7 +99,6 @@ public class DatabaseRepositoryPlugin implements RepositoryPlugin {
         return false;
     }
 
-
     @Override
     public Optional<RouteConfig> getRoute(String routeId) throws Exception {
         Optional<RouteEntity> entity = routeManager.findByRouteId(routeId);
@@ -122,14 +117,12 @@ public class DatabaseRepositoryPlugin implements RepositoryPlugin {
         return StreamSupport.stream(entities.spliterator(), false).map(this::convertToRouteConfig).collect(Collectors.toList());
     }
 
-
     @Override
     public Optional<String> getTemplate(String templateId, String templateType) throws Exception {
         Optional<TemplateEntity> entity = templateManager.findByTemplateIdAndTemplateType(templateId, templateType);
         return entity.map(TemplateEntity::getContent);
     }
 
-   
     @Override
     public String getSupportedStorageType() {
         return GatewayConstants.Storage.DATABASE;
@@ -175,7 +168,6 @@ public class DatabaseRepositoryPlugin implements RepositoryPlugin {
             }
         }
 
-
         // Ensure properties Contains in timeout And retryCount
         if (!properties.containsKey("timeout")) {
             properties.put("timeout", 30000L);
@@ -186,10 +178,11 @@ public class DatabaseRepositoryPlugin implements RepositoryPlugin {
 
         boolean enabled = Boolean.TRUE.equals(entity.getEnabled());
 
-        RouteConfig config = RouteConfig.builder().path(entity.getPath()).method(entity.getMethod()).target(entity.getTarget()).requestTemplate(entity.getRequestTemplate()).responseTemplate(entity.getResponseTemplate()).enabled(enabled).properties(properties).build();
+        RouteConfig config = RouteConfig.builder().path(entity.getPath()).method(entity.getMethod()).target(entity.getTarget())
+                .requestTemplate(entity.getRequestTemplate()).responseTemplate(entity.getResponseTemplate()).enabled(enabled).properties(
+                        properties).build();
 
         return config;
     }
-
 
 }

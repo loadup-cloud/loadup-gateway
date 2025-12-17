@@ -25,10 +25,7 @@ package com.github.loadup.gateway.plugins;
 import com.github.loadup.gateway.facade.config.GatewayProperties;
 import com.github.loadup.gateway.facade.constants.GatewayConstants;
 import com.github.loadup.gateway.facade.dto.RouteStructure;
-import com.github.loadup.gateway.facade.model.GatewayRequest;
-import com.github.loadup.gateway.facade.model.GatewayResponse;
-import com.github.loadup.gateway.facade.model.PluginConfig;
-import com.github.loadup.gateway.facade.model.RouteConfig;
+import com.github.loadup.gateway.facade.model.*;
 import com.github.loadup.gateway.facade.spi.RepositoryPlugin;
 import com.github.loadup.gateway.facade.utils.CommonUtils;
 import com.github.loadup.gateway.plugins.entity.FileRouteEntity;
@@ -37,17 +34,13 @@ import com.opencsv.CSVWriter;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.JarURLConnection;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -58,14 +51,15 @@ import java.util.stream.Stream;
  */
 @Slf4j
 @Component
+@ConditionalOnProperty(prefix = "loadup.gateway.storage", name = "type", havingValue = "FILE", matchIfMissing = true)
 public class FileRepositoryPlugin implements RepositoryPlugin {
 
     // basePath will be resolved during initialize. Default source is classpath:/gateway-config
-    private String basePath = null; // resolved filesystem directory
-    private final String ROUTES_FILE = "routes.csv";
-    private final String TEMPLATES_DIR = "templates";
+    private       String            basePath      = null; // resolved filesystem directory
+    private final String            ROUTES_FILE   = "routes.csv";
+    private final String            TEMPLATES_DIR = "templates";
     @Resource
-    private GatewayProperties gatewayProperties;
+    private       GatewayProperties gatewayProperties;
 
     public FileRepositoryPlugin() {
     }
@@ -254,7 +248,6 @@ public class FileRepositoryPlugin implements RepositoryPlugin {
         return false; // Repository pluginDoes not directly handle requests
     }
 
-    
     @Override
     public Optional<RouteConfig> getRoute(String routeId) throws Exception {
         return getAllRoutes().stream().filter(route -> route.getRouteId().equals(routeId)).findFirst();
@@ -264,7 +257,6 @@ public class FileRepositoryPlugin implements RepositoryPlugin {
     public Optional<RouteConfig> getRouteByPath(String path, String method) throws Exception {
         return getAllRoutes().stream().filter(route -> route.getPath().equals(path) && route.getMethod().equals(method)).findFirst();
     }
-
 
     @Override
     public List<RouteConfig> getAllRoutes() throws Exception {
@@ -302,20 +294,20 @@ public class FileRepositoryPlugin implements RepositoryPlugin {
      * replaced (using RouteConfig.builderFrom(rc)).
      */
     private RouteConfig applyTemplates(RouteConfig rc) {
-        if (rc == null) return null;
+        if (rc == null) {return null;}
         try {
             String req = rc.getRequestTemplate();
             String newReq = req;
             if (req != null && !req.trim().isEmpty()) {
                 String loaded = loadTemplateContent(req.trim());
-                if (loaded != null) newReq = loaded;
+                if (loaded != null) {newReq = loaded;}
             }
 
             String resp = rc.getResponseTemplate();
             String newResp = resp;
             if (resp != null && !resp.trim().isEmpty()) {
                 String loaded = loadTemplateContent(resp.trim());
-                if (loaded != null) newResp = loaded;
+                if (loaded != null) {newResp = loaded;}
             }
 
             if (!Objects.equals(req, newReq) || !Objects.equals(resp, newResp)) {
@@ -332,7 +324,7 @@ public class FileRepositoryPlugin implements RepositoryPlugin {
      * If not found, try classpath `templates/<name>` (or the plain name) as fallback. Returns null if not found.
      */
     private String loadTemplateContent(String templateName) {
-        if (templateName == null || templateName.trim().isEmpty()) return null;
+        if (templateName == null || templateName.trim().isEmpty()) {return null;}
         try {
             // Try a list of candidate filenames to be more flexible with CSV template naming
             List<String> candidates = new ArrayList<>();
@@ -411,10 +403,8 @@ public class FileRepositoryPlugin implements RepositoryPlugin {
             }
         }
 
-
         return null;
     }
-
 
     @Override
     public Optional<String> getTemplate(String templateId, String templateType) throws Exception {
@@ -428,7 +418,6 @@ public class FileRepositoryPlugin implements RepositoryPlugin {
 
         return Optional.empty();
     }
-
 
     @Override
     public String getSupportedStorageType() {
@@ -445,7 +434,9 @@ public class FileRepositoryPlugin implements RepositoryPlugin {
 
         boolean enabled = Boolean.TRUE.equals(entity.getEnabled()) || entity.getEnabled() == null;
 
-        return RouteConfig.builder().path(entity.getPath()).method(entity.getMethod() != null ? entity.getMethod() : "POST").target(entity.getTarget()).requestTemplate(entity.getRequestTemplate()).responseTemplate(entity.getResponseTemplate()).enabled(enabled).properties(properties).build();
+        return RouteConfig.builder().path(entity.getPath()).method(entity.getMethod() != null ? entity.getMethod() : "POST").target(
+                entity.getTarget()).requestTemplate(entity.getRequestTemplate()).responseTemplate(entity.getResponseTemplate()).enabled(
+                enabled).properties(properties).build();
     }
 
     /**
