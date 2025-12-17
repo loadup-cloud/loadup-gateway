@@ -32,7 +32,7 @@ jobs:
           server-username: GITHUB_ACTOR
           server-password: GITHUB_TOKEN
           settings-path: ${{ github.workspace }}
-          repositories: github
+          overwrite-settings: false
 
 
       - name: Build and package with Maven
