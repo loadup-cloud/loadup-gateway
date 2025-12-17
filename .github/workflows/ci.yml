@@ -31,6 +31,8 @@ jobs:
           server-id: 'github'
           server-username: GITHUB_ACTOR
           server-password: GITHUB_TOKEN
+          settings-path: ${{ github.workspace }}        # 会在工作目录写入 settings.xml
+
 
       - name: Build and package with Maven
         run: mvn clean verify  -DskipTests
