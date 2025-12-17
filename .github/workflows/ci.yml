@@ -28,13 +28,15 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: 'maven'
-          cache-dependency-path: 'pom.xml'
           server-id: 'github'
           server-username: GITHUB_ACTOR
           server-password: GITHUB_TOKEN
 
       - name: Build and package with Maven
         run: mvn clean verify  -DskipTests
+        env:
+          GITHUB_ACTOR: ${{ secrets.OSSRH_USERNAME }}
+          GITHUB_TOKEN: ${{ secrets.OSSRH_TOKEN }}
 
       - name: Deploy to GitHub Packages
         if: github.event_name == 'push'
