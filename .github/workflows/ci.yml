@@ -31,8 +31,6 @@ jobs:
           server-id: 'github'
           server-username: GITHUB_ACTOR
           server-password: GITHUB_TOKEN
-          settings-path: ${{ github.workspace }}
-          overwrite-settings: false
 
 
       - name: Build and package with Maven
