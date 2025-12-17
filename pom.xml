@@ -242,6 +242,7 @@
             </plugin>
         </plugins>
     </build>
+    
     <distributionManagement>
         <repository>
             <id>github</id>
@@ -254,4 +255,17 @@
             <url>https://maven.pkg.github.com/loadup-cloud/loadup-packages</url>
         </snapshotRepository>
     </distributionManagement>
+
+    <repositories>
+        <repository>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/loadup-cloud/loadup-packages</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 </project>
