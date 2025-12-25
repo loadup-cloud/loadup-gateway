@@ -31,6 +31,9 @@ loadup:
       rpc:
         enabled: false
         priority: 300
+        registry-address: localhost:2181
+        timeout: 5000
+        retries: 2
 
 logging:
   level:

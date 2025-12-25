@@ -25,12 +25,9 @@ package com.github.loadup.gateway.plugins;
 import com.github.loadup.gateway.facade.constants.GatewayConstants;
 import com.github.loadup.gateway.facade.model.GatewayRequest;
 import com.github.loadup.gateway.facade.model.GatewayResponse;
-import com.github.loadup.gateway.facade.model.PluginConfig;
 import com.github.loadup.gateway.facade.spi.ProxyPlugin;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
@@ -47,7 +44,6 @@ import java.util.Map;
 public class HttpProxyPlugin implements ProxyPlugin {
 
     private final RestClient restClient = RestClient.create();
-
 
     @Override
     public String getName() {
@@ -70,14 +66,9 @@ public class HttpProxyPlugin implements ProxyPlugin {
     }
 
     @Override
-    public void initialize(PluginConfig config) {
-        log.info("HttpProxyPlugin initialized with config: {}", config);
+    public void initialize() {
+        log.info("HttpProxyPlugin initialized");
         // RestClient can be configured centrally via its @Bean
-    }
-
-    @Override
-    public GatewayResponse execute(GatewayRequest request) {
-        throw new UnsupportedOperationException("Use proxy method instead");
     }
 
     @Override
@@ -177,11 +168,6 @@ public class HttpProxyPlugin implements ProxyPlugin {
     @Override
     public void destroy() {
         log.info("HttpProxyPlugin destroyed");
-    }
-
-    @Override
-    public boolean supports(GatewayRequest request) {
-        return true;
     }
 
     @Override

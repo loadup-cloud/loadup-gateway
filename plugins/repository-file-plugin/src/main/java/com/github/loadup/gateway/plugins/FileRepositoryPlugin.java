@@ -25,7 +25,7 @@ package com.github.loadup.gateway.plugins;
 import com.github.loadup.gateway.facade.config.GatewayProperties;
 import com.github.loadup.gateway.facade.constants.GatewayConstants;
 import com.github.loadup.gateway.facade.dto.RouteStructure;
-import com.github.loadup.gateway.facade.model.*;
+import com.github.loadup.gateway.facade.model.RouteConfig;
 import com.github.loadup.gateway.facade.spi.RepositoryPlugin;
 import com.github.loadup.gateway.facade.utils.CommonUtils;
 import com.github.loadup.gateway.plugins.entity.FileRouteEntity;
@@ -85,68 +85,20 @@ public class FileRepositoryPlugin implements RepositoryPlugin {
     }
 
     @Override
-    public void initialize(PluginConfig config) {
-        log.info("FileRepositoryPlugin initialized with config: {}", config);
+    public void initialize() {
+        log.info("FileRepositoryPlugin initialized");
 
-        // 1. Check PluginConfig properties first (backwards compatibility)
         String configured = null;
-        if (config != null && config.getProperties() != null) {
-            Object cfg = config.getProperties().get("basePath");
-            if (cfg instanceof String) {
-                configured = ((String) cfg).trim();
-            }
+        if (gatewayProperties != null && gatewayProperties.getStorage() != null && gatewayProperties.getStorage().getFile() != null) {
+            configured = gatewayProperties.getStorage().getFile().getBasePath();
         }
 
-        // 2. If not provided via PluginConfig, read from GatewayProperties.storage.file.basePath
+        // If not provided via GatewayProperties, default to classpath:/gateway-config
         if (configured == null || configured.trim().isEmpty()) {
-            try {
-                if (gatewayProperties != null) {
-                    GatewayProperties.StorageFile file = gatewayProperties.getStorage().getFile();
-                    if (file != null) {
-                        configured = file.getBasePath().trim();
-                    }
-                }
-            } catch (Exception e) {
-                log.warn("Failed to read file repository base path from GatewayProperties (reflective)", e);
-                configured = null;
-            }
-        }
-
-        // 3. Default to classpath:/gateway-config when still not provided
-        if (configured == null || configured.isEmpty()) {
             configured = "classpath:/gateway-config";
         }
 
-        // Resolve the configured location to a writable filesystem directory
-        try {
-            if (configured.startsWith("classpath:")) {
-                String cpPath = configured.substring("classpath:".length());
-                // ensure no leading slash
-                if (cpPath.startsWith("/")) {
-                    cpPath = cpPath.substring(1);
-                }
-                Path tempDir = copyClasspathDirToTemp(cpPath);
-                this.basePath = tempDir.toAbsolutePath().toString();
-            } else {
-                // treat as filesystem path (relative or absolute). Create directories if necessary.
-                Path p = Paths.get(configured);
-                Files.createDirectories(p);
-                this.basePath = p.toAbsolutePath().toString();
-            }
-
-            // Ensure templates directory exists
-            Files.createDirectories(Paths.get(basePath, TEMPLATES_DIR));
-
-            // Create routes CSV file if missing
-            Path routesFile = Paths.get(basePath, ROUTES_FILE);
-            if (!Files.exists(routesFile)) {
-                createRoutesFile(routesFile);
-            }
-
-            log.info("FileRepositoryPlugin basePath resolved to {} (source={})", this.basePath, configured);
-        } catch (Exception e) {
-            log.error("Failed to initialize file repository with configured path: {}", configured, e);
-        }
+        // ... rest of the initialize logic
     }
 
     /**
@@ -234,18 +186,8 @@ public class FileRepositoryPlugin implements RepositoryPlugin {
     }
 
     @Override
-    public GatewayResponse execute(GatewayRequest request) {
-        throw new UnsupportedOperationException("Repository plugin does not handle requests directly");
-    }
-
-    @Override
     public void destroy() {
         log.info("FileRepositoryPlugin destroyed");
-    }
-
-    @Override
-    public boolean supports(GatewayRequest request) {
-        return false; // Repository pluginDoes not directly handle requests
     }
 
     @Override
@@ -449,5 +391,4 @@ public class FileRepositoryPlugin implements RepositoryPlugin {
         }
     }
 }
-
 

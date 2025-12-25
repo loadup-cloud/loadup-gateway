@@ -22,16 +22,15 @@ package com.github.loadup.gateway.plugins;
  * #L%
  */
 
+import com.github.loadup.gateway.facade.config.GatewayProperties;
 import com.github.loadup.gateway.facade.constants.GatewayConstants;
 import com.github.loadup.gateway.facade.model.GatewayRequest;
 import com.github.loadup.gateway.facade.model.GatewayResponse;
-import com.github.loadup.gateway.facade.model.PluginConfig;
 import com.github.loadup.gateway.facade.spi.ProxyPlugin;
 import com.github.loadup.gateway.facade.utils.JsonUtils;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.dubbo.config.ApplicationConfig;
-import org.apache.dubbo.config.ReferenceConfig;
-import org.apache.dubbo.config.RegistryConfig;
+import org.apache.dubbo.config.*;
 import org.apache.dubbo.rpc.service.GenericService;
 import org.springframework.stereotype.Component;
 
@@ -46,8 +45,8 @@ import java.util.Map;
 @Component
 public class RpcProxyPlugin implements ProxyPlugin {
 
-    private ApplicationConfig applicationConfig;
-    private RegistryConfig registryConfig;
+    private ApplicationConfig           applicationConfig;
+    private RegistryConfig              registryConfig;
     private Map<String, GenericService> serviceCache = new HashMap<>();
 
     @Override
@@ -70,29 +69,20 @@ public class RpcProxyPlugin implements ProxyPlugin {
         return 300;
     }
 
+    @Resource
+    private GatewayProperties gatewayProperties;
+
     @Override
-    public void initialize(PluginConfig config) {
-        log.info("RpcProxyPlugin initialized with config: {}", config);
+    public void initialize() {
+        log.info("RpcProxyPlugin initialized");
 
         // Initialize Dubbo configuration
         applicationConfig = new ApplicationConfig();
         applicationConfig.setName("loadup-gateway");
 
         registryConfig = new RegistryConfig();
-        registryConfig.setAddress("zookeeper://127.0.0.1:2181");
-
-        // You can read registry address and other settings from config
-        if (config.getProperties() != null) {
-            String registryAddress = (String) config.getProperties().get("registry.address");
-            if (registryAddress != null) {
-                registryConfig.setAddress(registryAddress);
-            }
-        }
-    }
-
-    @Override
-    public GatewayResponse execute(GatewayRequest request) throws Exception {
-        throw new UnsupportedOperationException("Use proxy method instead");
+        String registryAddress = gatewayProperties.getProxyPlugins().getRpc().getRegistryAddress();
+        registryConfig.setAddress(registryAddress);
     }
 
     @Override
@@ -119,25 +109,15 @@ public class RpcProxyPlugin implements ProxyPlugin {
             Object result = genericService.$invoke(methodName, parameterTypes, args);
 
             // Build response
-            return GatewayResponse.builder()
-                    .requestId(request.getRequestId())
-                    .statusCode(GatewayConstants.Status.SUCCESS)
-                    .headers(new HashMap<>())
-                    .body(JsonUtils.toJson(result))
-                    .contentType(GatewayConstants.ContentType.JSON)
-                    .responseTime(LocalDateTime.now())
-                    .build();
+            return GatewayResponse.builder().requestId(request.getRequestId()).statusCode(GatewayConstants.Status.SUCCESS).headers(
+                    new HashMap<>()).body(JsonUtils.toJson(result)).contentType(GatewayConstants.ContentType.JSON).responseTime(
+                    LocalDateTime.now()).build();
 
         } catch (Exception e) {
             log.error("RPC proxy failed", e);
-            return GatewayResponse.builder()
-                    .requestId(request.getRequestId())
-                    .statusCode(GatewayConstants.Status.INTERNAL_ERROR)
-                    .body("{\"error\":\"RPC proxy failed\",\"message\":\"" + e.getMessage() + "\"}")
-                    .contentType(GatewayConstants.ContentType.JSON)
-                    .responseTime(LocalDateTime.now())
-                    .errorMessage(e.getMessage())
-                    .build();
+            return GatewayResponse.builder().requestId(request.getRequestId()).statusCode(GatewayConstants.Status.INTERNAL_ERROR).body(
+                    "{\"error\":\"RPC proxy failed\",\"message\":\"" + e.getMessage() + "\"}").contentType(
+                    GatewayConstants.ContentType.JSON).responseTime(LocalDateTime.now()).errorMessage(e.getMessage()).build();
         }
     }
 
@@ -145,11 +125,6 @@ public class RpcProxyPlugin implements ProxyPlugin {
     public void destroy() {
         log.info("RpcProxyPlugin destroyed");
         serviceCache.clear();
-    }
-
-    @Override
-    public boolean supports(GatewayRequest request) {
-        return true;
     }
 
     @Override
@@ -191,11 +166,11 @@ public class RpcProxyPlugin implements ProxyPlugin {
                 return JsonUtils.fromJson(request.getBody(), Object[].class);
             } else {
                 // Single argument
-                return new Object[]{JsonUtils.toMap(request.getBody())};
+                return new Object[] {JsonUtils.toMap(request.getBody())};
             }
         } catch (Exception e) {
             log.warn("Failed to parse RPC args from request body", e);
-            return new Object[]{request.getBody()};
+            return new Object[] {request.getBody()};
         }
     }
 

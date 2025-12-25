@@ -22,9 +22,10 @@ package com.github.loadup.gateway.plugins;
  * #L%
  */
 
+import com.github.loadup.gateway.facade.config.GatewayProperties;
 import com.github.loadup.gateway.facade.constants.GatewayConstants;
 import com.github.loadup.gateway.facade.dto.RouteStructure;
-import com.github.loadup.gateway.facade.model.*;
+import com.github.loadup.gateway.facade.model.RouteConfig;
 import com.github.loadup.gateway.facade.spi.RepositoryPlugin;
 import com.github.loadup.gateway.facade.utils.JsonUtils;
 import com.github.loadup.gateway.plugins.entity.RouteEntity;
@@ -79,24 +80,18 @@ public class DatabaseRepositoryPlugin implements RepositoryPlugin {
         return 200;
     }
 
-    @Override
-    public void initialize(PluginConfig config) {
-        log.info("DatabaseRepositoryPlugin initialized with config: {}", config);
-    }
+    @Resource
+    private GatewayProperties gatewayProperties;
 
     @Override
-    public GatewayResponse execute(GatewayRequest request) throws Exception {
-        throw new UnsupportedOperationException("Repository plugin does not handle requests directly");
+    public void initialize() {
+        log.info("DatabaseRepositoryPlugin initialized");
+        // Configuration can be accessed from gatewayProperties if needed
     }
 
     @Override
     public void destroy() {
         log.info("DatabaseRepositoryPlugin destroyed");
-    }
-
-    @Override
-    public boolean supports(GatewayRequest request) {
-        return false;
     }
 
     @Override

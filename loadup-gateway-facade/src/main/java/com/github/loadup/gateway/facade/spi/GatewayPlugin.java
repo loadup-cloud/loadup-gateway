@@ -22,12 +22,10 @@ package com.github.loadup.gateway.facade.spi;
  * #L%
  */
 
-import com.github.loadup.gateway.facade.model.GatewayRequest;
-import com.github.loadup.gateway.facade.model.GatewayResponse;
-import com.github.loadup.gateway.facade.model.PluginConfig;
-
 /**
  * Gateway plugin SPI interface
+ *
+ * @param <T>
  */
 public interface GatewayPlugin {
 
@@ -54,20 +52,10 @@ public interface GatewayPlugin {
     /**
      * Initialize the plugin
      */
-    void initialize(PluginConfig config);
-
-    /**
-     * Execute plugin logic
-     */
-    GatewayResponse execute(GatewayRequest request) throws Exception;
+    void initialize();
 
     /**
      * Destroy the plugin
      */
     void destroy();
-
-    /**
-     * Check whether the plugin supports the given request
-     */
-    boolean supports(GatewayRequest request);
 }

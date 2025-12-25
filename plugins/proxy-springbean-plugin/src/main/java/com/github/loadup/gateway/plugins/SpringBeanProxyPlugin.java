@@ -23,12 +23,9 @@ package com.github.loadup.gateway.plugins;
  */
 
 import com.github.loadup.gateway.facade.constants.GatewayConstants;
-import com.github.loadup.gateway.facade.exception.ExceptionHandler;
-import com.github.loadup.gateway.facade.exception.GatewayException;
-import com.github.loadup.gateway.facade.exception.GatewayExceptionFactory;
+import com.github.loadup.gateway.facade.exception.*;
 import com.github.loadup.gateway.facade.model.GatewayRequest;
 import com.github.loadup.gateway.facade.model.GatewayResponse;
-import com.github.loadup.gateway.facade.model.PluginConfig;
 import com.github.loadup.gateway.facade.spi.ProxyPlugin;
 import com.github.loadup.gateway.facade.utils.JsonUtils;
 import jakarta.annotation.Resource;
@@ -71,14 +68,8 @@ public class SpringBeanProxyPlugin implements ProxyPlugin {
     }
 
     @Override
-    public void initialize(PluginConfig config) {
-        log.info("SpringBeanProxyPlugin initialized with config: {}", config);
-    }
-
-    @Override
-    public GatewayResponse execute(GatewayRequest request) throws Exception {
-        // This method is not used directly in ProxyPlugin, but through proxy method
-        throw GatewayExceptionFactory.operationNotSupported("Use proxy method instead");
+    public void initialize() {
+        log.info("SpringBeanProxyPlugin initialized");
     }
 
     @Override
@@ -143,11 +134,6 @@ public class SpringBeanProxyPlugin implements ProxyPlugin {
     @Override
     public void destroy() {
         log.info("SpringBeanProxyPlugin destroyed");
-    }
-
-    @Override
-    public boolean supports(GatewayRequest request) {
-        return true; // Support all requests
     }
 
     @Override
