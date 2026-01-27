@@ -4,7 +4,7 @@ package io.github.loadup.gateway.plugins;
  * #%L
  * Proxy SpringBean Plugin
  * %%
- * Copyright (C) 2025 LoadUp Gateway Authors
+ * Copyright (C) 2025 - 2026 LoadUp Cloud
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -39,144 +39,137 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
-/**
- * Spring Bean proxy plugin
- */
+/** Spring Bean proxy plugin */
 @Slf4j
 @Component
 public class SpringBeanProxyPlugin implements ProxyPlugin {
 
-    @Resource
-    private ApplicationContext applicationContext;
+  @Resource private ApplicationContext applicationContext;
 
-    @Override
-    public String getName() {
-        return "SpringBeanProxyPlugin";
+  @Override
+  public String getName() {
+    return "SpringBeanProxyPlugin";
+  }
+
+  @Override
+  public String getType() {
+    return "PROXY";
+  }
+
+  @Override
+  public String getVersion() {
+    return "1.0.0";
+  }
+
+  @Override
+  public int getPriority() {
+    return 100;
+  }
+
+  @Override
+  public void initialize() {
+    log.info("SpringBeanProxyPlugin initialized");
+  }
+
+  @Override
+  public GatewayResponse proxy(GatewayRequest request, String target) throws Exception {
+
+    try {
+      String[] parts = target.split(":");
+      if (parts.length != 2) {
+        throw GatewayExceptionFactory.invalidBeanTarget(target);
+      }
+
+      String beanName = parts[0];
+      String methodName = parts[1];
+
+      // GetSpring Bean
+      Object bean;
+      try {
+        bean = applicationContext.getBean(beanName);
+      } catch (Exception e) {
+        throw GatewayExceptionFactory.beanNotFound(beanName);
+      }
+
+      // Get method
+      Method method = findMethod(bean.getClass(), methodName);
+      if (method == null) {
+        throw GatewayExceptionFactory.methodNotFound(beanName, methodName);
+      }
+
+      // Prepare parameters
+      Object[] args = prepareMethodArgs(request, method);
+
+      // Invoke method
+      Object result;
+      try {
+        result = method.invoke(bean, args);
+      } catch (java.lang.reflect.InvocationTargetException e) {
+        // Extract original exception and wrap
+        Throwable cause = e.getCause() != null ? e.getCause() : e;
+        throw GatewayExceptionFactory.methodInvokeFailed(beanName, methodName, cause);
+      }
+
+      // Build response
+      return GatewayResponse.builder()
+          .requestId(request.getRequestId())
+          .statusCode(GatewayConstants.Status.SUCCESS)
+          .headers(new HashMap<>())
+          .body(JsonUtils.toJson(result))
+          .contentType(GatewayConstants.ContentType.JSON)
+          .responseTime(LocalDateTime.now())
+          .build();
+
+    } catch (GatewayException e) {
+      // Gateway exceptions are handled directly using exception handler
+      return ExceptionHandler.handleException(request.getRequestId(), e);
+    } catch (Exception e) {
+      // Wrap and handle other exceptions
+      GatewayException wrappedException = GatewayExceptionFactory.wrap(e, "SPRINGBEAN_PROXY");
+      return ExceptionHandler.handleException(request.getRequestId(), wrappedException);
     }
+  }
 
-    @Override
-    public String getType() {
-        return "PROXY";
+  @Override
+  public void destroy() {
+    log.info("SpringBeanProxyPlugin destroyed");
+  }
+
+  @Override
+  public String getSupportedProtocol() {
+    return GatewayConstants.Protocol.BEAN;
+  }
+
+  /** Find matching method */
+  private Method findMethod(Class<?> clazz, String methodName) {
+    for (Method method : clazz.getDeclaredMethods()) {
+      if (method.getName().equals(methodName)) {
+        return method;
+      }
     }
+    return null;
+  }
 
-    @Override
-    public String getVersion() {
-        return "1.0.0";
-    }
+  /** Prepare method parameters */
+  private Object[] prepareMethodArgs(GatewayRequest request, Method method) {
+    Class<?>[] paramTypes = method.getParameterTypes();
+    Object[] args = new Object[paramTypes.length];
 
-    @Override
-    public int getPriority() {
-        return 100;
-    }
-
-    @Override
-    public void initialize() {
-        log.info("SpringBeanProxyPlugin initialized");
-    }
-
-    @Override
-    public GatewayResponse proxy(GatewayRequest request, String target) throws Exception {
-
+    for (int i = 0; i < paramTypes.length; i++) {
+      if (paramTypes[i] == GatewayRequest.class) {
+        args[i] = request;
+      } else if (paramTypes[i] == String.class) {
+        args[i] = request.getBody();
+      } else {
+        // TryFromRequest bodyJSONParse
         try {
-            String[] parts = target.split(":");
-            if (parts.length != 2) {
-                throw GatewayExceptionFactory.invalidBeanTarget(target);
-            }
-
-            String beanName = parts[0];
-            String methodName = parts[1];
-
-            // GetSpring Bean
-            Object bean;
-            try {
-                bean = applicationContext.getBean(beanName);
-            } catch (Exception e) {
-                throw GatewayExceptionFactory.beanNotFound(beanName);
-            }
-
-            // Get method
-            Method method = findMethod(bean.getClass(), methodName);
-            if (method == null) {
-                throw GatewayExceptionFactory.methodNotFound(beanName, methodName);
-            }
-
-            // Prepare parameters
-            Object[] args = prepareMethodArgs(request, method);
-
-            // Invoke method
-            Object result;
-            try {
-                result = method.invoke(bean, args);
-            } catch (java.lang.reflect.InvocationTargetException e) {
-                // Extract original exception and wrap
-                Throwable cause = e.getCause() != null ? e.getCause() : e;
-                throw GatewayExceptionFactory.methodInvokeFailed(beanName, methodName, cause);
-            }
-
-            // Build response
-            return GatewayResponse.builder()
-                    .requestId(request.getRequestId())
-                    .statusCode(GatewayConstants.Status.SUCCESS)
-                    .headers(new HashMap<>())
-                    .body(JsonUtils.toJson(result))
-                    .contentType(GatewayConstants.ContentType.JSON)
-                    .responseTime(LocalDateTime.now())
-                    .build();
-
-        } catch (GatewayException e) {
-            // Gateway exceptions are handled directly using exception handler
-            return ExceptionHandler.handleException(request.getRequestId(), e);
+          args[i] = JsonUtils.fromJson(request.getBody(), paramTypes[i]);
         } catch (Exception e) {
-            // Wrap and handle other exceptions
-            GatewayException wrappedException = GatewayExceptionFactory.wrap(e, "SPRINGBEAN_PROXY");
-            return ExceptionHandler.handleException(request.getRequestId(), wrappedException);
+          args[i] = null;
         }
+      }
     }
 
-    @Override
-    public void destroy() {
-        log.info("SpringBeanProxyPlugin destroyed");
-    }
-
-    @Override
-    public String getSupportedProtocol() {
-        return GatewayConstants.Protocol.BEAN;
-    }
-
-    /**
-     * Find matching method
-     */
-    private Method findMethod(Class<?> clazz, String methodName) {
-        for (Method method : clazz.getDeclaredMethods()) {
-            if (method.getName().equals(methodName)) {
-                return method;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Prepare method parameters
-     */
-    private Object[] prepareMethodArgs(GatewayRequest request, Method method) {
-        Class<?>[] paramTypes = method.getParameterTypes();
-        Object[] args = new Object[paramTypes.length];
-
-        for (int i = 0; i < paramTypes.length; i++) {
-            if (paramTypes[i] == GatewayRequest.class) {
-                args[i] = request;
-            } else if (paramTypes[i] == String.class) {
-                args[i] = request.getBody();
-            } else {
-                // TryFromRequest bodyJSONParse
-                try {
-                    args[i] = JsonUtils.fromJson(request.getBody(), paramTypes[i]);
-                } catch (Exception e) {
-                    args[i] = null;
-                }
-            }
-        }
-
-        return args;
-    }
+    return args;
+  }
 }

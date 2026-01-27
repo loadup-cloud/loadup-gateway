@@ -4,7 +4,7 @@ package io.github.loadup.gateway.core.plugin;
  * #%L
  * LoadUp Gateway Core
  * %%
- * Copyright (C) 2025 LoadUp Gateway Authors
+ * Copyright (C) 2025 - 2026 LoadUp Cloud
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -34,55 +34,46 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-/**
- * Plugin manager
- */
+/** Plugin manager */
 @Slf4j
 @Component
 public class PluginManager {
 
-    @Resource
-    private List<ProxyPlugin> proxyPlugins;
+  @Resource private List<ProxyPlugin> proxyPlugins;
 
-    /**
-     * Execute proxy forwarding
-     */
-    public GatewayResponse executeProxy(GatewayRequest request, RouteConfig route) throws Exception {
-        if (StringUtils.isBlank(route.getProtocol())) {
-            throw new RuntimeException("No protocol found!");
-        }
-        Optional<ProxyPlugin> pluginOpt = findProxyPlugin(route.getProtocol());
-        if (!pluginOpt.isPresent()) {
-            throw new RuntimeException("No proxy plugin found for protocol: " + route.getProtocol());
-        }
-        ProxyPlugin plugin = pluginOpt.get();
-        String target = determineTarget(route);
-        log.debug("Executing proxy with plugin: {} for target: {}", plugin.getName(), target);
-        return plugin.proxy(request, target);
+  /** Execute proxy forwarding */
+  public GatewayResponse executeProxy(GatewayRequest request, RouteConfig route) throws Exception {
+    if (StringUtils.isBlank(route.getProtocol())) {
+      throw new RuntimeException("No protocol found!");
     }
+    Optional<ProxyPlugin> pluginOpt = findProxyPlugin(route.getProtocol());
+    if (!pluginOpt.isPresent()) {
+      throw new RuntimeException("No proxy plugin found for protocol: " + route.getProtocol());
+    }
+    ProxyPlugin plugin = pluginOpt.get();
+    String target = determineTarget(route);
+    log.debug("Executing proxy with plugin: {} for target: {}", plugin.getName(), target);
+    return plugin.proxy(request, target);
+  }
 
-    /**
-     * Find the proxy plugin for the given protocol
-     */
-    private Optional<ProxyPlugin> findProxyPlugin(String protocol) {
-        return proxyPlugins.stream()
-                .filter(plugin -> protocol.equals(plugin.getSupportedProtocol()))
-                .findFirst();
-    }
+  /** Find the proxy plugin for the given protocol */
+  private Optional<ProxyPlugin> findProxyPlugin(String protocol) {
+    return proxyPlugins.stream()
+        .filter(plugin -> protocol.equals(plugin.getSupportedProtocol()))
+        .findFirst();
+  }
 
-    /**
-     * Determine the proxy target
-     */
-    private String determineTarget(RouteConfig route) {
-        switch (route.getProtocol()) {
-            case GatewayConstants.Protocol.HTTP:
-                return route.getTargetUrl();
-            case GatewayConstants.Protocol.RPC:
-                return route.getTargetUrl();
-            case GatewayConstants.Protocol.BEAN:
-                return route.getTargetBean() + ":" + route.getTargetMethod();
-            default:
-                throw new IllegalArgumentException("Unsupported protocol: " + route.getProtocol());
-        }
+  /** Determine the proxy target */
+  private String determineTarget(RouteConfig route) {
+    switch (route.getProtocol()) {
+      case GatewayConstants.Protocol.HTTP:
+        return route.getTargetUrl();
+      case GatewayConstants.Protocol.RPC:
+        return route.getTargetUrl();
+      case GatewayConstants.Protocol.BEAN:
+        return route.getTargetBean() + ":" + route.getTargetMethod();
+      default:
+        throw new IllegalArgumentException("Unsupported protocol: " + route.getProtocol());
     }
+  }
 }

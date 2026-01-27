@@ -4,7 +4,7 @@ package io.github.loadup.gateway.facade.config;
  * #%L
  * LoadUp Gateway Facade
  * %%
- * Copyright (C) 2026 LoadUp Cloud
+ * Copyright (C) 2025 - 2026 LoadUp Cloud
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -30,135 +30,106 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.stereotype.Component;
 
-/**
- * Gateway configuration properties (corresponds to loadup.gateway in application.yml)
- */
+/** Gateway configuration properties (corresponds to loadup.gateway in application.yml) */
 @Data
 @Component
 @ConfigurationProperties(prefix = "loadup.gateway")
 public class GatewayProperties {
 
-    /**
-     * Whether to enable Gateway
-     */
+  /** Whether to enable Gateway */
+  private boolean enabled = true;
+
+  /** Route refresh interval (seconds) */
+  private int routeRefreshInterval = 5;
+
+  /** Template cache size */
+  private int templateCacheSize = 100;
+
+  /** Default timeout (milliseconds) */
+  private long defaultTimeout = 10000L;
+
+  /** Default retry count */
+  private int defaultRetryCount = 1;
+
+  /** Storage related configuration */
+
+  // Replace the generic map with a strongly-typed Plugins holder so IDEs can provide YAML
+  // autocompletion
+  @NestedConfigurationProperty private ProxyPlugins proxyPlugins = new ProxyPlugins();
+
+  // New storage-plugin holder: contains type and type-specific property groups
+  @NestedConfigurationProperty private Storage storage = new Storage();
+
+  private ResponseProperties response = new ResponseProperties();
+
+  @Data
+  public static class PluginProperties {
     private boolean enabled = true;
+    private int priority = 100;
+    private Map<String, Object> properties = new HashMap<>();
+  }
 
-    /**
-     * Route refresh interval (seconds)
-     */
-    private int routeRefreshInterval = 5;
+  // New strongly-typed holder for known plugins. Field names use camelCase and will map to
+  // kebab-case in YAML
+  @Data
+  public static class ProxyPlugins {
+    @NestedConfigurationProperty private Bean bean = new Bean();
 
-    /**
-     * Template cache size
-     */
-    private int templateCacheSize = 100;
+    @NestedConfigurationProperty private Http http = new Http();
 
-    /**
-     * Default timeout (milliseconds)
-     */
-    private long defaultTimeout = 10000L;
+    @NestedConfigurationProperty private Rpc rpc = new Rpc();
+  }
 
-    /**
-     * Default retry count
-     */
-    private int defaultRetryCount = 1;
+  @EqualsAndHashCode(callSuper = true)
+  @Data
+  public static class Bean extends PluginProperties {
+    // add plugin-specific properties here if needed in future
+  }
 
-    /**
-     * Storage related configuration
-     */
+  @EqualsAndHashCode(callSuper = true)
+  @Data
+  public static class Http extends PluginProperties {
+    /** Maximum number of connections for the HTTP proxy plugin */
+    private int maxConnections = 100;
+  }
 
-    // Replace the generic map with a strongly-typed Plugins holder so IDEs can provide YAML autocompletion
-    @NestedConfigurationProperty
-    private ProxyPlugins proxyPlugins = new ProxyPlugins();
+  @EqualsAndHashCode(callSuper = true)
+  @Data
+  public static class Rpc extends PluginProperties {
+    // RPC-specific configuration
+    private String registryAddress;
+    private Long timeout;
+    private Long retries;
+  }
 
-    // New storage-plugin holder: contains type and type-specific property groups
-    @NestedConfigurationProperty
-    private Storage storage = new Storage();
+  @Data
+  public static class StorageFile {
+    // File storage specific properties can be added here
+    /** Base path for file storage */
+    private String basePath;
+  }
 
-    private ResponseProperties response = new ResponseProperties();
+  @Data
+  public static class StorageDatabase {}
 
-    @Data
-    public static class PluginProperties {
-        private boolean             enabled    = true;
-        private int                 priority   = 100;
-        private Map<String, Object> properties = new HashMap<>();
+  // Holder that selects storage type and provides type-specific config groups
+  @Data
+  public static class Storage {
+    /** Storage type to use for repository. Allowed values: FILE, DATABASE */
+    private StorageType type = StorageType.FILE;
+
+    @NestedConfigurationProperty private StorageFile file = new StorageFile();
+
+    @NestedConfigurationProperty private StorageDatabase database = new StorageDatabase();
+
+    public enum StorageType {
+      FILE,
+      DATABASE
     }
+  }
 
-    // New strongly-typed holder for known plugins. Field names use camelCase and will map to kebab-case in YAML
-    @Data
-    public static class ProxyPlugins {
-        @NestedConfigurationProperty
-        private Bean bean = new Bean();
-
-        @NestedConfigurationProperty
-        private Http http = new Http();
-
-        @NestedConfigurationProperty
-        private Rpc rpc = new Rpc();
-
-    }
-
-    @EqualsAndHashCode(callSuper = true)
-    @Data
-    public static class Bean extends PluginProperties {
-        // add plugin-specific properties here if needed in future
-    }
-
-    @EqualsAndHashCode(callSuper = true)
-    @Data
-    public static class Http extends PluginProperties {
-        /**
-         * Maximum number of connections for the HTTP proxy plugin
-         */
-        private int maxConnections = 100;
-    }
-
-    @EqualsAndHashCode(callSuper = true)
-    @Data
-    public static class Rpc extends PluginProperties {
-        // RPC-specific configuration
-        private String registryAddress;
-        private Long   timeout;
-        private Long   retries;
-    }
-
-    @Data
-    public static class StorageFile {
-        // File storage specific properties can be added here
-        /**
-         * Base path for file storage
-         */
-        private String basePath;
-    }
-
-    @Data
-    public static class StorageDatabase {
-
-    }
-
-    // Holder that selects storage type and provides type-specific config groups
-    @Data
-    public static class Storage {
-        /**
-         * Storage type to use for repository. Allowed values: FILE, DATABASE
-         */
-        private StorageType type = StorageType.FILE;
-
-        @NestedConfigurationProperty
-        private StorageFile file = new StorageFile();
-
-        @NestedConfigurationProperty
-        private StorageDatabase database = new StorageDatabase();
-
-        public enum StorageType {
-            FILE,
-            DATABASE
-        }
-    }
-
-    @Data
-    public static class ResponseProperties {
-        private boolean wrap = true;
-    }
-
+  @Data
+  public static class ResponseProperties {
+    private boolean wrap = true;
+  }
 }

@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.github.loadup-cloud</groupId>
@@ -33,6 +31,18 @@
             <email>lslvxy@gmail.com</email>
         </developer>
     </developers>
+
+    <modules>
+        <module>loadup-gateway-facade</module>
+        <module>loadup-gateway-core</module>
+        <module>loadup-gateway-starter</module>
+        <module>loadup-gateway-test</module>
+        <module>plugins/proxy-springbean-plugin</module>
+        <module>plugins/proxy-http-plugin</module>
+        <module>plugins/proxy-rpc-plugin</module>
+        <module>plugins/repository-file-plugin</module>
+        <module>plugins/repository-database-plugin</module>
+    </modules>
     <scm>
         <connection>scm:git:git://github.com/loadup-cloud/loadup-gateway.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/loadup-cloud/loadup-gateway.git</developerConnection>
@@ -65,19 +75,8 @@
         <dubbo.version>3.2.8</dubbo.version>
         <junit.version>5.10.0</junit.version>
         <license.header.file>${project.basedir}/license-header.txt</license.header.file>
+        <spotless.skip>false</spotless.skip>
     </properties>
-
-    <modules>
-        <module>loadup-gateway-facade</module>
-        <module>loadup-gateway-core</module>
-        <module>loadup-gateway-starter</module>
-        <module>loadup-gateway-test</module>
-        <module>plugins/proxy-springbean-plugin</module>
-        <module>plugins/proxy-http-plugin</module>
-        <module>plugins/proxy-rpc-plugin</module>
-        <module>plugins/repository-file-plugin</module>
-        <module>plugins/repository-database-plugin</module>
-    </modules>
 
     <dependencyManagement>
         <dependencies>

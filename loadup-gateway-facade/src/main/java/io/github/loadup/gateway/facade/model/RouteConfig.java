@@ -4,7 +4,7 @@ package io.github.loadup.gateway.facade.model;
  * #%L
  * LoadUp Gateway Facade
  * %%
- * Copyright (C) 2025 LoadUp Gateway Authors
+ * Copyright (C) 2025 - 2026 LoadUp Cloud
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -23,13 +23,12 @@ package io.github.loadup.gateway.facade.model;
  */
 
 import io.github.loadup.gateway.facade.constants.GatewayConstants;
-import lombok.Getter;
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
 
 /** Route configuration model (immutable) */
 @Getter

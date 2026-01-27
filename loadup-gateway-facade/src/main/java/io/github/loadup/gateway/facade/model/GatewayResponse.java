@@ -4,7 +4,7 @@ package io.github.loadup.gateway.facade.model;
  * #%L
  * LoadUp Gateway Facade
  * %%
- * Copyright (C) 2025 LoadUp Gateway Authors
+ * Copyright (C) 2025 - 2026 LoadUp Cloud
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -29,57 +29,37 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * Gateway response model
- */
+/** Gateway response model */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class GatewayResponse {
 
-    /**
-     * Request ID
-     */
-    private String requestId;
+  /** Request ID */
+  private String requestId;
 
-    /**
-     * Status code
-     */
-    private int statusCode;
+  /** Status code */
+  private int statusCode;
 
-    /**
-     * Response headers
-     */
-    private Map<String, String> headers;
+  /** Response headers */
+  private Map<String, String> headers;
 
-    /**
-     * Response body
-     */
-    private String body;
+  /** Response body */
+  private String body;
 
-    /**
-     * Content type
-     */
-    private String contentType;
+  /** Content type */
+  private String contentType;
 
-    /**
-     * Response time
-     */
-    private LocalDateTime responseTime;
+  /** Response time */
+  private LocalDateTime responseTime;
 
-    /**
-     * Processing time in milliseconds
-     */
-    private long processingTime;
+  /** Processing time in milliseconds */
+  private long processingTime;
 
-    /**
-     * Error message
-     */
-    private String errorMessage;
+  /** Error message */
+  private String errorMessage;
 
-    /**
-     * Extension attributes
-     */
-    private Map<String, Object> attributes;
+  /** Extension attributes */
+  private Map<String, Object> attributes;
 }

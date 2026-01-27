@@ -4,7 +4,7 @@ package io.github.loadup.gateway.plugins.manager;
  * #%L
  * Repository Database Plugin
  * %%
- * Copyright (C) 2025 LoadUp Gateway Authors
+ * Copyright (C) 2025 - 2026 LoadUp Cloud
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -27,15 +27,13 @@ import java.util.Optional;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
-/**
- * Route database Repository
- */
+/** Route database Repository */
 @Repository
 public interface RouteManager extends CrudRepository<RouteEntity, Long> {
 
-    Optional<RouteEntity> findByRouteId(String routeId);
+  Optional<RouteEntity> findByRouteId(String routeId);
 
-    Optional<RouteEntity> findByPathAndMethod(String path, String method);
+  Optional<RouteEntity> findByPathAndMethod(String path, String method);
 
-    void deleteByRouteId(String routeId);
+  void deleteByRouteId(String routeId);
 }

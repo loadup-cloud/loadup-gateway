@@ -4,7 +4,7 @@ package io.github.loadup.gateway.plugins.entity;
  * #%L
  * Repository Database Plugin
  * %%
- * Copyright (C) 2025 LoadUp Gateway Authors
+ * Copyright (C) 2025 - 2026 LoadUp Cloud
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
@@ -27,23 +27,20 @@ import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
-/**
- * Template entity
- */
+/** Template entity */
 @Data
 @Table("gateway_templates")
 public class TemplateEntity {
-    @Id
-    private Long id;
+  @Id private Long id;
 
-    // nullable constraint enforced by DB schema
-    private String templateId;
+  // nullable constraint enforced by DB schema
+  private String templateId;
 
-    // nullable constraint enforced by DB schema
-    private String templateType;
+  // nullable constraint enforced by DB schema
+  private String templateType;
 
-    private String content;
+  private String content;
 
-    // temporal information stored as timestamp in DB
-    private Date updatedAt;
+  // temporal information stored as timestamp in DB
+  private Date updatedAt;
 }
