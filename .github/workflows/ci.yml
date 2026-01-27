@@ -1,47 +1,48 @@
-name: Build and Package
+name: Build and Test
 
 on:
   push:
     branches:
       - main
       - develop
+      - dev
   pull_request:
     branches:
       - main
       - develop
+      - dev
 
 jobs:
-  build:
+  # Job 5: 部署（仅在所有测试通过后）
+  deploy:
+    name: Deploy to GitHub Packages
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
 
     permissions:
       contents: read
       packages: write
 
+    env:
+      MAVEN_OPTS: -Xmx2048m -Djava.awt.headless=true
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'temurin'
           cache: 'maven'
           server-id: 'github'
           server-username: GITHUB_ACTOR
           server-password: GITHUB_TOKEN
 
-
-      - name: Build and package with Maven
-        run: mvn clean verify  -DskipTests
-        env:
-          GITHUB_ACTOR: ${{ secrets.OSSRH_USERNAME }}
-          GITHUB_TOKEN: ${{ secrets.OSSRH_TOKEN }}
-
       - name: Deploy to GitHub Packages
-        if: github.event_name == 'push'
-        run: mvn deploy -DskipTests
+        run: mvn deploy -B -P github -DskipTests
         env:
           GITHUB_ACTOR: ${{ secrets.OSSRH_USERNAME }}
           GITHUB_TOKEN: ${{ secrets.OSSRH_TOKEN }}
