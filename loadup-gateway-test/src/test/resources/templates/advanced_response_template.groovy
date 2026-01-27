@@ -1,6 +1,6 @@
 // 高级响应模板 - 支持数据包装、缓存和监控
-import com.github.loadup.gateway.facade.model.GatewayResponse
-import com.github.loadup.gateway.facade.utils.JsonUtils
+import io.github.loadup.gateway.facade.model.GatewayResponse
+import io.github.loadup.gateway.facade.utils.JsonUtils
 
 // 添加通用响应头
 response.headers.put("X-Gateway-Version", "1.0.0")

@@ -1,6 +1,6 @@
 // 高级请求模板 - 支持数据转换和路由决策
-import com.github.loadup.gateway.facade.model.GatewayRequest
-import com.github.loadup.gateway.facade.utils.JsonUtils
+import io.github.loadup.gateway.facade.model.GatewayRequest
+import io.github.loadup.gateway.facade.utils.JsonUtils
 
 // 用户认证和权限检查
 def token = request.headers.get("Authorization")

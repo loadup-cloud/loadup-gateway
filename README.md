@@ -50,8 +50,9 @@ loadup-gateway/
 Add the LoadUp Gateway starter to your project:
 
 ```xml
+
 <dependency>
-    <groupId>com.github.loadup</groupId>
+    <groupId>io.github.loadup-cloud</groupId>
     <artifactId>loadup-gateway-starter</artifactId>
     <version>1.0.0-SNAPSHOT</version>
 </dependency>
@@ -112,7 +113,7 @@ public class MyCustomPlugin implements GatewayPlugin {
     public String getName() {
         return "my-custom-plugin";
     }
-    
+
     @Override
     public void initialize(PluginContext context) {
         // Plugin initialization logic
@@ -123,7 +124,7 @@ public class MyCustomPlugin implements GatewayPlugin {
 2. Register your plugin in `META-INF/spring.factories`:
 
 ```properties
-com.github.loadup.gateway.plugin.GatewayPlugin=\
+io.github.loadup.gateway.plugin.GatewayPlugin=\
 com.example.MyCustomPlugin
 ```
 

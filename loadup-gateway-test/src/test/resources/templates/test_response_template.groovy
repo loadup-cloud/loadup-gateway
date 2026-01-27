@@ -1,6 +1,6 @@
 // 测试响应模板 - 处理响应并添加统一格式
-import com.github.loadup.gateway.facade.model.GatewayResponse
-import com.github.loadup.gateway.facade.utils.JsonUtils
+import io.github.loadup.gateway.facade.model.GatewayResponse
+import io.github.loadup.gateway.facade.utils.JsonUtils
 
 // 添加通用响应头
 response.headers.put("X-Gateway-Response-Processed", "true")

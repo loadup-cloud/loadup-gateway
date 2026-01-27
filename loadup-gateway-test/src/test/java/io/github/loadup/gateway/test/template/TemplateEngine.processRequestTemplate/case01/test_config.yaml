@@ -1,0 +1,56 @@
+# Test configuration for OrderService.createOrder/case01
+# This demonstrates basic order creation testing
+
+description: "Test processRequestTemplate"
+
+# Arguments passed to the test method (createOrder)
+args:
+  - requestId: 1
+    path: "/test"
+    method: GET
+    body: '{"a":"a","b":"b"}'
+  - templateScript: '''
+                import io.github.loadup.gateway.facade.utils.JsonUtils
+                
+                if (request.body != null) {
+                    def bodyMap = JsonUtils.toMap(request.body)
+                
+                    // Name lengthVerify
+                    if (bodyMap.containsKey("name") && bodyMap.name.length() > 20) {
+                        bodyMap.put("_validation", ["nameLength": "too_long"])
+                    }
+                
+                    // Age rangeVerify
+                    if (bodyMap.containsKey("age")) {
+                        def age = bodyMap.age as Integer
+                        if (age < 0 || age > 150) {
+                            def validation = bodyMap.get("_validation", [:])
+                            validation.put("ageRange", "invalid")
+                            bodyMap.put("_validation", validation)
+                        }
+                    }
+                
+                    request.body = JsonUtils.toJson(bodyMap)
+                }
+                
+                return request
+                '''
+
+# Expected result from the method
+# Note: Only fields we care about - id and timestamps will be ignored
+result:
+  requestId: 1
+  path: "/test"
+  method: GET
+  body: '{"a":"a","b":"b"}'
+
+# Assertion rules - only response assertions
+# Database assertions are handled via ExpectedData/*.csv files
+expected:
+  - field: "response.requestId"
+    operator: "NOT_NULL"
+  - field: "response.path"
+    operator: "EQUALS"
+    expectedValue: "/test"
+
+enabled: true

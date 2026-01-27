@@ -4,27 +4,52 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.github.loadup.framework</groupId>
+        <groupId>io.github.loadup-cloud</groupId>
         <artifactId>loadup-dependencies</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.0.3</version>
         <relativePath/>
     </parent>
-    <groupId>com.github.loadup</groupId>
+    <groupId>io.github.loadup-cloud</groupId>
     <artifactId>loadup-gateway</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>LoadUp Gateway</name>
     <description>A flexible gateway framework with plugin architecture</description>
+    <url>https://github.com/loadup-cloud</url>
+    <inceptionYear>2025</inceptionYear>
+    <organization>
+        <name>loadup_cloud</name>
+    </organization>
+    <licenses>
+        <license>
+            <name>GPL-3.0</name>
+            <url>https://opensource.org/license/gpl-3-0</url>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <id>Laysan</id>
+            <email>lslvxy@gmail.com</email>
+        </developer>
+    </developers>
+    <scm>
+        <connection>scm:git:git://github.com/loadup-cloud/loadup-gateway.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/loadup-cloud/loadup-gateway.git</developerConnection>
+        <url>https://github.com/loadup-cloud/loadup-gateway</url>
+    </scm>
 
-    <inceptionYear>2026</inceptionYear>
     <properties>
-        <java.version>17</java.version>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>21</java.version>
+        <project.encoding>UTF-8</project.encoding>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <maven.compiler.release>${java.version}</maven.compiler.release>
+        <project.build.encoding>${project.encoding}</project.build.encoding>
+        <project.build.sourceEncoding>${project.encoding}</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>${project.encoding}</project.reporting.outputEncoding>
 
-        <spring.boot.version>3.5.8</spring.boot.version>
+        <spring.boot.version>3.4.3</spring.boot.version>
         <lombok.version>1.18.42</lombok.version>
         <jackson.version>2.19.4</jackson.version>
         <vavr.version>0.10.4</vavr.version>
@@ -67,49 +92,49 @@
 
             <!-- Project modules -->
             <dependency>
-                <groupId>com.github.loadup</groupId>
+                <groupId>io.github.loadup-cloud</groupId>
                 <artifactId>loadup-gateway-facade</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.github.loadup</groupId>
+                <groupId>io.github.loadup-cloud</groupId>
                 <artifactId>loadup-gateway-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.github.loadup</groupId>
+                <groupId>io.github.loadup-cloud</groupId>
                 <artifactId>loadup-gateway-starter</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.github.loadup</groupId>
+                <groupId>io.github.loadup-cloud</groupId>
                 <artifactId>loadup-gateway-test</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <!-- Plugin modules -->
             <dependency>
-                <groupId>com.github.loadup</groupId>
+                <groupId>io.github.loadup-cloud</groupId>
                 <artifactId>proxy-springbean-plugin</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.github.loadup</groupId>
+                <groupId>io.github.loadup-cloud</groupId>
                 <artifactId>proxy-http-plugin</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.github.loadup</groupId>
+                <groupId>io.github.loadup-cloud</groupId>
                 <artifactId>proxy-rpc-plugin</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.github.loadup</groupId>
+                <groupId>io.github.loadup-cloud</groupId>
                 <artifactId>repository-file-plugin</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.github.loadup</groupId>
+                <groupId>io.github.loadup-cloud</groupId>
                 <artifactId>repository-database-plugin</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -189,16 +214,4 @@
         </dependencies>
     </dependencyManagement>
 
-    <repositories>
-        <repository>
-            <id>github</id>
-            <url>https://maven.pkg.github.com/loadup-cloud/loadup-packages</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
 </project>

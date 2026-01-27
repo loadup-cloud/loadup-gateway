@@ -1,6 +1,6 @@
 // 测试请求模板 - 处理入参并添加通用字段
-import com.github.loadup.gateway.facade.model.GatewayRequest
-import com.github.loadup.gateway.facade.utils.JsonUtils
+import io.github.loadup.gateway.facade.model.GatewayRequest
+import io.github.loadup.gateway.facade.utils.JsonUtils
 
 // 添加通用请求头
 request.headers.put("X-Gateway-Processed", "true")
