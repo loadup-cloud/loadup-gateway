@@ -131,5 +131,7 @@ public class GatewayProperties {
   @Data
   public static class ResponseProperties {
     private boolean wrap = true;
+    private boolean result = true;
+    private boolean meta = true;
   }
 }

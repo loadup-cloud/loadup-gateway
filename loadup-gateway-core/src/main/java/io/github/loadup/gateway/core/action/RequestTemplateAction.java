@@ -34,7 +34,6 @@ public class RequestTemplateAction implements GatewayAction {
     chain.proceed(context);
   }
 
-  @Override
   public int getOrder() {
     return Ordered.HIGHEST_PRECEDENCE + 2000; // Early in the chain
   }

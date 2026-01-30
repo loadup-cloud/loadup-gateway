@@ -26,7 +26,7 @@ if (response.body != null && response.statusCode == 200) {
                                     "timestamp"     : System.currentTimeMillis(),
                                     "processingTime": response.processingTime]]
 
-    response.body = JsonUtils.toJson(unifiedResponse)
+    response.body = JsonUtils.toJson(responseData)
     response.contentType = "application/json"
 
 }

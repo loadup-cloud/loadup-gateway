@@ -1,10 +1,9 @@
 package io.github.loadup.gateway.core.action;
 
 import io.github.loadup.gateway.facade.context.GatewayContext;
-import org.springframework.core.Ordered;
 
 /** Interface for gateway actions in the processing chain. */
-public interface GatewayAction extends Ordered {
+public interface GatewayAction {
 
   /**
    * Execute the action.

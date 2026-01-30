@@ -23,13 +23,7 @@ package io.github.loadup.gateway.starter;
  */
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.loadup.gateway.core.action.ActionDispatcher;
-import io.github.loadup.gateway.core.action.GatewayAction;
-import io.github.loadup.gateway.core.action.ProxyAction;
-import io.github.loadup.gateway.core.action.RequestTemplateAction;
-import io.github.loadup.gateway.core.action.ResponseTemplateAction;
-import io.github.loadup.gateway.core.action.ResponseWrapperAction;
-import io.github.loadup.gateway.core.action.RouteAction;
+import io.github.loadup.gateway.core.action.*;
 import io.github.loadup.gateway.core.handler.GatewayHandlerAdapter;
 import io.github.loadup.gateway.core.handler.GatewayHandlerMapping;
 import io.github.loadup.gateway.core.plugin.PluginManager;
@@ -38,6 +32,7 @@ import io.github.loadup.gateway.core.template.TemplateEngine;
 import io.github.loadup.gateway.facade.config.GatewayProperties;
 import io.github.loadup.gateway.facade.spi.ProxyProcessor;
 import io.github.loadup.gateway.facade.spi.RepositoryPlugin;
+import java.util.Arrays;
 import java.util.List;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -104,8 +99,21 @@ public class GatewayAutoConfiguration {
 
   @Bean
   @ConditionalOnMissingBean
-  public ActionDispatcher actionDispatcher(List<GatewayAction> actions) {
-    return new ActionDispatcher(actions);
+  public ActionDispatcher actionDispatcher(
+      RouteAction routeAction,
+      RequestTemplateAction requestTemplateAction,
+      ResponseWrapperAction responseWrapperAction,
+      ResponseTemplateAction responseTemplateAction,
+      ProxyAction proxyAction) {
+    List<GatewayAction> actionChain =
+        Arrays.asList(
+            routeAction, // 1. 寻址
+            requestTemplateAction, // 2. 处理请求参数
+            proxyAction, // 3. 处于最内层，发送请求
+            responseTemplateAction, // 4.  转换结果
+            responseWrapperAction // 5.  包装结果
+            );
+    return new ActionDispatcher(actionChain);
   }
 
   @Bean

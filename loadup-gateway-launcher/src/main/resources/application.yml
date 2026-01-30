@@ -12,6 +12,8 @@ loadup:
     enabled: true
     route-refresh-interval: 5
     template-cache-size: 100
+    response:
+      wrap: true
     default-timeout: 10000
     default-retry-count: 1
     # Proxy plugin configuration (kebab-case maps to camelCase fields in GatewayProperties)

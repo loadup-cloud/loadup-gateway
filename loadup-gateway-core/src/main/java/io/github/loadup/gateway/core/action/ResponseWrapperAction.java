@@ -4,11 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.loadup.gateway.facade.config.GatewayProperties;
 import io.github.loadup.gateway.facade.context.GatewayContext;
 import io.github.loadup.gateway.facade.model.GatewayResponse;
-import io.github.loadup.gateway.facade.model.Result;
 import io.github.loadup.gateway.facade.model.RouteConfig;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import lombok.extern.slf4j.Slf4j;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import lombok.extern.slf4j.Slf4j; // ...existing code...
 import org.springframework.core.Ordered;
 
 /** Action to wrap response in standard format */
@@ -29,10 +30,17 @@ public class ResponseWrapperAction implements GatewayAction {
 
     GatewayResponse response = context.getResponse();
     RouteConfig route = context.getRoute();
-    if (response != null
-        && route != null
-        && route.getWrapResponse() != null
-        && route.getWrapResponse()) {
+
+    boolean shouldWrap = false;
+    if (response != null && route != null) {
+      if (route.getWrapResponse() != null) {
+        shouldWrap = route.getWrapResponse();
+      } else if (gatewayProperties.getResponse() != null) {
+        shouldWrap = gatewayProperties.getResponse().isWrap();
+      }
+    }
+
+    if (shouldWrap) {
       try {
         // Assume response body is JSON, wrap it in Result
         Object data = null;
@@ -44,8 +52,41 @@ public class ResponseWrapperAction implements GatewayAction {
           }
         }
 
-        Result<Object> result = Result.success(data);
-        String newBody = objectMapper.writeValueAsString(result);
+        Map<String, Object> wrapper = new LinkedHashMap<>();
+
+        // 1. Result block
+        if (gatewayProperties.getResponse().isResult()) {
+          Map<String, Object> result = new LinkedHashMap<>();
+          // Use response status code or default to 200/success logic
+          int statusCode = response.getStatusCode();
+          result.put("code", statusCode == 0 ? 200 : statusCode);
+          result.put("status", (statusCode >= 200 && statusCode < 300) ? "success" : "error");
+          result.put(
+              "message",
+              (statusCode >= 200 && statusCode < 300)
+                  ? "Request processed successfully"
+                  : "Request processed with error");
+          wrapper.put("result", result);
+        }
+
+        // 2. Data block
+        wrapper.put("data", data);
+
+        // 3. Meta block
+        if (gatewayProperties.getResponse().isMeta()) {
+          Map<String, Object> meta = new LinkedHashMap<>();
+          if (context.getRequest() != null) {
+            meta.put("requestId", context.getRequest().getRequestId());
+            if (context.getRequest().getRequestTime() != null) {
+              meta.put("timestamp", context.getRequest().getRequestTime().toString());
+            } else {
+              meta.put("timestamp", java.time.LocalDateTime.now().toString());
+            }
+          }
+          wrapper.put("meta", meta);
+        }
+
+        String newBody = objectMapper.writeValueAsString(wrapper);
 
         response.setBody(newBody);
         if (response.getHeaders() == null) {
@@ -63,11 +104,7 @@ public class ResponseWrapperAction implements GatewayAction {
     }
   }
 
-  @Override
   public int getOrder() {
-    // Execute before ResponseTemplateAction (-2000) and ProxyAction (-1000)
-    // So that on the return path (post-processing), it corresponds to:
-    // Proxy (returns raw) -> Template (transforms) -> Wrapper (wraps)
     return Ordered.LOWEST_PRECEDENCE - 3000;
   }
 }

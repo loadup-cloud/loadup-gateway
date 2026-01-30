@@ -35,7 +35,6 @@ public class ProxyAction implements GatewayAction {
     }
   }
 
-  @Override
   public int getOrder() {
     return Ordered.LOWEST_PRECEDENCE - 1000;
   }

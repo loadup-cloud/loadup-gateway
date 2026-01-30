@@ -38,7 +38,6 @@ public class RouteAction implements GatewayAction {
     chain.proceed(context);
   }
 
-  @Override
   public int getOrder() {
     return Ordered.HIGHEST_PRECEDENCE + 1000;
   }
