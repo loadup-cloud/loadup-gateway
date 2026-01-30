@@ -32,7 +32,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Result {
+public class Result<T> {
   /** Business code */
   private String code;
 
@@ -41,4 +41,20 @@ public class Result {
 
   /** Message */
   private String message;
+
+  /** Data */
+  private T data;
+
+  public static <T> Result<T> success(T data) {
+    return Result.<T>builder()
+        .code("20000")
+        .status("success")
+        .message("Success")
+        .data(data)
+        .build();
+  }
+
+  public static <T> Result<T> error(String code, String message) {
+    return Result.<T>builder().code(code).status("error").message(message).build();
+  }
 }

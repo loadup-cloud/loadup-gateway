@@ -80,10 +80,4 @@ public class PluginManager {
         "Executing proxy with plugin: {} for route: {}", plugin.getName(), route.getRouteId());
     return plugin.proxy(request, route);
   }
-
-  /** Find the proxy plugin for the given protocol */
-  @Deprecated
-  private Optional<ProxyProcessor> findProxyPlugin(String protocol) {
-    return Optional.ofNullable(processorMap.get(protocol));
-  }
 }

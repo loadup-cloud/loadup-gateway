@@ -2,23 +2,21 @@ package io.github.loadup.gateway.core.handler;
 
 import io.github.loadup.gateway.facade.model.RouteConfig;
 import io.github.loadup.gateway.facade.spi.RepositoryPlugin;
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
 import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 
-@Component
-@Order(Ordered.HIGHEST_PRECEDENCE) // 优先级最高，先于普通 Controller
 public class GatewayHandlerMapping extends AbstractHandlerMapping {
-  public GatewayHandlerMapping() {
+
+  private final RepositoryPlugin routeRepository;
+
+  public GatewayHandlerMapping(RepositoryPlugin routeRepository) {
+    this.routeRepository = routeRepository;
     setOrder(Ordered.HIGHEST_PRECEDENCE); // 优先级高于普通 Controller
     System.out.println("GatewayHandlerMapping initialized");
   }
 
-  @Resource private RepositoryPlugin routeRepository; // 你的插件化仓库
 
   @Override
   protected Object getHandlerInternal(HttpServletRequest request) throws Exception {

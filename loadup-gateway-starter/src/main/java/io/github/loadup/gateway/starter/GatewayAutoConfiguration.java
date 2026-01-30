@@ -22,11 +22,23 @@ package io.github.loadup.gateway.starter;
  * #L%
  */
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.loadup.gateway.core.action.ActionDispatcher;
+import io.github.loadup.gateway.core.action.GatewayAction;
+import io.github.loadup.gateway.core.action.ProxyAction;
+import io.github.loadup.gateway.core.action.RequestTemplateAction;
+import io.github.loadup.gateway.core.action.ResponseTemplateAction;
+import io.github.loadup.gateway.core.action.ResponseWrapperAction;
+import io.github.loadup.gateway.core.action.RouteAction;
+import io.github.loadup.gateway.core.handler.GatewayHandlerAdapter;
+import io.github.loadup.gateway.core.handler.GatewayHandlerMapping;
 import io.github.loadup.gateway.core.plugin.PluginManager;
 import io.github.loadup.gateway.core.router.RouteResolver;
 import io.github.loadup.gateway.core.template.TemplateEngine;
 import io.github.loadup.gateway.facade.config.GatewayProperties;
+import io.github.loadup.gateway.facade.spi.ProxyProcessor;
+import io.github.loadup.gateway.facade.spi.RepositoryPlugin;
+import java.util.List;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -42,14 +54,15 @@ public class GatewayAutoConfiguration {
 
   @Bean
   @ConditionalOnMissingBean
-  public ActionDispatcher actionDispatcher() {
-    return new ActionDispatcher();
+  public RouteResolver routeResolver(
+      RepositoryPlugin repositoryPlugin, GatewayProperties gatewayProperties) {
+    return new RouteResolver(repositoryPlugin, gatewayProperties);
   }
 
   @Bean
   @ConditionalOnMissingBean
-  public RouteResolver routeResolver() {
-    return new RouteResolver();
+  public PluginManager pluginManager(List<ProxyProcessor> proxyProcessors) {
+    return new PluginManager(proxyProcessors);
   }
 
   @Bean
@@ -60,7 +73,50 @@ public class GatewayAutoConfiguration {
 
   @Bean
   @ConditionalOnMissingBean
-  public PluginManager pluginManager() {
-    return new PluginManager();
+  public RouteAction routeAction(RouteResolver routeResolver) {
+    return new RouteAction(routeResolver);
+  }
+
+  @Bean
+  @ConditionalOnMissingBean
+  public ProxyAction proxyAction(PluginManager pluginManager) {
+    return new ProxyAction(pluginManager);
+  }
+
+  @Bean
+  @ConditionalOnMissingBean
+  public RequestTemplateAction requestTemplateAction(TemplateEngine templateEngine) {
+    return new RequestTemplateAction(templateEngine);
+  }
+
+  @Bean
+  @ConditionalOnMissingBean
+  public ResponseTemplateAction responseTemplateAction(TemplateEngine templateEngine) {
+    return new ResponseTemplateAction(templateEngine);
+  }
+
+  @Bean
+  @ConditionalOnMissingBean
+  public ResponseWrapperAction responseWrapperAction(
+      GatewayProperties gatewayProperties, ObjectMapper objectMapper) {
+    return new ResponseWrapperAction(gatewayProperties, objectMapper);
+  }
+
+  @Bean
+  @ConditionalOnMissingBean
+  public ActionDispatcher actionDispatcher(List<GatewayAction> actions) {
+    return new ActionDispatcher(actions);
+  }
+
+  @Bean
+  @ConditionalOnMissingBean
+  public GatewayHandlerAdapter gatewayHandlerAdapter(ActionDispatcher actionDispatcher) {
+    return new GatewayHandlerAdapter(actionDispatcher);
+  }
+
+  @Bean
+  @ConditionalOnMissingBean
+  public GatewayHandlerMapping gatewayHandlerMapping(RepositoryPlugin repositoryPlugin) {
+    return new GatewayHandlerMapping(repositoryPlugin);
   }
 }
