@@ -22,58 +22,68 @@ package io.github.loadup.gateway.core.plugin;
  * #L%
  */
 
-import io.github.loadup.gateway.facade.constants.GatewayConstants;
 import io.github.loadup.gateway.facade.model.GatewayRequest;
 import io.github.loadup.gateway.facade.model.GatewayResponse;
 import io.github.loadup.gateway.facade.model.RouteConfig;
-import io.github.loadup.gateway.facade.spi.ProxyPlugin;
-import jakarta.annotation.Resource;
+import io.github.loadup.gateway.facade.spi.ProxyProcessor;
+import jakarta.annotation.PostConstruct;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Component;
 
 /** Plugin manager */
 @Slf4j
-@Component
 public class PluginManager {
 
-  @Resource private List<ProxyPlugin> proxyPlugins;
+  private final List<ProxyProcessor> proxyProcessors;
+
+  public PluginManager(List<ProxyProcessor> proxyProcessors) {
+    this.proxyProcessors = proxyProcessors;
+  }
+
+  private final Map<String, ProxyProcessor> processorMap = new ConcurrentHashMap<>();
+
+  @PostConstruct
+  public void init() {
+    if (proxyProcessors != null) {
+      for (ProxyProcessor processor : proxyProcessors) {
+        String protocol = processor.getSupportedProtocol();
+        if (processorMap.containsKey(protocol)) {
+          log.warn(
+              "Duplicate protocol processor found for: {}, overwriting with {}",
+              protocol,
+              processor.getClass().getName());
+        }
+        processorMap.put(protocol, processor);
+      }
+    }
+    log.info(
+        "Initialized PluginManager with {} processors: {}",
+        processorMap.size(),
+        processorMap.keySet());
+  }
 
   /** Execute proxy forwarding */
   public GatewayResponse executeProxy(GatewayRequest request, RouteConfig route) throws Exception {
     if (StringUtils.isBlank(route.getProtocol())) {
       throw new RuntimeException("No protocol found!");
     }
-    Optional<ProxyPlugin> pluginOpt = findProxyPlugin(route.getProtocol());
-    if (!pluginOpt.isPresent()) {
+    ProxyProcessor plugin = processorMap.get(route.getProtocol());
+    if (plugin == null) {
       throw new RuntimeException("No proxy plugin found for protocol: " + route.getProtocol());
     }
-    ProxyPlugin plugin = pluginOpt.get();
-    String target = determineTarget(route);
-    log.debug("Executing proxy with plugin: {} for target: {}", plugin.getName(), target);
-    return plugin.proxy(request, target);
+
+    log.debug(
+        "Executing proxy with plugin: {} for route: {}", plugin.getName(), route.getRouteId());
+    return plugin.proxy(request, route);
   }
 
   /** Find the proxy plugin for the given protocol */
-  private Optional<ProxyPlugin> findProxyPlugin(String protocol) {
-    return proxyPlugins.stream()
-        .filter(plugin -> protocol.equals(plugin.getSupportedProtocol()))
-        .findFirst();
-  }
-
-  /** Determine the proxy target */
-  private String determineTarget(RouteConfig route) {
-    switch (route.getProtocol()) {
-      case GatewayConstants.Protocol.HTTP:
-        return route.getTargetUrl();
-      case GatewayConstants.Protocol.RPC:
-        return route.getTargetUrl();
-      case GatewayConstants.Protocol.BEAN:
-        return route.getTargetBean() + ":" + route.getTargetMethod();
-      default:
-        throw new IllegalArgumentException("Unsupported protocol: " + route.getProtocol());
-    }
+  @Deprecated
+  private Optional<ProxyProcessor> findProxyPlugin(String protocol) {
+    return Optional.ofNullable(processorMap.get(protocol));
   }
 }

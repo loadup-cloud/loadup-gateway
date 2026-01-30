@@ -1,6 +1,6 @@
 spring:
   application:
-    name: loadup-gateway-test
+    name: loadup-gateway-launcher
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/loadup-boot?useUnicode=true&characterEncoding=utf8
     username: root
@@ -30,11 +30,11 @@ loadup:
       type: FILE
       # When type = FILE, configure the `file` group below
       file:
-        base-path: /Users/lise/PersonalSpace/loadup-cloud/loadup-gateway/loadup-gateway-launcher/src/main/resources/gateway-config
+        base-path: /Users/lise/PersonalSpace/loadup-cloud/loadup-gateway-old/loadup-gateway-launcher/src/main/resources/gateway-config
 
       #
 
 logging:
   level:
-    com.github.loadup: DEBUG
+    io.github.loadup: DEBUG
     org.springframework: INFO

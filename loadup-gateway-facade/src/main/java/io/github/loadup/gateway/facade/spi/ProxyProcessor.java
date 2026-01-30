@@ -24,12 +24,13 @@ package io.github.loadup.gateway.facade.spi;
 
 import io.github.loadup.gateway.facade.model.GatewayRequest;
 import io.github.loadup.gateway.facade.model.GatewayResponse;
+import io.github.loadup.gateway.facade.model.RouteConfig;
 
 /** Proxy plugin SPI interface */
-public interface ProxyPlugin extends GatewayPlugin {
+public interface ProxyProcessor extends GatewayPlugin {
 
   /** Proxy request to target service */
-  GatewayResponse proxy(GatewayRequest request, String target) throws Exception;
+  GatewayResponse proxy(GatewayRequest request, RouteConfig route) throws Exception;
 
   /** Get supported protocol type */
   String getSupportedProtocol();

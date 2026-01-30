@@ -29,11 +29,9 @@ import io.github.loadup.gateway.facade.model.GatewayResponse;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 /** Template engine - supports Groovy scripts */
 @Slf4j
-@Component
 public class TemplateEngine {
 
   private final ConcurrentHashMap<String, groovy.lang.Script> scriptCache =

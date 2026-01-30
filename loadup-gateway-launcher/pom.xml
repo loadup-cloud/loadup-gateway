@@ -24,7 +24,7 @@
 
         <dependency>
             <groupId>io.github.loadup-cloud</groupId>
-            <artifactId>repository-database-plugin</artifactId>
+            <artifactId>repository-file-plugin</artifactId>
         </dependency>
 
         <dependency>
@@ -35,10 +35,10 @@
             <groupId>io.github.loadup-cloud</groupId>
             <artifactId>proxy-http-plugin</artifactId>
         </dependency>
-        <dependency>
-            <groupId>io.github.loadup-cloud</groupId>
-            <artifactId>proxy-rpc-plugin</artifactId>
-        </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>io.github.loadup-cloud</groupId>-->
+        <!--            <artifactId>proxy-rpc-plugin</artifactId>-->
+        <!--        </dependency>-->
 
         <!-- Spring Boot Starter -->
         <dependency>

@@ -26,7 +26,8 @@ import io.github.loadup.gateway.facade.config.GatewayProperties;
 import io.github.loadup.gateway.facade.constants.GatewayConstants;
 import io.github.loadup.gateway.facade.model.GatewayRequest;
 import io.github.loadup.gateway.facade.model.GatewayResponse;
-import io.github.loadup.gateway.facade.spi.ProxyPlugin;
+import io.github.loadup.gateway.facade.model.RouteConfig;
+import io.github.loadup.gateway.facade.spi.ProxyProcessor;
 import io.github.loadup.gateway.facade.utils.JsonUtils;
 import jakarta.annotation.Resource;
 import java.time.LocalDateTime;
@@ -40,7 +41,7 @@ import org.springframework.stereotype.Component;
 /** Dubbo RPC proxy plugin */
 @Slf4j
 @Component
-public class RpcProxyPlugin implements ProxyPlugin {
+public class RpcProxyProcessor implements ProxyProcessor {
 
   private ApplicationConfig applicationConfig;
   private RegistryConfig registryConfig;
@@ -82,8 +83,9 @@ public class RpcProxyPlugin implements ProxyPlugin {
   }
 
   @Override
-  public GatewayResponse proxy(GatewayRequest request, String target) throws Exception {
+  public GatewayResponse proxy(GatewayRequest request, RouteConfig route) throws Exception {
     try {
+      String target = route.getTargetUrl();
       // Parse target format: interfaceName:methodName:version
       String[] parts = target.split(":");
       if (parts.length < 2) {

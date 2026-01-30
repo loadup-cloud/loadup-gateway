@@ -99,7 +99,36 @@ public class FileRepositoryPlugin implements RepositoryPlugin {
       configured = "classpath:/gateway-config";
     }
 
-    // ... rest of the initialize logic
+    try {
+      if (configured.startsWith("classpath:")) {
+        String cpPath = configured.substring("classpath:".length());
+        // ensure no leading slash
+        if (cpPath.startsWith("/")) {
+          cpPath = cpPath.substring(1);
+        }
+        Path tempDir = copyClasspathDirToTemp(cpPath);
+        this.basePath = tempDir.toAbsolutePath().toString();
+      } else {
+        // treat as filesystem path (relative or absolute). Create directories if necessary.
+        Path p = Paths.get(configured);
+        Files.createDirectories(p);
+        this.basePath = p.toAbsolutePath().toString();
+      }
+
+      // Ensure templates directory exists
+      Files.createDirectories(Paths.get(basePath, TEMPLATES_DIR));
+
+      // Create routes CSV file if missing
+      Path routesFile = Paths.get(basePath, ROUTES_FILE);
+      if (!Files.exists(routesFile)) {
+        createRoutesFile(routesFile);
+      }
+
+      log.info(
+          "FileRepositoryPlugin basePath resolved to {} (source={})", this.basePath, configured);
+    } catch (Exception e) {
+      log.error("Failed to initialize file repository with configured path: {}", configured, e);
+    }
   }
 
   /**

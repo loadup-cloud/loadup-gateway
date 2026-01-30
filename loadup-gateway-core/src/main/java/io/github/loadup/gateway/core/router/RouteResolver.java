@@ -27,20 +27,22 @@ import io.github.loadup.gateway.facade.model.GatewayRequest;
 import io.github.loadup.gateway.facade.model.RouteConfig;
 import io.github.loadup.gateway.facade.spi.RepositoryPlugin;
 import jakarta.annotation.PostConstruct;
-import jakarta.annotation.Resource;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 /** Route resolver */
 @Slf4j
-@Component
 public class RouteResolver {
 
-  @Resource private RepositoryPlugin repositoryPlugin;
-  @Resource private GatewayProperties gatewayProperties;
+  private final RepositoryPlugin repositoryPlugin;
+  private final GatewayProperties gatewayProperties;
+
+  public RouteResolver(RepositoryPlugin repositoryPlugin, GatewayProperties gatewayProperties) {
+    this.repositoryPlugin = repositoryPlugin;
+    this.gatewayProperties = gatewayProperties;
+  }
 
   private final ConcurrentHashMap<String, RouteConfig> routeCache = new ConcurrentHashMap<>();
   private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
@@ -48,7 +50,7 @@ public class RouteResolver {
   @PostConstruct
   public void refresh() {
     repositoryPlugin.initialize();
-    this.refreshRoutes();
+    //    this.refreshRoutes();
     // Periodically refresh route cache (hot reload support)
     //        scheduler.scheduleAtFixedRate(this::refreshRoutes, 30, 30, TimeUnit.SECONDS);
   }

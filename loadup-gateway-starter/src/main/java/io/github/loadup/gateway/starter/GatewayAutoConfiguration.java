@@ -23,12 +23,10 @@ package io.github.loadup.gateway.starter;
  */
 
 import io.github.loadup.gateway.core.action.ActionDispatcher;
-import io.github.loadup.gateway.core.filter.GatewayFilter;
 import io.github.loadup.gateway.core.plugin.PluginManager;
 import io.github.loadup.gateway.core.router.RouteResolver;
 import io.github.loadup.gateway.core.template.TemplateEngine;
 import io.github.loadup.gateway.facade.config.GatewayProperties;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -38,7 +36,7 @@ import org.springframework.context.annotation.Configuration;
 /** Gateway auto-configuration */
 @Configuration
 @EnableConfigurationProperties(GatewayProperties.class)
-@ConditionalOnClass(GatewayFilter.class)
+// @ConditionalOnClass(GatewayFilter.class)
 @ComponentScan(basePackages = "io.github.loadup.gateway")
 public class GatewayAutoConfiguration {
 
@@ -64,11 +62,5 @@ public class GatewayAutoConfiguration {
   @ConditionalOnMissingBean
   public PluginManager pluginManager() {
     return new PluginManager();
-  }
-
-  @Bean
-  @ConditionalOnMissingBean
-  public GatewayFilter gatewayFilter() {
-    return new GatewayFilter();
   }
 }

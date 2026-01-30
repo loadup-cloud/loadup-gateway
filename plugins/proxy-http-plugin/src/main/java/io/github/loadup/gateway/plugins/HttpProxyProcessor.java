@@ -25,7 +25,8 @@ package io.github.loadup.gateway.plugins;
 import io.github.loadup.gateway.facade.constants.GatewayConstants;
 import io.github.loadup.gateway.facade.model.GatewayRequest;
 import io.github.loadup.gateway.facade.model.GatewayResponse;
-import io.github.loadup.gateway.facade.spi.ProxyPlugin;
+import io.github.loadup.gateway.facade.model.RouteConfig;
+import io.github.loadup.gateway.facade.spi.ProxyProcessor;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -38,7 +39,7 @@ import org.springframework.web.client.RestClient;
 /** HTTP proxy plugin */
 @Slf4j
 @Component
-public class HttpProxyPlugin implements ProxyPlugin {
+public class HttpProxyProcessor implements ProxyProcessor {
 
   private final RestClient restClient = RestClient.create();
 
@@ -69,8 +70,9 @@ public class HttpProxyPlugin implements ProxyPlugin {
   }
 
   @Override
-  public GatewayResponse proxy(GatewayRequest request, String target) {
+  public GatewayResponse proxy(GatewayRequest request, RouteConfig route) {
     try {
+      String target = route.getTargetUrl();
       // Build request headers
       HttpHeaders headers = new HttpHeaders();
       if (request.getHeaders() != null) {
