@@ -65,6 +65,9 @@ public class ResponseWrapperAction implements GatewayAction {
 
   @Override
   public int getOrder() {
-    return Ordered.LOWEST_PRECEDENCE;
+    // Execute before ResponseTemplateAction (-2000) and ProxyAction (-1000)
+    // So that on the return path (post-processing), it corresponds to:
+    // Proxy (returns raw) -> Template (transforms) -> Wrapper (wraps)
+    return Ordered.LOWEST_PRECEDENCE - 3000;
   }
 }
